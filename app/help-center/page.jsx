@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, MessageCircle, Book, Users, ArrowRight, HelpCircle, FileText, Video, Mail } from "lucide-react"
-import Header from "@/components/header"
-import Footer from "@/components/footer"
+import Header from "../components/header"
+import Footer from "../components/footer"
 
 export const metadata = {
   title: "Help Center | Connected",
