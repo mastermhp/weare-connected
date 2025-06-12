@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation"
 
 // import { getService } from "@/lib/data"
-import ServicePageContent from "@/components/service-page-content"
+// import ServicePageContent from "@/components/service-page-content"
 import { getService } from "@/app/lib/data"
+import ServicePageContent from "@/app/components/service-page-content"
 
 export async function generateStaticParams() {
   // Replace with your actual service slugs
