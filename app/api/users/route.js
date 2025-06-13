@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
-import { getAllUsers } from "@/lib/models/user"
+// import { getAllUsers } from "@/lib/models/user"
 import { verifyAuth } from "@/app/lib/auth"
+import { getAllUsers } from "@/app/lib/models/user"
 // import { verifyAuth } from "@/lib/auth"
 
 export async function GET(request) {
