@@ -7,6 +7,7 @@ import ServicesSection from "./components/services-section"
 import InnovationEcosystemSection from "./components/innovation-ecosystem-section"
 import ContactSection from "./components/contact-section"
 import Footer from "./components/footer"
+import Header from "./components/header"
 
 export default function Home() {
   const [data, setData] = useState({
@@ -57,6 +58,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
+      <Header/>
       <HeroSection {...data.heroData} />
       <AboutSection {...data.aboutData} />
       <VenturesSection ventures={data.featuredVentures} />

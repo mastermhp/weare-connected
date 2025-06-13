@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   FileText,
@@ -20,9 +20,11 @@ import {
   X,
   Bell,
   Search,
+  UserCheck,
+  UserPlus,
   User,
-} from "lucide-react"
-import { Suspense } from "react"
+} from "lucide-react";
+import { Suspense } from "react";
 
 const sidebarItems = [
   {
@@ -49,7 +51,13 @@ const sidebarItems = [
   {
     title: "Team Management",
     href: "/admin/team",
-    icon: Users,
+    icon: UserPlus,
+  },
+  {
+    title: "Applications",
+    href: "/admin/applications",
+    label: "Applications",
+    icon: UserCheck,
   },
   {
     title: "Messages",
@@ -63,6 +71,12 @@ const sidebarItems = [
     icon: ImageIcon,
   },
   {
+    title: "Users",
+    href: "/admin/users",
+    label: "Users",
+    icon: Users,
+  },
+  {
     title: "Analytics",
     href: "/admin/analytics",
     icon: BarChart3,
@@ -72,15 +86,52 @@ const sidebarItems = [
     href: "/admin/settings",
     icon: Settings,
   },
-]
+];
 
 export default function AdminLayout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [expandedItems, setExpandedItems] = useState(["Content Management"])
-  const pathname = usePathname()
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedItems, setExpandedItems] = useState(["Content Management"]);
+  const pathname = usePathname();
 
   const toggleExpanded = (title) => {
-    setExpandedItems((prev) => (prev.includes(title) ? prev.filter((item) => item !== title) : [...prev, title]))
+    setExpandedItems((prev) =>
+      prev.includes(title)
+        ? prev.filter((item) => item !== title)
+        : [...prev, title]
+    );
+  };
+
+
+   const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Clear any client-side storage
+        if (typeof window !== "undefined") {
+          localStorage.clear()
+          sessionStorage.clear()
+        }
+
+        // Redirect to home page
+        window.location.href = "/"
+      } else {
+        console.error("Logout failed:", data.message)
+        // Still redirect even if API fails
+        window.location.href = "/"
+      }
+    } catch (error) {
+      console.error("Logout error:", error)
+      // Redirect to home even if there's an error
+      window.location.href = "/"
+    }
   }
 
   return (
@@ -88,14 +139,17 @@ export default function AdminLayout({ children }) {
       <div className="min-h-screen bg-gray-50">
         {/* Mobile sidebar backdrop */}
         {sidebarOpen && (
-          <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setSidebarOpen(false)} />
+          <div
+            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
         )}
 
         {/* Sidebar */}
         <div
           className={cn(
             "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0",
-            sidebarOpen ? "translate-x-0" : "-translate-x-full",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
           {/* Logo */}
@@ -106,7 +160,12 @@ export default function AdminLayout({ children }) {
               </div>
               <span className="font-bold text-gray-900">Admin Panel</span>
             </Link>
-            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(false)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+            >
               <X className="h-5 w-5" />
             </Button>
           </div>
@@ -121,7 +180,8 @@ export default function AdminLayout({ children }) {
                       variant="ghost"
                       className={cn(
                         "w-full justify-between text-left font-medium",
-                        expandedItems.includes(item.title) && "text-purple-emperor",
+                        expandedItems.includes(item.title) &&
+                          "text-purple-emperor"
                       )}
                       onClick={() => toggleExpanded(item.title)}
                     >
@@ -132,7 +192,7 @@ export default function AdminLayout({ children }) {
                       <Calendar
                         className={cn(
                           "h-4 w-4 transition-transform",
-                          expandedItems.includes(item.title) && "rotate-180",
+                          expandedItems.includes(item.title) && "rotate-180"
                         )}
                       />
                     </Button>
@@ -146,7 +206,7 @@ export default function AdminLayout({ children }) {
                               "block px-3 py-2 text-sm rounded-md transition-colors",
                               pathname === subItem.href
                                 ? "bg-purple-emperor text-white"
-                                : "text-gray-600 hover:bg-gray-100",
+                                : "text-gray-600 hover:bg-gray-100"
                             )}
                           >
                             {subItem.title}
@@ -160,7 +220,9 @@ export default function AdminLayout({ children }) {
                     href={item.href}
                     className={cn(
                       "flex items-center justify-between px-3 py-2 rounded-md transition-colors",
-                      pathname === item.href ? "bg-purple-emperor text-white" : "text-gray-700 hover:bg-gray-100",
+                      pathname === item.href
+                        ? "bg-purple-emperor text-white"
+                        : "text-gray-700 hover:bg-gray-100"
                     )}
                   >
                     <div className="flex items-center space-x-3">
@@ -168,7 +230,9 @@ export default function AdminLayout({ children }) {
                       <span className="font-medium">{item.title}</span>
                     </div>
                     {item.badge && (
-                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">{item.badge}</span>
+                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                        {item.badge}
+                      </span>
                     )}
                   </Link>
                 )}
@@ -187,10 +251,13 @@ export default function AdminLayout({ children }) {
                 <p className="text-sm text-gray-500">admin@connected.com</p>
               </div>
             </div>
-            <Button variant="outline" className="w-full" size="sm">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4 text-gray-500" />
+            </button>
           </div>
         </div>
 
@@ -200,7 +267,12 @@ export default function AdminLayout({ children }) {
           <header className="bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden"
+                  onClick={() => setSidebarOpen(true)}
+                >
                   <Menu className="h-5 w-5" />
                 </Button>
                 <div className="relative">
@@ -229,5 +301,5 @@ export default function AdminLayout({ children }) {
         </div>
       </div>
     </Suspense>
-  )
+  );
 }

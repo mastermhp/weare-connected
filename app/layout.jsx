@@ -23,9 +23,9 @@ export default function RootLayout({ children }) {
         <ThemeProvider attribute="class" defaultTheme="light">
           <AuthProvider>
             <div className="flex flex-col min-h-screen">
-              <Header />
+              {/* <Header /> */}
               <main className="flex-grow">{children}</main>
-              <Footer />
+              {/* <Footer /> */}
             </div>
           </AuthProvider>
         </ThemeProvider>
