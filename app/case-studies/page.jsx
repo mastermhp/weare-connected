@@ -1,4 +1,4 @@
-import { getCaseStudies } from "@/lib/data"
+// import { getCaseStudies } from "@/lib/data"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -6,6 +6,7 @@ import Link from "next/link"
 import { ArrowRight, Clock, Building, TrendingUp } from "lucide-react"
 import Header from "../components/header"
 import Footer from "../components/footer"
+import { getCaseStudies } from "../lib/data"
 
 export const metadata = {
   title: "Case Studies | Connected",
