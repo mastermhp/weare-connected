@@ -2,8 +2,9 @@ import { notFound } from "next/navigation"
 
 // import { getService } from "@/lib/data"
 // import ServicePageContent from "@/components/service-page-content"
-import { getService } from "@/app/lib/data"
+// import { getService } from "@/app/lib/data"
 import ServicePageContent from "@/app/components/service-page-content"
+import { getServiceBySlug, getServices } from "@/app/lib/data"
 
 export async function generateStaticParams() {
   // Replace with your actual service slugs
@@ -16,7 +17,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const service = await getService(params.slug)
+  const service = await getServices(params.slug)
 
   if (!service) {
     return {
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ServicePage({ params }) {
-  const service = await getService(params.slug)
+  const service = await getServices(params.slug)
 
   if (!service) {
     notFound()
