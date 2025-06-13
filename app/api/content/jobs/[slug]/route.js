@@ -10,7 +10,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Job slug is required" }, { status: 400 })
     }
 
-    console.log("Looking for job with slug:", slug)
+    console.log("API: Looking for job with slug:", slug)
 
     const { db } = await connectToDatabase()
 
@@ -23,20 +23,20 @@ export async function GET(request, { params }) {
         const { ObjectId } = require("mongodb")
         if (ObjectId.isValid(slug)) {
           job = await db.collection("jobs").findOne({ _id: new ObjectId(slug) })
-          console.log("Tried finding by ID:", job ? "Found" : "Not found")
+          console.log("API: Tried finding by ID:", job ? "Found" : "Not found")
         }
       } catch (err) {
-        console.log("Error trying to find by ID:", err.message)
+        console.log("API: Error trying to find by ID:", err.message)
       }
     }
 
-    console.log("Found job:", job ? "Yes" : "No")
+    console.log("API: Found job:", job ? "Yes" : "No")
 
     if (!job) {
       // Debug: List all jobs in the collection to see what's available
       const allJobs = await db.collection("jobs").find({}).toArray()
       console.log(
-        "Available jobs:",
+        "API: Available jobs:",
         allJobs.map((j) => ({ _id: j._id.toString(), slug: j.slug, title: j.title })),
       )
 
@@ -49,7 +49,7 @@ export async function GET(request, { params }) {
       id: job._id.toString(),
     })
   } catch (error) {
-    console.error("Error fetching job:", error)
+    console.error("API: Error fetching job:", error)
     return NextResponse.json({ error: "Failed to fetch job" }, { status: 500 })
   }
 }

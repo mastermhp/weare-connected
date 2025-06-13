@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -33,6 +33,15 @@ export default function JobApplicationClient({ job }) {
   })
   const [uploadProgress, setUploadProgress] = useState({})
   const [errors, setErrors] = useState({})
+
+  useEffect(() => {
+    console.log("JobApplicationClient loaded for job:", job.title, "slug:", job.slug)
+  }, [job])
+
+  const testNavigation = () => {
+    console.log("Test button clicked - job slug:", job.slug)
+    console.log("Current URL would be:", `/careers/${job.slug}/apply`)
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -250,6 +259,16 @@ export default function JobApplicationClient({ job }) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* DEBUG: Test button - remove after testing */}
+      <div className="bg-yellow-100 border border-yellow-400 p-4 rounded-md mb-4">
+        <p className="text-sm text-yellow-800 mb-2">Debug Info:</p>
+        <p className="text-xs text-yellow-700">Job Slug: {job.slug}</p>
+        <p className="text-xs text-yellow-700">Current Path: /careers/{job.slug}/apply</p>
+        <Button onClick={testNavigation} variant="outline" size="sm">
+          Test Console Log
+        </Button>
       </div>
 
       {/* Application Form */}

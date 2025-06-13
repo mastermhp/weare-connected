@@ -4,7 +4,11 @@ import JobApplicationClient from "./JobApplicationClient"
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params
+  console.log("Apply page metadata: Received slug:", resolvedParams.slug)
+
   const job = await getJobBySlug(resolvedParams.slug)
+  console.log("Apply page metadata: Found job:", job ? job.title : "Not found")
+
   if (!job) {
     return {
       title: "Job Not Found",
@@ -18,9 +22,13 @@ export async function generateMetadata({ params }) {
 
 async function JobApplicationPage({ params }) {
   const resolvedParams = await params
+  console.log("Apply page: Received slug:", resolvedParams.slug)
+
   const job = await getJobBySlug(resolvedParams.slug)
+  console.log("Apply page: Found job:", job ? job.title : "Not found")
 
   if (!job) {
+    console.log("Apply page: Job not found, calling notFound()")
     notFound()
   }
 
@@ -46,6 +54,7 @@ async function JobApplicationPage({ params }) {
     postedDate: job.postedDate ? new Date(job.postedDate).toISOString() : new Date().toISOString(),
   }
 
+  console.log("Apply page: Rendering with job:", serializedJob.title)
   return <JobApplicationClient job={serializedJob} />
 }
 

@@ -2,6 +2,21 @@ import { getJobBySlug } from "@/app/lib/data"
 import { notFound } from "next/navigation"
 import JobPageClient from "./JobPageClient"
 
+export async function generateStaticParams() {
+  try {
+    const { connectToDatabase } = await import("@/app/lib/mongodb")
+    const { db } = await connectToDatabase()
+    const jobs = await db.collection("jobs").find({ status: "open" }).toArray()
+
+    return jobs.map((job) => ({
+      slug: job.slug,
+    }))
+  } catch (error) {
+    console.error("Error generating static params:", error)
+    return []
+  }
+}
+
 export async function generateMetadata({ params }) {
   const resolvedParams = await params
   const job = await getJobBySlug(resolvedParams.slug)
@@ -18,9 +33,13 @@ export async function generateMetadata({ params }) {
 
 async function JobPage({ params }) {
   const resolvedParams = await params
+  console.log("JobPage: Received slug:", resolvedParams.slug)
+
   const job = await getJobBySlug(resolvedParams.slug)
+  console.log("JobPage: Found job:", job ? job.title : "Not found")
 
   if (!job) {
+    console.log("JobPage: Job not found, calling notFound()")
     notFound()
   }
 

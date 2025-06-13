@@ -92,8 +92,14 @@ export default function JobContent({ job }) {
                 </div>
               )}
 
-              <Button size="lg" className="w-full sm:w-auto">
-                Apply for this Position
+              <Button
+                asChild
+                size="lg"
+                className="bg-purple-700 hover:bg-purple-800 active:bg-purple-900 transform active:scale-95 transition-all duration-150 w-full sm:w-auto text-white font-semibold shadow-lg hover:shadow-xl"
+              >
+                <Link href={`/careers/${job.slug}/apply`} className="flex items-center justify-center">
+                  Apply for this Position
+                </Link>
               </Button>
             </div>
 
@@ -164,8 +170,14 @@ export default function JobContent({ job }) {
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Apply</h3>
                 <div className="space-y-4">
-                  <Button className="w-full" size="lg">
-                    Apply Now
+                  <Button
+                    asChild
+                    className="bg-purple-700 hover:bg-purple-800 active:bg-purple-900 transform active:scale-95 transition-all duration-150 w-full text-white font-semibold shadow-lg hover:shadow-xl"
+                    size="lg"
+                  >
+                    <Link href={`/careers/${job.slug}/apply`} className="flex items-center justify-center">
+                      Apply Now
+                    </Link>
                   </Button>
                   <Button variant="outline" className="w-full">
                     Save for Later
