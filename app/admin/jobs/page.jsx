@@ -17,7 +17,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { Plus, Search, Edit, Trash2, Eye, Loader2, MapPin, Briefcase, Clock } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Eye, Loader2, MapPin, Briefcase, Clock, DollarSign } from "lucide-react"
 import Link from "next/link"
 
 export default function JobsManagement() {
@@ -40,10 +40,17 @@ export default function JobsManagement() {
     location: "",
     type: "Full-time",
     salary: "",
-    requirements: "",
-    responsibilities: "",
+    experienceLevel: "",
+    technologies: [],
+    responsibilities: [],
+    requirements: [],
+    benefits: [],
     status: "open",
   })
+  const [newTechnology, setNewTechnology] = useState("")
+  const [newResponsibility, setNewResponsibility] = useState("")
+  const [newRequirement, setNewRequirement] = useState("")
+  const [newBenefit, setNewBenefit] = useState("")
   const [formErrors, setFormErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -99,6 +106,74 @@ export default function JobsManagement() {
     }
   }
 
+  const addTechnology = () => {
+    if (newTechnology.trim() !== "") {
+      setFormData((prev) => ({
+        ...prev,
+        technologies: [...prev.technologies, newTechnology.trim()],
+      }))
+      setNewTechnology("")
+    }
+  }
+
+  const removeTechnology = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      technologies: prev.technologies.filter((_, i) => i !== index),
+    }))
+  }
+
+  const addResponsibility = () => {
+    if (newResponsibility.trim() !== "") {
+      setFormData((prev) => ({
+        ...prev,
+        responsibilities: [...prev.responsibilities, newResponsibility.trim()],
+      }))
+      setNewResponsibility("")
+    }
+  }
+
+  const removeResponsibility = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      responsibilities: prev.responsibilities.filter((_, i) => i !== index),
+    }))
+  }
+
+  const addRequirement = () => {
+    if (newRequirement.trim() !== "") {
+      setFormData((prev) => ({
+        ...prev,
+        requirements: [...prev.requirements, newRequirement.trim()],
+      }))
+      setNewRequirement("")
+    }
+  }
+
+  const removeRequirement = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      requirements: prev.requirements.filter((_, i) => i !== index),
+    }))
+  }
+
+  const addBenefit = () => {
+    if (newBenefit.trim() !== "") {
+      setFormData((prev) => ({
+        ...prev,
+        benefits: [...prev.benefits, newBenefit.trim()],
+      }))
+      setNewBenefit("")
+    }
+  }
+
+  const removeBenefit = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      benefits: prev.benefits.filter((_, i) => i !== index),
+    }))
+  }
+
   const validateForm = () => {
     const errors = {}
     if (!formData.title.trim()) errors.title = "Title is required"
@@ -106,6 +181,7 @@ export default function JobsManagement() {
     if (!formData.slug.trim()) errors.slug = "Slug is required"
     if (!formData.department.trim()) errors.department = "Department is required"
     if (!formData.location.trim()) errors.location = "Location is required"
+    if (!formData.experienceLevel.trim()) errors.experienceLevel = "Experience level is required"
 
     setFormErrors(errors)
     return Object.keys(errors).length === 0
@@ -119,21 +195,10 @@ export default function JobsManagement() {
     try {
       setIsSubmitting(true)
 
-      // Format requirements and responsibilities as arrays if provided
-      const formattedData = {
-        ...formData,
-        requirements: formData.requirements
-          ? formData.requirements.split("\n").filter((item) => item.trim() !== "")
-          : [],
-        responsibilities: formData.responsibilities
-          ? formData.responsibilities.split("\n").filter((item) => item.trim() !== "")
-          : [],
-      }
-
       const response = await fetch("/api/admin/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formattedData),
+        body: JSON.stringify(formData),
       })
 
       if (!response.ok) {
@@ -157,8 +222,11 @@ export default function JobsManagement() {
         location: "",
         type: "Full-time",
         salary: "",
-        requirements: "",
-        responsibilities: "",
+        experienceLevel: "",
+        technologies: [],
+        responsibilities: [],
+        requirements: [],
+        benefits: [],
         status: "open",
       })
     } catch (err) {
@@ -213,6 +281,20 @@ export default function JobsManagement() {
     }
   }
 
+  // Format date to "X days ago"
+  const formatPostedDate = (date) => {
+    if (!date) return "Recently"
+
+    const postedDate = new Date(date)
+    const now = new Date()
+    const diffTime = Math.abs(now - postedDate)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+    if (diffDays === 0) return "Today"
+    if (diffDays === 1) return "1 day ago"
+    return `${diffDays} days ago`
+  }
+
   // Get unique departments for filter
   const departments = [...new Set(jobs.map((job) => job.department).filter(Boolean))]
 
@@ -226,7 +308,7 @@ export default function JobsManagement() {
         </div>
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-purple-emperor hover:bg-purple-emperor/90">
+            <Button className="bg-purple-700 hover:bg-purple-800">
               <Plus className="h-4 w-4 mr-2" />
               New Job
             </Button>
@@ -268,33 +350,6 @@ export default function JobsManagement() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">
-                  Description <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Write your job description here..."
-                  rows={6}
-                />
-                {formErrors.description && <p className="text-sm text-red-500">{formErrors.description}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="shortDescription">Short Description</Label>
-                <Textarea
-                  id="shortDescription"
-                  name="shortDescription"
-                  value={formData.shortDescription}
-                  onChange={handleInputChange}
-                  placeholder="Brief summary of the job (optional)"
-                  rows={2}
-                />
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="department">
@@ -319,7 +374,7 @@ export default function JobsManagement() {
                     name="location"
                     value={formData.location}
                     onChange={handleInputChange}
-                    placeholder="e.g. Remote, New York, NY"
+                    placeholder="e.g. Remote, San Francisco, CA"
                   />
                   {formErrors.location && <p className="text-sm text-red-500">{formErrors.location}</p>}
                 </div>
@@ -350,37 +405,170 @@ export default function JobsManagement() {
                     name="salary"
                     value={formData.salary}
                     onChange={handleInputChange}
-                    placeholder="e.g. $50,000 - $70,000"
+                    placeholder="e.g. $120k - $180k"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="requirements">Requirements (one per line)</Label>
-                <Textarea
-                  id="requirements"
-                  name="requirements"
-                  value={formData.requirements}
+                <Label htmlFor="experienceLevel">
+                  Experience Level <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="experienceLevel"
+                  name="experienceLevel"
+                  value={formData.experienceLevel}
                   onChange={handleInputChange}
-                  placeholder="Bachelor's degree in Computer Science
-3+ years of experience with React
-Strong communication skills"
-                  rows={4}
+                  placeholder="e.g. 5+ years, 3+ years"
                 />
+                {formErrors.experienceLevel && <p className="text-sm text-red-500">{formErrors.experienceLevel}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="responsibilities">Responsibilities (one per line)</Label>
+                <Label htmlFor="description">
+                  Job Description <span className="text-red-500">*</span>
+                </Label>
                 <Textarea
-                  id="responsibilities"
-                  name="responsibilities"
-                  value={formData.responsibilities}
+                  id="description"
+                  name="description"
+                  value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="Develop and maintain web applications
-Collaborate with cross-functional teams
-Participate in code reviews"
-                  rows={4}
+                  placeholder="Write your job description here..."
+                  rows={6}
                 />
+                {formErrors.description && <p className="text-sm text-red-500">{formErrors.description}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="shortDescription">Short Description</Label>
+                <Textarea
+                  id="shortDescription"
+                  name="shortDescription"
+                  value={formData.shortDescription}
+                  onChange={handleInputChange}
+                  placeholder="Brief summary of the job (optional)"
+                  rows={2}
+                />
+              </div>
+
+              {/* Technologies */}
+              <div className="space-y-2 border border-gray-200 rounded-md p-4">
+                <Label>Technologies</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newTechnology}
+                    onChange={(e) => setNewTechnology(e.target.value)}
+                    placeholder="e.g. React, Node.js"
+                    className="flex-1"
+                  />
+                  <Button type="button" onClick={addTechnology} variant="outline">
+                    Add
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.technologies.map((tech, index) => (
+                    <Badge key={index} className="px-3 py-1 bg-gray-100 text-gray-800">
+                      {tech}
+                      <button
+                        type="button"
+                        className="ml-2 text-gray-500 hover:text-gray-700"
+                        onClick={() => removeTechnology(index)}
+                      >
+                        ×
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Responsibilities */}
+              <div className="space-y-2 border border-gray-200 rounded-md p-4">
+                <Label>Key Responsibilities</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newResponsibility}
+                    onChange={(e) => setNewResponsibility(e.target.value)}
+                    placeholder="Add a responsibility"
+                    className="flex-1"
+                  />
+                  <Button type="button" onClick={addResponsibility} variant="outline">
+                    Add
+                  </Button>
+                </div>
+                <ul className="mt-2 space-y-1">
+                  {formData.responsibilities.map((item, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <span className="flex-1">{item}</span>
+                      <button
+                        type="button"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => removeResponsibility(index)}
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Requirements */}
+              <div className="space-y-2 border border-gray-200 rounded-md p-4">
+                <Label>Requirements</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newRequirement}
+                    onChange={(e) => setNewRequirement(e.target.value)}
+                    placeholder="Add a requirement"
+                    className="flex-1"
+                  />
+                  <Button type="button" onClick={addRequirement} variant="outline">
+                    Add
+                  </Button>
+                </div>
+                <ul className="mt-2 space-y-1">
+                  {formData.requirements.map((item, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <span className="flex-1">{item}</span>
+                      <button
+                        type="button"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => removeRequirement(index)}
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Benefits */}
+              <div className="space-y-2 border border-gray-200 rounded-md p-4">
+                <Label>Benefits & Perks</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newBenefit}
+                    onChange={(e) => setNewBenefit(e.target.value)}
+                    placeholder="Add a benefit"
+                    className="flex-1"
+                  />
+                  <Button type="button" onClick={addBenefit} variant="outline">
+                    Add
+                  </Button>
+                </div>
+                <ul className="mt-2 space-y-1">
+                  {formData.benefits.map((item, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <span className="flex-1">{item}</span>
+                      <button
+                        type="button"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => removeBenefit(index)}
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
               <div className="space-y-2">
@@ -406,7 +594,7 @@ Participate in code reviews"
                 <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting} className="bg-purple-700 hover:bg-purple-800">
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -438,7 +626,7 @@ Participate in code reviews"
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-emperor focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-700 focus:border-transparent"
             >
               <option value="all">All Status</option>
               <option value="open">Open</option>
@@ -448,7 +636,7 @@ Participate in code reviews"
             <select
               value={departmentFilter}
               onChange={(e) => setDepartmentFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-emperor focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-700 focus:border-transparent"
             >
               <option value="all">All Departments</option>
               {departments.map((dept) => (
@@ -464,7 +652,7 @@ Participate in code reviews"
       {/* Loading State */}
       {loading && (
         <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-emperor" />
+          <Loader2 className="h-8 w-8 animate-spin text-purple-700" />
           <span className="ml-2 text-lg text-gray-600">Loading jobs...</span>
         </div>
       )}
@@ -507,8 +695,26 @@ Participate in code reviews"
                         <Clock className="h-4 w-4 mr-1" />
                         <span>{job.type}</span>
                       </div>
-                      {job.salary && <span>{job.salary}</span>}
+                      {job.salary && (
+                        <div className="flex items-center">
+                          <DollarSign className="h-4 w-4 mr-1" />
+                          <span>{job.salary}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span>Posted {formatPostedDate(job.createdAt)}</span>
+                      </div>
                     </div>
+                    {job.technologies && job.technologies.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {job.technologies.map((tech, index) => (
+                          <Badge key={index} variant="outline" className="bg-gray-100">
+                            {tech}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2 ml-4">
                     <Button variant="ghost" size="icon" asChild>
@@ -550,7 +756,7 @@ Participate in code reviews"
                 ? "Try adjusting your search or filters"
                 : "Get started by creating your first job listing"}
             </p>
-            <Button className="bg-purple-emperor hover:bg-purple-emperor/90" onClick={() => setIsCreateModalOpen(true)}>
+            <Button className="bg-purple-700 hover:bg-purple-800" onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Create Job
             </Button>

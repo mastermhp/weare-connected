@@ -51,8 +51,8 @@ export async function POST(request) {
     const data = await request.json()
 
     // Validate required fields
-    if (!data.title || !data.description) {
-      return NextResponse.json({ error: "Title and description are required" }, { status: 400 })
+    if (!data.title || !data.description || !data.department || !data.location) {
+      return NextResponse.json({ error: "Title, description, department, and location are required" }, { status: 400 })
     }
 
     const { db } = await connectToDatabase()
@@ -77,6 +77,7 @@ export async function POST(request) {
       status: data.status || "open",
       createdAt: new Date(),
       updatedAt: new Date(),
+      postedDate: new Date(),
     }
 
     const result = await db.collection("jobs").insertOne(job)

@@ -1,44 +1,42 @@
 import { MongoClient } from "mongodb"
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017"
-const MONGODB_DB = process.env.MONGODB_DB || "connected_website"
+const uri = process.env.MONGODB_URI
+const options = {}
 
-// Check if we're in a production environment
-const isProd = process.env.NODE_ENV === "production"
+let client
+let clientPromise
 
-// Connection cache
-let cachedClient = null
-let cachedDb = null
-
-if (!MONGODB_URI) {
-  throw new Error("Please define the MONGODB_URI environment variable")
+if (!process.env.MONGODB_URI) {
+  throw new Error("Please add your Mongo URI to .env.local")
 }
 
-if (!MONGODB_DB) {
-  throw new Error("Please define the MONGODB_DB environment variable")
+if (process.env.NODE_ENV === "development") {
+  // In development mode, use a global variable so that the value
+  // is preserved across module reloads caused by HMR (Hot Module Replacement).
+  if (!global._mongoClientPromise) {
+    client = new MongoClient(uri, options)
+    global._mongoClientPromise = client.connect()
+  }
+  clientPromise = global._mongoClientPromise
+} else {
+  // In production mode, it's best to not use a global variable.
+  client = new MongoClient(uri, options)
+  clientPromise = client.connect()
 }
+
+// Export a module-scoped MongoClient promise. By doing this in a
+// separate module, the client can be shared across functions.
+export default clientPromise
 
 export async function connectToDatabase() {
-  // If we have a cached connection, use it
-  if (cachedClient && cachedDb) {
-    return { client: cachedClient, db: cachedDb }
-  }
-
-  // Log connection attempt
-  console.log(`Connecting to MongoDB at: ${MONGODB_URI.split("@")[1] || "localhost"}`)
-
-  // Connect to MongoDB
-  const client = new MongoClient(MONGODB_URI, {
-    // Remove deprecated options
-  })
-
   try {
-    await client.connect()
-    const db = client.db(MONGODB_DB)
+    const client = await clientPromise
 
-    // Cache the connection
-    cachedClient = client
-    cachedDb = db
+    // Use the database name from environment variable, fallback to 'connected_website'
+    const dbName = process.env.MONGODB_DB || "connected_website"
+    console.log(`Connecting to database: ${dbName}`)
+
+    const db = client.db(dbName)
 
     return { client, db }
   } catch (error) {

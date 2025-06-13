@@ -21,7 +21,11 @@ export async function GET(request) {
     // Build query
     const query = {}
     if (search) {
-      query.$or = [{ name: { $regex: search, $options: "i" } }, { description: { $regex: search, $options: "i" } }]
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { tagline: { $regex: search, $options: "i" } },
+      ]
     }
     if (status) query.status = status
 
@@ -47,8 +51,8 @@ export async function POST(request) {
     const data = await request.json()
 
     // Validate required fields
-    if (!data.name || !data.description) {
-      return NextResponse.json({ error: "Name and description are required" }, { status: 400 })
+    if (!data.name || !data.description || !data.tagline) {
+      return NextResponse.json({ error: "Name, description, and tagline are required" }, { status: 400 })
     }
 
     const { db } = await connectToDatabase()

@@ -8,6 +8,20 @@ import { MapPin, Clock, DollarSign, Users, Calendar, CheckCircle, ArrowLeft, Sha
 import Link from "next/link"
 
 export default function JobContent({ job }) {
+  // Format posted date
+  const formatPostedDate = (date) => {
+    if (!date) return "Recently"
+
+    const postedDate = new Date(date)
+    const now = new Date()
+    const diffTime = Math.abs(now - postedDate)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+    if (diffDays === 0) return "Today"
+    if (diffDays === 1) return "1 day ago"
+    return `${diffDays} days ago`
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
@@ -50,13 +64,15 @@ export default function JobContent({ job }) {
                       <Clock className="h-4 w-4 mr-1" />
                       {job.type}
                     </div>
-                    <div className="flex items-center">
-                      <DollarSign className="h-4 w-4 mr-1" />
-                      {job.salary}
-                    </div>
+                    {job.salary && (
+                      <div className="flex items-center">
+                        <DollarSign className="h-4 w-4 mr-1" />
+                        {job.salary}
+                      </div>
+                    )}
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-1" />
-                      Posted {job.posted}
+                      Posted {formatPostedDate(job.createdAt || job.postedDate)}
                     </div>
                   </div>
                 </div>
@@ -65,13 +81,16 @@ export default function JobContent({ job }) {
                 </Badge>
               </div>
 
-              <div className="flex flex-wrap gap-2 mb-6">
-                {job.skills.map((skill, index) => (
-                  <Badge key={index} variant="outline">
-                    {skill}
-                  </Badge>
-                ))}
-              </div>
+              {/* Technologies/Skills */}
+              {job.technologies && job.technologies.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {job.technologies.map((tech, index) => (
+                    <Badge key={index} variant="outline">
+                      {tech}
+                    </Badge>
+                  ))}
+                </div>
+              )}
 
               <Button size="lg" className="w-full sm:w-auto">
                 Apply for this Position
@@ -82,54 +101,60 @@ export default function JobContent({ job }) {
             <Card>
               <CardContent className="p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Job Description</h2>
-                <p className="text-gray-600 leading-relaxed">{job.description}</p>
+                <p className="text-gray-600 leading-relaxed whitespace-pre-line">{job.description}</p>
               </CardContent>
             </Card>
 
             {/* Responsibilities */}
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Key Responsibilities</h2>
-                <ul className="space-y-3">
-                  {job.responsibilities.map((responsibility, index) => (
-                    <li key={index} className="flex items-start">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-600">{responsibility}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            {job.responsibilities && job.responsibilities.length > 0 && (
+              <Card>
+                <CardContent className="p-8">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Key Responsibilities</h2>
+                  <ul className="space-y-3">
+                    {job.responsibilities.map((responsibility, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-600">{responsibility}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Requirements */}
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Requirements</h2>
-                <ul className="space-y-3">
-                  {job.requirements.map((requirement, index) => (
-                    <li key={index} className="flex items-start">
-                      <CheckCircle className="h-5 w-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-600">{requirement}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            {job.requirements && job.requirements.length > 0 && (
+              <Card>
+                <CardContent className="p-8">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Requirements</h2>
+                  <ul className="space-y-3">
+                    {job.requirements.map((requirement, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-600">{requirement}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Benefits */}
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Benefits & Perks</h2>
-                <ul className="space-y-3">
-                  {job.benefits.map((benefit, index) => (
-                    <li key={index} className="flex items-start">
-                      <CheckCircle className="h-5 w-5 text-purple-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-600">{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            {job.benefits && job.benefits.length > 0 && (
+              <Card>
+                <CardContent className="p-8">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Benefits & Perks</h2>
+                  <ul className="space-y-3">
+                    {job.benefits.map((benefit, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-purple-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-600">{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -165,7 +190,7 @@ export default function JobContent({ job }) {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Experience</span>
-                    <span className="font-medium">{job.experience}</span>
+                    <span className="font-medium">{job.experienceLevel}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Employment Type</span>
@@ -175,10 +200,12 @@ export default function JobContent({ job }) {
                     <span className="text-gray-600">Location</span>
                     <span className="font-medium">{job.location}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Salary Range</span>
-                    <span className="font-medium">{job.salary}</span>
-                  </div>
+                  {job.salary && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Salary Range</span>
+                      <span className="font-medium">{job.salary}</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

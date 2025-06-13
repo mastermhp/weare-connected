@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
+import { AlertCircle, CheckCircle2, Loader2, Settings } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function LoginPage() {
@@ -17,6 +17,7 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [activeTab, setActiveTab] = useState("user")
+  const [noAdminsFound, setNoAdminsFound] = useState(false)
   const router = useRouter()
   const { login, adminLogin } = useAuth()
 
@@ -47,6 +48,7 @@ export default function LoginPage() {
     setIsLoading(true)
     setError("")
     setSuccess("")
+    setNoAdminsFound(false)
 
     try {
       const { email, password } = userCredentials
@@ -72,6 +74,7 @@ export default function LoginPage() {
     setIsLoading(true)
     setError("")
     setSuccess("")
+    setNoAdminsFound(false)
 
     try {
       const { username, password } = adminCredentials
@@ -79,7 +82,13 @@ export default function LoginPage() {
       const result = await adminLogin(username, password)
 
       if (!result.success) {
-        setError(result.error || "Admin login failed. Please check your credentials.")
+        // Check if the error is about no admin users
+        if (result.error?.includes("No admin users found")) {
+          setNoAdminsFound(true)
+          setError("No admin users found in the database.")
+        } else {
+          setError(result.error || "Admin login failed. Please check your credentials.")
+        }
       } else {
         setSuccess("Login successful! Redirecting to admin panel...")
         router.push("/admin")
@@ -114,6 +123,25 @@ export default function LoginPage() {
           <Alert variant="destructive" className="animate-in fade-in-50">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {noAdminsFound && (
+          <Alert className="bg-blue-50 text-blue-800 border-blue-200 animate-in fade-in-50">
+            <Settings className="h-4 w-4 text-blue-600" />
+            <AlertDescription>
+              <div className="space-y-2">
+                <p>No admin users found in the database.</p>
+                <Link
+                  href="/admin/setup"
+                  className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium underline"
+                >
+                  <Settings className="h-3 w-3" />
+                  Go to Admin Setup
+                </Link>
+                <p className="text-sm">Create your first admin user to get started.</p>
+              </div>
+            </AlertDescription>
           </Alert>
         )}
 
@@ -219,7 +247,7 @@ export default function LoginPage() {
                     />
                   </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-col space-y-2">
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading && activeTab === "admin" ? (
                       <>
@@ -230,6 +258,15 @@ export default function LoginPage() {
                       "Admin Sign in"
                     )}
                   </Button>
+                  <div className="text-center">
+                    <Link
+                      href="/admin/setup"
+                      className="text-sm text-muted-foreground hover:text-primary inline-flex items-center gap-1"
+                    >
+                      <Settings className="h-3 w-3" />
+                      Need to create an admin user?
+                    </Link>
+                  </div>
                 </CardFooter>
               </form>
             </Card>

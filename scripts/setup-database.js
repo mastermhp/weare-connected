@@ -1,8 +1,9 @@
 // This script sets up the database with initial data
-// Run with: node -r dotenv/config scripts/setup-database.js
+// Run with: node scripts/setup-database.js
 
 const { MongoClient } = require("mongodb")
 const bcrypt = require("bcryptjs")
+require("dotenv").config({ path: ".env.local" })
 
 // Default admin credentials
 const DEFAULT_ADMIN = {

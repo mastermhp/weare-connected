@@ -18,6 +18,22 @@ export async function POST(request) {
 
     // Connect to database
     const { db } = await connectToDatabase()
+    console.log("Database connected successfully")
+
+    // Check if any admins exist at all
+    const adminCount = await db.collection("admins").countDocuments()
+    console.log(`Total admin users in database: ${adminCount}`)
+
+    if (adminCount === 0) {
+      console.log("No admin users found in database")
+      return NextResponse.json(
+        {
+          message: "No admin users found. Please create an admin user first.",
+          noAdmins: true,
+        },
+        { status: 401 },
+      )
+    }
 
     // Find admin by username
     const admin = await db.collection("admins").findOne({ username })
@@ -25,6 +41,15 @@ export async function POST(request) {
     // Check if admin exists
     if (!admin) {
       console.log(`Admin not found: ${username}`)
+      // List all admin usernames for debugging (remove in production)
+      const allAdmins = await db
+        .collection("admins")
+        .find({}, { projection: { username: 1 } })
+        .toArray()
+      console.log(
+        "Available admin usernames:",
+        allAdmins.map((a) => a.username),
+      )
       return NextResponse.json({ message: "Invalid username or password" }, { status: 401 })
     }
 
@@ -82,6 +107,12 @@ export async function POST(request) {
     })
   } catch (error) {
     console.error("Admin login error:", error)
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 })
+    return NextResponse.json(
+      {
+        message: "Internal server error",
+        error: error.message,
+      },
+      { status: 500 },
+    )
   }
 }

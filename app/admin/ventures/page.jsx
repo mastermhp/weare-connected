@@ -24,53 +24,44 @@ import ImageUpload from "@/app/components/admin/image-upload"
 const mockVentures = [
   {
     _id: 1,
-    name: "Web Development",
-    slug: "web-development",
-    description: "Custom web applications and websites built with modern technologies",
-    shortDescription: "Custom web apps and websites",
-    website: "https://webdevelopment.com",
-    industry: "Technology",
-    foundedYear: "2024",
+    name: "TechFlow",
+    slug: "techflow",
+    description:
+      "A comprehensive SaaS platform that revolutionizes how teams manage workflows and automate repetitive tasks.",
+    tagline: "Workflow automation reimagined",
+    category: "SaaS",
     status: "active",
+    foundedYear: "2022",
+    teamSize: "12",
+    growth: "+150% YoY",
+    website: "https://techflow.example.com",
+    metrics: [
+      { label: "Active Users", value: "10K+" },
+      { label: "Projects", value: "50K+" },
+      { label: "Time Saved", value: "2M+ hrs" },
+    ],
+    technologies: ["React", "Node.js", "PostgreSQL", "AWS"],
     logo: "/placeholder.svg?height=100&width=100",
-    featuredImage: "/placeholder.svg?height=200&width=300",
+    featuredImage: "/placeholder.svg?height=400&width=600",
   },
   {
     _id: 2,
     name: "Mobile App Development",
     slug: "mobile-app-development",
     description: "Native and cross-platform mobile applications for iOS and Android",
-    shortDescription: "Native and cross-platform mobile apps",
+    tagline: "Native and cross-platform mobile apps",
+    category: "Technology",
+    status: "active",
+    foundedYear: "2023",
+    teamSize: "8",
+    growth: "+120% YoY",
     website: "https://mobileappdevelopment.com",
-    industry: "Technology",
-    foundedYear: "2024",
-    status: "active",
-    logo: "/placeholder.svg?height=100&width=100",
-    featuredImage: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    _id: 3,
-    name: "UI/UX Design",
-    slug: "ui-ux-design",
-    description: "User-centered design solutions for digital products",
-    shortDescription: "User-centered design solutions",
-    website: "https://uidesign.com",
-    industry: "Design",
-    foundedYear: "2024",
-    status: "active",
-    logo: "/placeholder.svg?height=100&width=100",
-    featuredImage: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    _id: 4,
-    name: "Digital Marketing",
-    slug: "digital-marketing",
-    description: "Comprehensive digital marketing strategies and campaigns",
-    shortDescription: "Digital marketing strategies",
-    website: "https://digitalmarketing.com",
-    industry: "Marketing",
-    foundedYear: "2024",
-    status: "inactive",
+    metrics: [
+      { label: "Apps Delivered", value: "50+" },
+      { label: "Downloads", value: "1M+" },
+      { label: "Client Satisfaction", value: "4.9/5" },
+    ],
+    technologies: ["React Native", "Swift", "Kotlin", "Firebase"],
     logo: "/placeholder.svg?height=100&width=100",
     featuredImage: "/placeholder.svg?height=200&width=300",
   },
@@ -90,14 +81,23 @@ export default function VenturesPage() {
     name: "",
     slug: "",
     description: "",
-    shortDescription: "",
-    website: "",
-    industry: "",
-    foundedYear: "",
+    tagline: "",
+    category: "SaaS",
     status: "active",
+    foundedYear: "",
+    teamSize: "",
+    growth: "",
+    website: "",
+    metrics: [
+      { label: "Active Users", value: "" },
+      { label: "Projects", value: "" },
+      { label: "Time Saved", value: "" },
+    ],
+    technologies: [],
     logo: null,
     featuredImage: null,
   })
+  const [techInput, setTechInput] = useState("")
   const [formErrors, setFormErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -152,6 +152,42 @@ export default function VenturesPage() {
     }
   }
 
+  const handleMetricChange = (index, field, value) => {
+    const updatedMetrics = [...formData.metrics]
+    updatedMetrics[index] = { ...updatedMetrics[index], [field]: value }
+    setFormData((prev) => ({ ...prev, metrics: updatedMetrics }))
+  }
+
+  const addMetric = () => {
+    setFormData((prev) => ({
+      ...prev,
+      metrics: [...prev.metrics, { label: "", value: "" }],
+    }))
+  }
+
+  const removeMetric = (index) => {
+    const updatedMetrics = [...formData.metrics]
+    updatedMetrics.splice(index, 1)
+    setFormData((prev) => ({ ...prev, metrics: updatedMetrics }))
+  }
+
+  const handleAddTechnology = () => {
+    if (techInput.trim() && !formData.technologies.includes(techInput.trim())) {
+      setFormData((prev) => ({
+        ...prev,
+        technologies: [...prev.technologies, techInput.trim()],
+      }))
+      setTechInput("")
+    }
+  }
+
+  const removeTechnology = (tech) => {
+    setFormData((prev) => ({
+      ...prev,
+      technologies: prev.technologies.filter((t) => t !== tech),
+    }))
+  }
+
   const handleLogoUpload = (imageData) => {
     setFormData((prev) => ({
       ...prev,
@@ -171,6 +207,7 @@ export default function VenturesPage() {
     if (!formData.name.trim()) errors.name = "Name is required"
     if (!formData.description.trim()) errors.description = "Description is required"
     if (!formData.slug.trim()) errors.slug = "Slug is required"
+    if (!formData.tagline.trim()) errors.tagline = "Tagline is required"
 
     setFormErrors(errors)
     return Object.keys(errors).length === 0
@@ -206,11 +243,19 @@ export default function VenturesPage() {
         name: "",
         slug: "",
         description: "",
-        shortDescription: "",
-        website: "",
-        industry: "",
-        foundedYear: "",
+        tagline: "",
+        category: "SaaS",
         status: "active",
+        foundedYear: "",
+        teamSize: "",
+        growth: "",
+        website: "",
+        metrics: [
+          { label: "Active Users", value: "" },
+          { label: "Projects", value: "" },
+          { label: "Time Saved", value: "" },
+        ],
+        technologies: [],
         logo: null,
         featuredImage: null,
       })
@@ -279,126 +324,235 @@ export default function VenturesPage() {
               New Venture
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Venture</DialogTitle>
               <DialogDescription>Fill in the details to add a new venture to your portfolio</DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleCreateVenture} className="space-y-4 mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">
-                    Name <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Enter venture name"
-                  />
-                  {formErrors.name && <p className="text-sm text-red-500">{formErrors.name}</p>}
+            <form onSubmit={handleCreateVenture} className="space-y-6 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Basic Information */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Basic Information</h3>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">
+                          Name <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          placeholder="Enter venture name"
+                        />
+                        {formErrors.name && <p className="text-sm text-red-500">{formErrors.name}</p>}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="slug">
+                          Slug <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="slug"
+                          name="slug"
+                          value={formData.slug}
+                          onChange={handleInputChange}
+                          placeholder="enter-venture-slug"
+                        />
+                        {formErrors.slug && <p className="text-sm text-red-500">{formErrors.slug}</p>}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="tagline">
+                          Tagline <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="tagline"
+                          name="tagline"
+                          value={formData.tagline}
+                          onChange={handleInputChange}
+                          placeholder="Brief tagline (e.g. Workflow automation reimagined)"
+                        />
+                        {formErrors.tagline && <p className="text-sm text-red-500">{formErrors.tagline}</p>}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="description">
+                          Description <span className="text-red-500">*</span>
+                        </Label>
+                        <Textarea
+                          id="description"
+                          name="description"
+                          value={formData.description}
+                          onChange={handleInputChange}
+                          placeholder="Comprehensive description of the venture"
+                          rows={4}
+                        />
+                        {formErrors.description && <p className="text-sm text-red-500">{formErrors.description}</p>}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Details</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Category</Label>
+                        <Input
+                          id="category"
+                          name="category"
+                          value={formData.category}
+                          onChange={handleInputChange}
+                          placeholder="e.g. SaaS, Fintech"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="status">Status</Label>
+                        <select
+                          id="status"
+                          name="status"
+                          value={formData.status}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="active">Active</option>
+                          <option value="inactive">Inactive</option>
+                          <option value="scaling">Scaling</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="foundedYear">Founded Year</Label>
+                        <Input
+                          id="foundedYear"
+                          name="foundedYear"
+                          value={formData.foundedYear}
+                          onChange={handleInputChange}
+                          placeholder="e.g. 2022"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="teamSize">Team Size</Label>
+                        <Input
+                          id="teamSize"
+                          name="teamSize"
+                          value={formData.teamSize}
+                          onChange={handleInputChange}
+                          placeholder="e.g. 12"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="growth">Growth</Label>
+                        <Input
+                          id="growth"
+                          name="growth"
+                          value={formData.growth}
+                          onChange={handleInputChange}
+                          placeholder="e.g. +150% YoY"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="website">Website</Label>
+                        <Input
+                          id="website"
+                          name="website"
+                          value={formData.website}
+                          onChange={handleInputChange}
+                          placeholder="https://example.com"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="slug">
-                    Slug <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="slug"
-                    name="slug"
-                    value={formData.slug}
-                    onChange={handleInputChange}
-                    placeholder="enter-venture-slug"
-                  />
-                  {formErrors.slug && <p className="text-sm text-red-500">{formErrors.slug}</p>}
+                {/* Metrics, Technologies, and Images */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Metrics</h3>
+                    <div className="space-y-4">
+                      {formData.metrics.map((metric, index) => (
+                        <div key={index} className="grid grid-cols-5 gap-2 items-center">
+                          <div className="col-span-2">
+                            <Input
+                              placeholder="Label (e.g. Active Users)"
+                              value={metric.label}
+                              onChange={(e) => handleMetricChange(index, "label", e.target.value)}
+                            />
+                          </div>
+                          <div className="col-span-2">
+                            <Input
+                              placeholder="Value (e.g. 10K+)"
+                              value={metric.value}
+                              onChange={(e) => handleMetricChange(index, "value", e.target.value)}
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-500"
+                            onClick={() => removeMetric(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button type="button" variant="outline" size="sm" onClick={addMetric}>
+                        <Plus className="h-4 w-4 mr-2" /> Add Metric
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Technologies</h3>
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add technology (e.g. React)"
+                          value={techInput}
+                          onChange={(e) => setTechInput(e.target.value)}
+                          onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTechnology())}
+                        />
+                        <Button type="button" onClick={handleAddTechnology}>
+                          Add
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {formData.technologies.map((tech) => (
+                          <Badge key={tech} variant="secondary" className="px-2 py-1">
+                            {tech}
+                            <button
+                              type="button"
+                              className="ml-2 text-gray-500 hover:text-gray-700"
+                              onClick={() => removeTechnology(tech)}
+                            >
+                              ×
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Images</h3>
+                    <div className="grid grid-cols-1 gap-4">
+                      <ImageUpload onImageUpload={handleLogoUpload} defaultImage={formData.logo} label="Company Logo" />
+                      <ImageUpload
+                        onImageUpload={handleFeaturedImageUpload}
+                        defaultImage={formData.featuredImage}
+                        label="Featured Image"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">
-                  Description <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Write your venture description here..."
-                  rows={6}
-                />
-                {formErrors.description && <p className="text-sm text-red-500">{formErrors.description}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="shortDescription">Short Description</Label>
-                <Textarea
-                  id="shortDescription"
-                  name="shortDescription"
-                  value={formData.shortDescription}
-                  onChange={handleInputChange}
-                  placeholder="Brief summary of the venture (optional)"
-                  rows={2}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
-                  <Input
-                    id="website"
-                    name="website"
-                    value={formData.website}
-                    onChange={handleInputChange}
-                    placeholder="https://example.com"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="industry">Industry</Label>
-                  <Input
-                    id="industry"
-                    name="industry"
-                    value={formData.industry}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Fintech, Healthcare"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="foundedYear">Founded Year</Label>
-                  <Input
-                    id="foundedYear"
-                    name="foundedYear"
-                    value={formData.foundedYear}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 2023"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ImageUpload onImageUpload={handleLogoUpload} defaultImage={formData.logo} label="Company Logo" />
-                <ImageUpload
-                  onImageUpload={handleFeaturedImageUpload}
-                  defaultImage={formData.featuredImage}
-                  label="Featured Image"
-                />
               </div>
 
               {formErrors.submit && (
@@ -446,6 +600,7 @@ export default function VenturesPage() {
               <option value="all">All Status</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
+              <option value="scaling">Scaling</option>
             </select>
           </div>
         </CardContent>
@@ -475,54 +630,111 @@ export default function VenturesPage() {
           {ventures.map((venture) => (
             <Card key={venture._id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-xl font-semibold text-gray-900">{venture.name}</h3>
-                      <Badge className={getStatusColor(venture.status)}>{venture.status}</Badge>
-                    </div>
-                    <p className="text-gray-600 mb-4">
-                      {venture.shortDescription || venture.description.substring(0, 150) + "..."}
-                    </p>
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                      {venture.industry && (
-                        <div className="flex items-center">
-                          <Building className="h-4 w-4 mr-1" />
-                          <span>{venture.industry}</span>
-                        </div>
-                      )}
-                      {venture.foundedYear && <span>Founded: {venture.foundedYear}</span>}
-                      {venture.website && (
-                        <a
-                          href={venture.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-purple-emperor hover:underline"
-                        >
-                          Visit Website
-                        </a>
-                      )}
-                    </div>
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Logo */}
+                  <div className="w-full md:w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    {venture.logo ? (
+                      <img
+                        src={venture.logo || "/placeholder.svg"}
+                        alt={`${venture.name} logo`}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <Building className="h-12 w-12 text-gray-300" />
+                    )}
                   </div>
-                  <div className="flex items-center space-x-2 ml-4">
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/ventures/${venture.slug}`} target="_blank">
-                        <Eye className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/admin/ventures/${venture._id}/edit`}>
-                        <Edit className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-600 hover:text-red-700"
-                      onClick={() => handleDeleteClick(venture)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+
+                  {/* Content */}
+                  <div className="flex-1">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-xl font-semibold text-gray-900">{venture.name}</h3>
+                          <Badge className={getStatusColor(venture.status)}>{venture.status}</Badge>
+                          {venture.category && (
+                            <Badge variant="outline" className="text-xs">
+                              {venture.category}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-gray-600 text-sm mb-2">{venture.tagline || venture.shortDescription}</p>
+                      </div>
+                      <div className="flex items-center space-x-2 mt-4 md:mt-0">
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link href={`/ventures/${venture.slug}`} target="_blank">
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link href={`/admin/ventures/${venture._id}/edit`}>
+                            <Edit className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleDeleteClick(venture)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Details */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-700">Details</h4>
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600">
+                          {venture.foundedYear && <div>Founded: {venture.foundedYear}</div>}
+                          {venture.teamSize && <div>Team: {venture.teamSize} people</div>}
+                          {venture.growth && <div>Growth: {venture.growth}</div>}
+                          {venture.website && (
+                            <a
+                              href={venture.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-purple-emperor hover:underline"
+                            >
+                              Website
+                            </a>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Metrics */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-700">Metrics</h4>
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                          {venture.metrics && venture.metrics.length > 0 ? (
+                            venture.metrics.map((metric, i) => (
+                              <div key={i} className="text-gray-600">
+                                <span className="font-medium text-purple-emperor">{metric.value}</span>{" "}
+                                <span>{metric.label}</span>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-gray-400">No metrics added</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Technologies */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-700">Technologies</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {venture.technologies && venture.technologies.length > 0 ? (
+                            venture.technologies.map((tech) => (
+                              <Badge key={tech} variant="outline" className="text-xs">
+                                {tech}
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-gray-400">No technologies added</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
