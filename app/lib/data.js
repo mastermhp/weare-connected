@@ -1,4 +1,4 @@
-import { connectToDatabase } from "./mongodb"
+import { connectToDatabase, isMongoDBAvailable } from "./mongodb"
 import { ObjectId } from "mongodb"
 
 // Helper function to handle database errors
@@ -8,6 +8,18 @@ const handleDbError = (error, fallbackData, entityName) => {
 }
 
 // Helper function to serialize MongoDB objects
+function serializeMongoObject(obj) {
+  if (!obj) return null
+
+  return {
+    ...obj,
+    _id: obj._id?.toString() || obj._id,
+    createdAt: obj.createdAt?.toISOString?.() || obj.createdAt || new Date().toISOString(),
+    updatedAt: obj.updatedAt?.toISOString?.() || obj.updatedAt || new Date().toISOString(),
+    publishedAt: obj.publishedAt?.toISOString?.() || obj.publishedAt || null,
+  }
+}
+
 const serializeJob = (job) => {
   if (!job) return null
 
@@ -22,10 +34,10 @@ const serializeJob = (job) => {
     type: job.type || "",
     salary: job.salary || "",
     experienceLevel: job.experienceLevel || "",
-    technologies: job.technologies || [],
-    responsibilities: job.responsibilities || [],
-    requirements: job.requirements || [],
-    benefits: job.benefits || [],
+    technologies: Array.isArray(job.technologies) ? job.technologies : [],
+    responsibilities: Array.isArray(job.responsibilities) ? job.responsibilities : [],
+    requirements: Array.isArray(job.requirements) ? job.requirements : [],
+    benefits: Array.isArray(job.benefits) ? job.benefits : [],
     status: job.status || "open",
     createdAt: job.createdAt ? new Date(job.createdAt).toISOString() : new Date().toISOString(),
     updatedAt: job.updatedAt ? new Date(job.updatedAt).toISOString() : new Date().toISOString(),
@@ -33,108 +45,45 @@ const serializeJob = (job) => {
   }
 }
 
-// Get all ventures
-export async function getVentures() {
-  try {
-    const { db } = await connectToDatabase()
-    const ventures = await db.collection("ventures").find({ status: "active" }).sort({ createdAt: -1 }).toArray()
-
-    // Convert MongoDB _id to string id for client-side use
-    return ventures.map((venture) => ({
-      ...venture,
-      id: venture._id.toString(),
-      image:
-        venture.featuredImage?.url ||
-        venture.image ||
-        "/placeholder.svg?height=600&width=1200&text=" + encodeURIComponent(venture.name || "Venture"),
-      logo:
-        venture.logo?.url ||
-        venture.logo ||
-        "/placeholder.svg?height=120&width=120&text=" + encodeURIComponent(venture.name?.charAt(0) || "V"),
-    }))
-  } catch (error) {
-    console.error("Error fetching ventures:", error)
-    // Return fallback data
-    return [
-      {
-        id: "1",
-        slug: "techflow",
-        name: "TechFlow",
-        tagline: "Workflow automation reimagined",
-        description:
-          "A comprehensive SaaS platform that revolutionizes how teams manage workflows and automate repetitive tasks.",
-        image: "/placeholder.svg?height=600&width=1200&text=TechFlow+Dashboard",
-        logo: "/placeholder.svg?height=120&width=120&text=TF",
-        status: "active",
-      },
-      {
-        id: "2",
-        slug: "designhub",
-        name: "DesignHub",
-        tagline: "Creative solutions for modern brands",
-        description:
-          "A full-service design agency specializing in brand identity, digital experiences, and creative campaigns.",
-        image: "/placeholder.svg?height=600&width=1200&text=DesignHub+Portfolio",
-        logo: "/placeholder.svg?height=120&width=120&text=DH",
-        status: "active",
-      },
-    ]
-  }
-}
-
-// Get a single venture by slug
-export async function getVentureBySlug(slug) {
-  try {
-    const { db } = await connectToDatabase()
-    const venture = await db.collection("ventures").findOne({ slug })
-
-    if (!venture) return null
-
-    // Convert MongoDB _id to string id for client-side use
-    return {
-      ...venture,
-      id: venture._id.toString(),
-      image:
-        venture.featuredImage?.url ||
-        venture.image ||
-        "/placeholder.svg?height=600&width=1200&text=" + encodeURIComponent(venture.name || "Venture"),
-      logo:
-        venture.logo?.url ||
-        venture.logo ||
-        "/placeholder.svg?height=120&width=120&text=" + encodeURIComponent(venture.name?.charAt(0) || "V"),
-    }
-  } catch (error) {
-    console.error(`Error fetching venture with slug ${slug}:`, error)
-    return null
-  }
-}
-
 // Get all jobs
 export async function getJobs() {
   try {
-    const { db } = await connectToDatabase()
-    const jobs = await db.collection("jobs").find({}).toArray()
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning sample jobs")
+      return getSampleJobs()
+    }
 
-    // Convert MongoDB _id to string id for client-side use
+    const { db } = await connectToDatabase()
+    const jobs = await db.collection("jobs").find({ status: "open" }).sort({ createdAt: -1 }).toArray()
+
+    if (jobs.length === 0) {
+      return getSampleJobs()
+    }
+
     return jobs.map((job) => serializeJob(job))
   } catch (error) {
     console.error("Error fetching jobs:", error)
-    return []
+    return getSampleJobs()
   }
 }
 
 // Get a single job by slug
 export async function getJobBySlug(slug) {
   try {
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning null for job")
+      return null
+    }
+
     const { db } = await connectToDatabase()
 
     // Try to find by slug first
-    let job = await db.collection("jobs").findOne({ slug })
+    let job = await db.collection("jobs").findOne({ slug, status: "open" })
 
     // If not found, try to find by _id (in case slug is actually an ID)
     if (!job && ObjectId.isValid(slug)) {
       try {
-        job = await db.collection("jobs").findOne({ _id: new ObjectId(slug) })
+        job = await db.collection("jobs").findOne({ _id: new ObjectId(slug), status: "open" })
       } catch (err) {
         console.log("Error trying to find by ID:", err.message)
       }
@@ -152,84 +101,103 @@ export async function getJob(id) {
   return getJobBySlug(id)
 }
 
+// Sample jobs for build time and fallback
+function getSampleJobs() {
+  return [
+    {
+      id: "sample-1",
+      title: "Senior Frontend Developer",
+      slug: "senior-frontend-developer",
+      description: "Join our team as a Senior Frontend Developer and build amazing user experiences.",
+      shortDescription: "Build cutting-edge frontend applications with React and TypeScript.",
+      department: "Engineering",
+      location: "Remote / San Francisco",
+      type: "Full-time",
+      salary: "$120,000 - $160,000",
+      experienceLevel: "Senior",
+      technologies: ["React", "TypeScript", "Next.js", "Tailwind CSS"],
+      responsibilities: ["Develop frontend applications", "Collaborate with teams", "Optimize performance"],
+      requirements: ["5+ years React experience", "TypeScript proficiency", "Team collaboration"],
+      benefits: ["Competitive salary", "Health insurance", "Remote work", "Professional development"],
+      status: "open",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      postedDate: new Date().toISOString(),
+    },
+    {
+      id: "sample-2",
+      title: "Senior Backend Developer",
+      slug: "senior-backend-developer",
+      description: "Build robust backend systems as our Senior Backend Developer.",
+      shortDescription: "Architect scalable server-side applications with Node.js and Python.",
+      department: "Engineering",
+      location: "Remote / New York",
+      type: "Full-time",
+      salary: "$130,000 - $170,000",
+      experienceLevel: "Senior",
+      technologies: ["Node.js", "Python", "PostgreSQL", "AWS"],
+      responsibilities: ["Design backend architecture", "Develop APIs", "Optimize databases"],
+      requirements: ["5+ years backend experience", "Cloud platform knowledge", "Database expertise"],
+      benefits: ["Competitive salary", "Health insurance", "Remote work", "Professional development"],
+      status: "open",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      postedDate: new Date().toISOString(),
+    },
+    {
+      id: "sample-3",
+      title: "Senior Full Stack Developer",
+      slug: "senior-full-stack-developer",
+      description: "Lead full-stack development projects from conception to deployment.",
+      shortDescription: "Work with both frontend and backend technologies to deliver complete solutions.",
+      department: "Engineering",
+      location: "Remote / Austin",
+      type: "Full-time",
+      salary: "$125,000 - $165,000",
+      experienceLevel: "Senior",
+      technologies: ["React", "Node.js", "TypeScript", "PostgreSQL"],
+      responsibilities: ["Develop full-stack applications", "Work with product teams", "Ensure code quality"],
+      requirements: ["5+ years full-stack experience", "React and Node.js proficiency", "Problem-solving skills"],
+      benefits: ["Competitive salary", "Health insurance", "Remote work", "Professional development"],
+      status: "open",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      postedDate: new Date().toISOString(),
+    },
+  ]
+}
+
 // Get all blog posts
 export async function getBlogPosts() {
   try {
-    const { db } = await connectToDatabase()
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning sample blog posts")
+      return getSampleBlogPosts()
+    }
 
-    // Try multiple collection names
+    const { db } = await connectToDatabase()
     let posts = []
 
     try {
-      posts = await db.collection("blog").find({}).sort({ publishedAt: -1, createdAt: -1 }).toArray()
+      posts = await db
+        .collection("blog_posts")
+        .find({ status: "published" })
+        .sort({ publishedAt: -1, createdAt: -1 })
+        .toArray()
     } catch (err) {
       try {
-        posts = await db.collection("blog_posts").find({}).sort({ publishedAt: -1, createdAt: -1 }).toArray()
+        posts = await db
+          .collection("blog")
+          .find({ status: "published" })
+          .sort({ publishedAt: -1, createdAt: -1 })
+          .toArray()
       } catch (err2) {
         console.log("No blog collections found, returning sample data")
       }
     }
 
     if (posts.length === 0) {
-      // Return sample blog posts
-      return [
-        {
-          id: "sample-1",
-          title: "The Future of Technology: Trends to Watch",
-          slug: "future-of-technology",
-          excerpt:
-            "Explore the latest technological trends that are shaping our future and transforming industries worldwide.",
-          content:
-            "Technology continues to evolve at an unprecedented pace, bringing new opportunities and challenges...",
-          author: {
-            name: "Connected Team",
-            role: "Technology Analyst",
-            image: "/placeholder.svg?height=40&width=40&text=CT",
-          },
-          publishedAt: new Date().toLocaleDateString(),
-          image: "/placeholder.svg?height=400&width=600&text=Future+of+Technology",
-          tags: ["Technology", "Innovation", "Future"],
-          category: "Technology",
-          readTime: "8 min read",
-        },
-        {
-          id: "sample-2",
-          title: "Building Successful Ventures: Lessons Learned",
-          slug: "building-successful-ventures",
-          excerpt:
-            "Key insights and strategies for building and scaling successful technology ventures in today's market.",
-          content:
-            "Building a successful venture requires more than just a great idea. It demands strategic planning, execution excellence, and the ability to adapt...",
-          author: {
-            name: "Connected Team",
-            role: "Venture Builder",
-            image: "/placeholder.svg?height=40&width=40&text=VB",
-          },
-          publishedAt: new Date(Date.now() - 86400000).toLocaleDateString(),
-          image: "/placeholder.svg?height=400&width=600&text=Successful+Ventures",
-          tags: ["Ventures", "Startup", "Business"],
-          category: "Business",
-          readTime: "6 min read",
-        },
-        {
-          id: "sample-3",
-          title: "Creating an Innovation Ecosystem",
-          slug: "innovation-ecosystem",
-          excerpt: "How to foster innovation within organizations and build ecosystems that drive continuous growth.",
-          content:
-            "Innovation doesn't happen in isolation. It thrives in environments that encourage experimentation, collaboration, and continuous learning...",
-          author: {
-            name: "Connected Team",
-            role: "Innovation Lead",
-            image: "/placeholder.svg?height=40&width=40&text=IL",
-          },
-          publishedAt: new Date(Date.now() - 172800000).toLocaleDateString(),
-          image: "/placeholder.svg?height=400&width=600&text=Innovation+Ecosystem",
-          tags: ["Innovation", "Ecosystem", "Growth"],
-          category: "Innovation",
-          readTime: "7 min read",
-        },
-      ]
+      return getSampleBlogPosts()
     }
 
     return posts.map((post) => ({
@@ -244,7 +212,7 @@ export async function getBlogPosts() {
       author: post.author || {
         name: "Connected Team",
         role: "Author",
-        image: "/placeholder.svg?height=40&width=40&text=A",
+        image: "/placeholder.svg?height=40&width=40&text=" + encodeURIComponent(post.author?.name?.charAt(0) || "A"),
       },
       publishedAt: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : new Date().toLocaleDateString(),
       image:
@@ -256,44 +224,63 @@ export async function getBlogPosts() {
       readTime: post.readTime || "5 min read",
     }))
   } catch (error) {
-    return handleDbError(
-      error,
-      [
-        {
-          id: "fallback-1",
-          title: "Welcome to Our Blog",
-          slug: "welcome-to-our-blog",
-          excerpt:
-            "Stay tuned for insights, news, and perspectives from our team on technology, innovation, and business.",
-          content: "We're excited to share our thoughts and experiences with you...",
-          author: {
-            name: "Connected Team",
-            role: "Editorial Team",
-            image: "/placeholder.svg?height=40&width=40&text=CT",
-          },
-          publishedAt: new Date().toLocaleDateString(),
-          image: "/placeholder.svg?height=400&width=600&text=Welcome+to+Our+Blog",
-          tags: ["Welcome", "Blog", "Introduction"],
-          category: "General",
-          readTime: "3 min read",
-        },
-      ],
-      "blog posts",
-    )
+    return handleDbError(error, getSampleBlogPosts(), "blog posts")
   }
+}
+
+function getSampleBlogPosts() {
+  return [
+    {
+      id: "sample-1",
+      title: "The Future of Technology: Trends to Watch",
+      slug: "future-of-technology",
+      excerpt:
+        "Explore the latest technological trends that are shaping our future and transforming industries worldwide.",
+      content: "Technology continues to evolve at an unprecedented pace, bringing new opportunities and challenges...",
+      author: {
+        name: "Connected Team",
+        role: "Technology Analyst",
+        image: "/placeholder.svg?height=40&width=40&text=CT",
+      },
+      publishedAt: new Date().toLocaleDateString(),
+      image: "/placeholder.svg?height=400&width=600&text=Future+of+Technology",
+      tags: ["Technology", "Innovation", "Future"],
+      category: "Technology",
+      readTime: "8 min read",
+    },
+    {
+      id: "sample-2",
+      title: "Building Successful Ventures: Lessons Learned",
+      slug: "building-successful-ventures",
+      excerpt: "Key insights and strategies for building and scaling successful technology ventures in today's market.",
+      content:
+        "Building a successful venture requires more than just a great idea. It demands strategic planning, execution excellence, and the ability to adapt...",
+      author: { name: "Connected Team", role: "Venture Builder", image: "/placeholder.svg?height=40&width=40&text=VB" },
+      publishedAt: new Date(Date.now() - 86400000).toLocaleDateString(),
+      image: "/placeholder.svg?height=400&width=600&text=Successful+Ventures",
+      tags: ["Ventures", "Startup", "Business"],
+      category: "Business",
+      readTime: "6 min read",
+    },
+  ]
 }
 
 // Get a single blog post by slug
 export async function getBlogPostBySlug(slug) {
   try {
-    const { db } = await connectToDatabase()
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning null for blog post")
+      return null
+    }
 
+    const { db } = await connectToDatabase()
     let post = null
+
     try {
-      post = await db.collection("blog").findOne({ slug })
+      post = await db.collection("blog_posts").findOne({ slug, status: "published" })
     } catch (err) {
       try {
-        post = await db.collection("blog_posts").findOne({ slug })
+        post = await db.collection("blog").findOne({ slug, status: "published" })
       } catch (err2) {
         console.log("No blog collections found")
       }
@@ -329,58 +316,16 @@ export async function getBlogPostBySlug(slug) {
 // Get all services
 export async function getServices() {
   try {
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning sample services")
+      return getSampleServices()
+    }
+
     const { db } = await connectToDatabase()
-    const services = await db.collection("services").find({}).toArray()
+    const services = await db.collection("services").find({ status: "active" }).toArray()
 
     if (services.length === 0) {
-      // Return sample services
-      return [
-        {
-          id: "1",
-          slug: "web-development",
-          title: "Web Development",
-          description:
-            "Custom web applications built with modern technologies and best practices for optimal performance.",
-          image: "/placeholder.svg?height=400&width=600&text=Web+Development",
-          icon: "Code",
-          features: ["React & Next.js", "Node.js Backend", "Database Design", "API Development", "Responsive Design"],
-        },
-        {
-          id: "2",
-          slug: "mobile-app-development",
-          title: "Mobile App Development",
-          description:
-            "Native and cross-platform mobile applications for iOS and Android with seamless user experiences.",
-          image: "/placeholder.svg?height=400&width=600&text=Mobile+App+Development",
-          icon: "Smartphone",
-          features: ["iOS Development", "Android Development", "React Native", "Flutter", "App Store Optimization"],
-        },
-        {
-          id: "3",
-          slug: "product-strategy",
-          title: "Product Strategy",
-          description:
-            "Strategic planning and roadmapping for digital products to ensure market success and user satisfaction.",
-          image: "/placeholder.svg?height=400&width=600&text=Product+Strategy",
-          icon: "Target",
-          features: [
-            "Market Research",
-            "User Experience Design",
-            "Product Roadmapping",
-            "Competitive Analysis",
-            "Go-to-Market Strategy",
-          ],
-        },
-        {
-          id: "4",
-          slug: "venture-building",
-          title: "Venture Building",
-          description: "End-to-end support for launching new ventures from ideation to market entry and scaling.",
-          image: "/placeholder.svg?height=400&width=600&text=Venture+Building",
-          icon: "Rocket",
-          features: ["Idea Validation", "Business Model Design", "MVP Development", "Funding Support", "Team Building"],
-        },
-      ]
+      return getSampleServices()
     }
 
     return services.map((service) => ({
@@ -397,29 +342,44 @@ export async function getServices() {
       price: service.price,
     }))
   } catch (error) {
-    return handleDbError(
-      error,
-      [
-        {
-          id: "1",
-          slug: "web-development",
-          title: "Web Development",
-          description: "Custom web applications built with modern technologies",
-          image: "/placeholder.svg?height=400&width=600&text=Web+Development",
-          icon: "Code",
-          features: ["React & Next.js", "Node.js Backend", "Database Design"],
-        },
-      ],
-      "services",
-    )
+    return handleDbError(error, getSampleServices(), "services")
   }
+}
+
+function getSampleServices() {
+  return [
+    {
+      id: "1",
+      slug: "web-development",
+      title: "Web Development",
+      description: "Custom web applications built with modern technologies and best practices for optimal performance.",
+      image: "/placeholder.svg?height=400&width=600&text=Web+Development",
+      icon: "Code",
+      features: ["React & Next.js", "Node.js Backend", "Database Design", "API Development", "Responsive Design"],
+    },
+    {
+      id: "2",
+      slug: "mobile-app-development",
+      title: "Mobile App Development",
+      description: "Native and cross-platform mobile applications for iOS and Android with seamless user experiences.",
+      image: "/placeholder.svg?height=400&width=600&text=Mobile+App+Development",
+      icon: "Smartphone",
+      features: ["iOS Development", "Android Development", "React Native", "Flutter", "App Store Optimization"],
+    },
+  ]
 }
 
 // Get a single service by slug
 export async function getServiceBySlug(slug) {
   try {
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning null for service")
+      return null
+    }
+
     const { db } = await connectToDatabase()
-    const service = await db.collection("services").findOne({ slug })
+    const service = await db.collection("services").findOne({ slug, status: "active" })
+
     if (!service) return null
 
     return {
@@ -444,11 +404,108 @@ export async function getServiceBySlug(slug) {
   }
 }
 
+// Get all ventures
+export async function getVentures() {
+  try {
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning sample ventures")
+      return getSampleVentures()
+    }
+
+    const { db } = await connectToDatabase()
+    const ventures = await db.collection("ventures").find({ status: "active" }).sort({ createdAt: -1 }).toArray()
+
+    if (ventures.length === 0) {
+      return getSampleVentures()
+    }
+
+    return ventures.map((venture) => ({
+      ...venture,
+      id: venture._id.toString(),
+      image:
+        venture.featuredImage?.url ||
+        venture.image ||
+        "/placeholder.svg?height=600&width=1200&text=" + encodeURIComponent(venture.name || "Venture"),
+      logo:
+        venture.logo?.url ||
+        venture.logo ||
+        "/placeholder.svg?height=120&width=120&text=" + encodeURIComponent(venture.name?.charAt(0) || "V"),
+    }))
+  } catch (error) {
+    console.error("Error fetching ventures:", error)
+    return getSampleVentures()
+  }
+}
+
+function getSampleVentures() {
+  return [
+    {
+      id: "1",
+      slug: "techflow",
+      name: "TechFlow",
+      tagline: "Workflow automation reimagined",
+      description:
+        "A comprehensive SaaS platform that revolutionizes how teams manage workflows and automate repetitive tasks.",
+      image: "/placeholder.svg?height=600&width=1200&text=TechFlow+Dashboard",
+      logo: "/placeholder.svg?height=120&width=120&text=TF",
+      status: "active",
+    },
+    {
+      id: "2",
+      slug: "designhub",
+      name: "DesignHub",
+      tagline: "Creative solutions for modern brands",
+      description:
+        "A full-service design agency specializing in brand identity, digital experiences, and creative campaigns.",
+      image: "/placeholder.svg?height=600&width=1200&text=DesignHub+Portfolio",
+      logo: "/placeholder.svg?height=120&width=120&text=DH",
+      status: "active",
+    },
+  ]
+}
+
+// Get a single venture by slug
+export async function getVentureBySlug(slug) {
+  try {
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning null for venture")
+      return null
+    }
+
+    const { db } = await connectToDatabase()
+    const venture = await db.collection("ventures").findOne({ slug })
+
+    if (!venture) return null
+
+    return {
+      ...venture,
+      id: venture._id.toString(),
+      image:
+        venture.featuredImage?.url ||
+        venture.image ||
+        "/placeholder.svg?height=600&width=1200&text=" + encodeURIComponent(venture.name || "Venture"),
+      logo:
+        venture.logo?.url ||
+        venture.logo ||
+        "/placeholder.svg?height=120&width=120&text=" + encodeURIComponent(venture.name?.charAt(0) || "V"),
+    }
+  } catch (error) {
+    console.error(`Error fetching venture with slug ${slug}:`, error)
+    return null
+  }
+}
+
 // Get all case studies
 export async function getCaseStudies() {
   try {
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning empty case studies")
+      return []
+    }
+
     const { db } = await connectToDatabase()
-    const caseStudies = await db.collection("case_studies").find({}).toArray()
+    const caseStudies = await db.collection("case_studies").find({ status: "published" }).toArray()
+
     return caseStudies.map((study) => ({
       id: study._id.toString(),
       slug: study.slug || study._id.toString(),
@@ -470,8 +527,14 @@ export async function getCaseStudies() {
 // Get a single case study by slug
 export async function getCaseStudyBySlug(slug) {
   try {
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning null for case study")
+      return null
+    }
+
     const { db } = await connectToDatabase()
-    const study = await db.collection("case_studies").findOne({ slug })
+    const study = await db.collection("case_studies").findOne({ slug, status: "published" })
+
     if (!study) return null
 
     return {
@@ -499,8 +562,14 @@ export async function getCaseStudyBySlug(slug) {
 // Get all team members
 export async function getTeamMembers() {
   try {
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning empty team members")
+      return []
+    }
+
     const { db } = await connectToDatabase()
-    const teamMembers = await db.collection("team_members").find({}).toArray()
+    const teamMembers = await db.collection("team_members").find({ status: "active" }).toArray()
+
     return teamMembers.map((member) => ({
       id: member._id.toString(),
       name: member.name || "Team Member",
@@ -519,8 +588,14 @@ export async function getTeamMembers() {
 // Get all press releases
 export async function getPressReleases() {
   try {
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning empty press releases")
+      return []
+    }
+
     const { db } = await connectToDatabase()
-    const pressReleases = await db.collection("press_releases").find({}).toArray()
+    const pressReleases = await db.collection("press_releases").find({ status: "published" }).toArray()
+
     return pressReleases.map((release) => ({
       id: release._id.toString(),
       title: release.title || "Untitled Press Release",
@@ -537,8 +612,14 @@ export async function getPressReleases() {
 // Get all media assets
 export async function getMediaAssets() {
   try {
+    if (!isMongoDBAvailable()) {
+      console.warn("MongoDB not available, returning empty media assets")
+      return []
+    }
+
     const { db } = await connectToDatabase()
-    const mediaAssets = await db.collection("media_assets").find({}).toArray()
+    const mediaAssets = await db.collection("media_assets").find({ status: "active" }).toArray()
+
     return mediaAssets.map((asset) => ({
       id: asset._id.toString(),
       title: asset.title || "Untitled Asset",

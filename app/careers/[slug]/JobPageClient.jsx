@@ -65,19 +65,6 @@ export default function JobPageClient({ job }) {
           </Link>
         </div>
 
-        {/* Debug Panel - Remove this after testing */}
-        <div className="mb-4 p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
-          <h3 className="font-bold text-yellow-800">Debug Info:</h3>
-          <p className="text-yellow-700">Job Slug: {job.slug}</p>
-          <p className="text-yellow-700">Apply URL: /careers/{job.slug}/apply</p>
-          <button
-            onClick={() => console.log("Button clicked! Job:", job)}
-            className="mt-2 px-3 py-1 bg-yellow-200 text-yellow-800 rounded text-sm"
-          >
-            Test Console Log
-          </button>
-        </div>
-
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
@@ -106,18 +93,20 @@ export default function JobPageClient({ job }) {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {job.technologies?.map((tech, index) => (
-                        <Badge key={index} variant="secondary" className="bg-purple-100 text-purple-800">
-                          {tech}
-                        </Badge>
-                      ))}
+                      {job.technologies &&
+                        Array.isArray(job.technologies) &&
+                        job.technologies.map((tech, index) => (
+                          <Badge key={index} variant="secondary" className="bg-purple-100 text-purple-800">
+                            {tech}
+                          </Badge>
+                        ))}
                     </div>
                   </div>
                   <div className="flex flex-col gap-3 sm:min-w-[200px]">
                     <Button
                       asChild
                       size="lg"
-                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-150 active:scale-95 active:bg-purple-900"
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-150 active:scale-95"
                       onClick={handleApplyClick}
                       disabled={isLoading}
                     >
@@ -163,7 +152,7 @@ export default function JobPageClient({ job }) {
             </Card>
 
             {/* Responsibilities */}
-            {job.responsibilities && job.responsibilities.length > 0 && (
+            {job.responsibilities && Array.isArray(job.responsibilities) && job.responsibilities.length > 0 && (
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
@@ -185,7 +174,7 @@ export default function JobPageClient({ job }) {
             )}
 
             {/* Requirements */}
-            {job.requirements && job.requirements.length > 0 && (
+            {job.requirements && Array.isArray(job.requirements) && job.requirements.length > 0 && (
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
@@ -207,7 +196,7 @@ export default function JobPageClient({ job }) {
             )}
 
             {/* Benefits */}
-            {job.benefits && job.benefits.length > 0 && (
+            {job.benefits && Array.isArray(job.benefits) && job.benefits.length > 0 && (
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
@@ -305,7 +294,7 @@ export default function JobPageClient({ job }) {
 
         {/* Related Jobs */}
         <div className="mt-12">
-          <RelatedJobs currentJobId={job.id} department={job.department} />
+          <RelatedJobs currentJobId={job.id || job.slug} department={job.department} location={job.location} />
         </div>
       </div>
     </div>
