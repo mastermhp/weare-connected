@@ -45,6 +45,34 @@ const serializeJob = (job) => {
   }
 }
 
+// Helper function to serialize service data
+const serializeService = (service) => {
+  if (!service) return null
+
+  return {
+    id: service._id?.toString() || service.id,
+    slug: service.slug || "",
+    title: service.title || "",
+    description: service.description || service.shortDescription || "",
+    longDescription: service.longDescription || service.description || "",
+    image:
+      service.featuredImage?.url ||
+      service.image ||
+      "/placeholder.svg?height=400&width=600&text=" + encodeURIComponent(service.title || "Service"),
+    icon: service.icon || "Zap",
+    features: Array.isArray(service.features) ? service.features : [],
+    benefits: Array.isArray(service.benefits) ? service.benefits : [],
+    process: Array.isArray(service.process) ? service.process : [],
+    pricing: Array.isArray(service.pricing) ? service.pricing : [],
+    testimonials: Array.isArray(service.testimonials) ? service.testimonials : [],
+    technologies: Array.isArray(service.technologies) ? service.technologies : [],
+    deliverables: Array.isArray(service.deliverables) ? service.deliverables : [],
+    timeline: service.timeline || "",
+    startingPrice: service.startingPrice || "",
+    status: service.status || "active",
+  }
+}
+
 // Get all jobs
 export async function getJobs() {
   try {
@@ -328,19 +356,7 @@ export async function getServices() {
       return getSampleServices()
     }
 
-    return services.map((service) => ({
-      id: service._id.toString(),
-      slug: service.slug || service._id.toString(),
-      title: service.title || "Untitled Service",
-      description: service.shortDescription || service.description || "No description available",
-      image:
-        service.featuredImage?.url ||
-        service.image ||
-        "/placeholder.svg?height=400&width=600&text=" + encodeURIComponent(service.title || "Service"),
-      icon: service.icon || "Zap",
-      features: service.features || [],
-      price: service.price,
-    }))
+    return services.map((service) => serializeService(service))
   } catch (error) {
     return handleDbError(error, getSampleServices(), "services")
   }
@@ -353,18 +369,117 @@ function getSampleServices() {
       slug: "web-development",
       title: "Web Development",
       description: "Custom web applications built with modern technologies and best practices for optimal performance.",
+      longDescription:
+        "We create custom web applications using cutting-edge technologies like React, Next.js, and Node.js. Our development process focuses on performance, scalability, and user experience to deliver solutions that drive business growth.",
       image: "/placeholder.svg?height=400&width=600&text=Web+Development",
       icon: "Code",
       features: ["React & Next.js", "Node.js Backend", "Database Design", "API Development", "Responsive Design"],
+      benefits: ["Fast Performance", "SEO Optimized", "Mobile Responsive", "Scalable Architecture", "Modern UI/UX"],
+      process: [
+        { step: "Discovery", description: "Understanding your requirements and goals" },
+        { step: "Design", description: "Creating wireframes and visual designs" },
+        { step: "Development", description: "Building your application with modern technologies" },
+        { step: "Testing", description: "Comprehensive testing across devices and browsers" },
+        { step: "Deployment", description: "Launching your application to production" },
+      ],
+      technologies: ["React", "Next.js", "Node.js", "TypeScript", "Tailwind CSS"],
+      deliverables: ["Source Code", "Documentation", "Deployment Guide", "Training Materials"],
+      timeline: "4-8 weeks",
+      startingPrice: "$5,000",
     },
     {
       id: "2",
       slug: "mobile-app-development",
       title: "Mobile App Development",
       description: "Native and cross-platform mobile applications for iOS and Android with seamless user experiences.",
+      longDescription:
+        "We develop high-quality mobile applications for iOS and Android platforms using both native and cross-platform technologies. Our apps are designed to provide exceptional user experiences while maintaining optimal performance.",
       image: "/placeholder.svg?height=400&width=600&text=Mobile+App+Development",
       icon: "Smartphone",
       features: ["iOS Development", "Android Development", "React Native", "Flutter", "App Store Optimization"],
+      benefits: [
+        "Cross-Platform Compatibility",
+        "Native Performance",
+        "Offline Functionality",
+        "Push Notifications",
+        "App Store Ready",
+      ],
+      process: [
+        { step: "Strategy", description: "Defining app strategy and user journey" },
+        { step: "UI/UX Design", description: "Creating intuitive and engaging interfaces" },
+        { step: "Development", description: "Building native or cross-platform applications" },
+        { step: "Testing", description: "Rigorous testing on multiple devices" },
+        { step: "Launch", description: "App store submission and launch support" },
+      ],
+      technologies: ["React Native", "Flutter", "Swift", "Kotlin", "Firebase"],
+      deliverables: ["Mobile App", "App Store Assets", "Analytics Setup", "Maintenance Guide"],
+      timeline: "6-12 weeks",
+      startingPrice: "$8,000",
+    },
+    {
+      id: "3",
+      slug: "product-strategy",
+      title: "Product Strategy",
+      description:
+        "Strategic planning and roadmapping for digital products to ensure market success and user satisfaction.",
+      longDescription:
+        "Our product strategy services help you define clear roadmaps, validate ideas, and create products that resonate with your target market. We combine market research, user insights, and business objectives to guide your product development.",
+      image: "/placeholder.svg?height=400&width=600&text=Product+Strategy",
+      icon: "Target",
+      features: [
+        "Market Research",
+        "User Experience Design",
+        "Product Roadmapping",
+        "Competitive Analysis",
+        "Go-to-Market Strategy",
+      ],
+      benefits: [
+        "Clear Direction",
+        "Reduced Risk",
+        "Market Validation",
+        "User-Centered Design",
+        "Competitive Advantage",
+      ],
+      process: [
+        { step: "Research", description: "Market and user research to understand opportunities" },
+        { step: "Strategy", description: "Developing comprehensive product strategy" },
+        { step: "Roadmap", description: "Creating detailed product roadmap and milestones" },
+        { step: "Validation", description: "Testing concepts with target users" },
+        { step: "Launch Plan", description: "Go-to-market strategy and launch planning" },
+      ],
+      technologies: ["Analytics Tools", "User Research Platforms", "Prototyping Tools", "Market Research"],
+      deliverables: ["Strategy Document", "Product Roadmap", "User Personas", "Market Analysis"],
+      timeline: "2-4 weeks",
+      startingPrice: "$3,000",
+    },
+    {
+      id: "4",
+      slug: "venture-building",
+      title: "Venture Building",
+      description: "End-to-end support for launching new ventures from ideation to market entry and scaling.",
+      longDescription:
+        "We partner with entrepreneurs and organizations to build new ventures from the ground up. Our comprehensive approach covers everything from idea validation to product development, team building, and market launch.",
+      image: "/placeholder.svg?height=400&width=600&text=Venture+Building",
+      icon: "Rocket",
+      features: ["Idea Validation", "Business Model Design", "MVP Development", "Funding Support", "Team Building"],
+      benefits: [
+        "Reduced Time to Market",
+        "Expert Guidance",
+        "Network Access",
+        "Risk Mitigation",
+        "Scalable Foundation",
+      ],
+      process: [
+        { step: "Ideation", description: "Refining and validating your venture idea" },
+        { step: "Planning", description: "Business model and go-to-market planning" },
+        { step: "Building", description: "MVP development and initial team formation" },
+        { step: "Testing", description: "Market testing and iteration" },
+        { step: "Scaling", description: "Growth strategy and scaling support" },
+      ],
+      technologies: ["Various based on venture needs"],
+      deliverables: ["Business Plan", "MVP Product", "Team Structure", "Funding Strategy"],
+      timeline: "3-6 months",
+      startingPrice: "$15,000",
     },
   ]
 }
@@ -373,35 +488,32 @@ function getSampleServices() {
 export async function getServiceBySlug(slug) {
   try {
     if (!isMongoDBAvailable()) {
-      console.warn("MongoDB not available, returning null for service")
-      return null
+      console.warn("MongoDB not available, checking sample services")
+      const sampleServices = getSampleServices()
+      return sampleServices.find((service) => service.slug === slug) || null
     }
 
     const { db } = await connectToDatabase()
     const service = await db.collection("services").findOne({ slug, status: "active" })
 
-    if (!service) return null
-
-    return {
-      id: service._id.toString(),
-      slug: service.slug,
-      title: service.title || "Untitled Service",
-      description: service.shortDescription || service.description || "No description available",
-      longDescription: service.longDescription || service.description || "No detailed description available",
-      image:
-        service.featuredImage?.url ||
-        service.image ||
-        "/placeholder.svg?height=400&width=600&text=" + encodeURIComponent(service.title || "Service"),
-      icon: service.icon || "Zap",
-      features: service.features || [],
-      benefits: service.benefits || [],
-      process: service.process || [],
-      pricing: service.pricing || [],
-      testimonials: service.testimonials || [],
+    if (!service) {
+      // Fallback to sample services
+      const sampleServices = getSampleServices()
+      return sampleServices.find((s) => s.slug === slug) || null
     }
+
+    return serializeService(service)
   } catch (error) {
-    return handleDbError(error, null, `service with slug ${slug}`)
+    console.error(`Error fetching service with slug ${slug}:`, error)
+    // Fallback to sample services
+    const sampleServices = getSampleServices()
+    return sampleServices.find((service) => service.slug === slug) || null
   }
+}
+
+// Alias for backward compatibility
+export async function getService(slug) {
+  return getServiceBySlug(slug)
 }
 
 // Get all ventures
