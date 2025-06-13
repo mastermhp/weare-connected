@@ -1,10 +1,10 @@
-import { getServices } from "@/lib/data"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowRight, Check } from "lucide-react"
 import Header from "../components/header"
 import Footer from "../components/footer"
+import { getServices } from "../lib/data"
 
 export const metadata = {
   title: "Our Services | Connected",
