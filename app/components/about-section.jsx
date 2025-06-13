@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowRight, Users, Lightbulb, Rocket, Target } from "lucide-react"
 
-export default function AboutSection() {
+export default function AboutSection({ data }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true })
 
-  const values = [
+  // Use data from props if available, otherwise use default values
+  const values = data?.values || [
     {
       icon: Lightbulb,
       title: "Innovation First",
@@ -36,8 +37,13 @@ export default function AboutSection() {
     },
   ]
 
+  const mission =
+    data?.mission ||
+    "To build a portfolio of ventures that not only succeed commercially but also contribute to solving real-world problems. We believe in the power of technology and human creativity to create positive change."
+  const stats = data?.stats || ["12+ Active Ventures", "50+ Team Members", "8+ Industries", "$10M+ Revenue Generated"]
+
   return (
-    <section ref={ref} className="max-w-7xl mx-auto py-12 md:py-24 lg:py-32 bg-white">
+    <section ref={ref} className="w-full py-12 md:py-24 lg:py-32 bg-white">
       <div className="container px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -50,7 +56,7 @@ export default function AboutSection() {
               About Connected
             </div>
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Who We Are</h2>
-            <p className="max-w-[900px] text-muted-foreground md:text-md/relaxed ">
+            <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed">
               We're a venture studio that builds companies from the ground up. Our team of entrepreneurs, designers, and
               engineers work together to identify opportunities and create solutions that make a real difference.
             </p>
@@ -58,22 +64,25 @@ export default function AboutSection() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {values.map((value, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-            >
-              <Card className="h-full hover:shadow-lg transition-shadow duration-300">
-                <CardContent className="p-6 text-center">
-                  <value.icon className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">{value.title}</h3>
-                  <p className="text-sm text-muted-foreground">{value.description}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+          {values.map((value, index) => {
+            const Icon = value.icon || Lightbulb
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+              >
+                <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+                  <CardContent className="p-6 text-center">
+                    <Icon className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">{value.title}</h3>
+                    <p className="text-sm text-muted-foreground">{value.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
+          })}
         </div>
 
         <motion.div
@@ -82,26 +91,16 @@ export default function AboutSection() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="text-center"
         >
-          <div className="max-w-3xl mx-auto mt-40 mb-8">
+          <div className="max-w-3xl mx-auto mb-8">
             <h3 className="text-2xl font-bold mb-4">Our Mission</h3>
-            <p className="text-lg text-muted-foreground">
-              To build a portfolio of ventures that not only succeed commercially but also contribute to solving
-              real-world problems. We believe in the power of technology and human creativity to create positive change.
-            </p>
+            <p className="text-lg text-muted-foreground">{mission}</p>
           </div>
           <div className="flex flex-wrap justify-center gap-4 mb-8">
-            <Badge variant="outline" className="px-4 py-2">
-              12+ Active Ventures
-            </Badge>
-            <Badge variant="outline" className="px-4 py-2">
-              50+ Team Members
-            </Badge>
-            <Badge variant="outline" className="px-4 py-2">
-              8+ Industries
-            </Badge>
-            <Badge variant="outline" className="px-4 py-2">
-              $10M+ Revenue Generated
-            </Badge>
+            {stats.map((stat, index) => (
+              <Badge key={index} variant="outline" className="px-4 py-2">
+                {stat}
+              </Badge>
+            ))}
           </div>
           <Button asChild size="lg">
             <Link href="/about">

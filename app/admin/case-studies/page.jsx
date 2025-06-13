@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
@@ -14,455 +15,672 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog"
-import { Plus, Edit, Trash2, Search, Eye, TrendingUp, Award, ExternalLink } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Eye, Loader2, Building, Calendar } from "lucide-react"
+import Link from "next/link"
+import ImageUpload from "@/app/components/admin/image-upload"
+// import ImageUpload from "@/components/admin/image-upload"
 
+// Mock data for case studies
 const mockCaseStudies = [
   {
-    id: 1,
+    _id: 1,
     title: "E-commerce Platform Redesign",
-    client: "TechMart Inc.",
-    category: "Web Development",
-    status: "Published",
-    description:
-      "Complete redesign and development of a modern e-commerce platform with improved user experience and performance.",
-    image: "/placeholder.svg?height=300&width=400",
-    technologies: ["React", "Node.js", "PostgreSQL", "AWS"],
-    duration: "6 months",
-    teamSize: 8,
-    results: {
-      conversionRate: "+45%",
-      pageSpeed: "+60%",
-      userSatisfaction: "4.8/5",
-    },
-    publishDate: "2024-01-15",
-    featured: true,
-    url: "https://techmart.com",
+    slug: "ecommerce-platform-redesign",
+    client: "Fashion Retailer Inc.",
+    description: "Complete redesign of an e-commerce platform resulting in 45% increase in conversion rates",
+    shortDescription: "E-commerce redesign with 45% conversion increase",
+    industry: "Retail",
+    services: ["UX/UI Design", "Web Development", "Analytics"],
+    challenge: "The client's outdated platform was causing high bounce rates and cart abandonment.",
+    solution: "We implemented a modern, mobile-first design with streamlined checkout process.",
+    results: "45% increase in conversion rates, 30% reduction in cart abandonment",
+    testimonial: "The redesign transformed our business and significantly improved our bottom line.",
+    featuredImage: "/placeholder.svg?height=400&width=600",
+    gallery: ["/placeholder.svg?height=300&width=400", "/placeholder.svg?height=300&width=400"],
+    status: "published",
+    completionDate: "2023-06-15",
   },
   {
-    id: 2,
-    title: "Mobile Banking App",
-    client: "SecureBank",
-    category: "Mobile Development",
-    status: "Published",
-    description:
-      "Secure and user-friendly mobile banking application with advanced security features and intuitive design.",
-    image: "/placeholder.svg?height=300&width=400",
-    technologies: ["React Native", "Node.js", "MongoDB", "Firebase"],
-    duration: "8 months",
-    teamSize: 12,
-    results: {
-      downloads: "500K+",
-      rating: "4.9/5",
-      transactions: "+200%",
-    },
-    publishDate: "2024-01-10",
-    featured: true,
-    url: "https://securebank.com/app",
+    _id: 2,
+    title: "Mobile Banking App Development",
+    slug: "mobile-banking-app",
+    client: "Global Finance Bank",
+    description: "Development of a secure, user-friendly mobile banking application with biometric authentication",
+    shortDescription: "Secure mobile banking app with biometric authentication",
+    industry: "Finance",
+    services: ["Mobile App Development", "Security Implementation", "UX Design"],
+    challenge: "The bank needed a secure yet user-friendly mobile solution for their customers.",
+    solution: "We built a native app with advanced security features and intuitive interface.",
+    results: "200,000+ downloads in first month, 4.8/5 app store rating",
+    testimonial: "The app exceeded our expectations and our customers love the ease of use.",
+    featuredImage: "/placeholder.svg?height=400&width=600",
+    gallery: ["/placeholder.svg?height=300&width=400", "/placeholder.svg?height=300&width=400"],
+    status: "published",
+    completionDate: "2023-09-22",
   },
   {
-    id: 3,
-    title: "Healthcare Dashboard",
-    client: "MedTech Solutions",
-    category: "UI/UX Design",
-    status: "Published",
-    description:
-      "Comprehensive healthcare dashboard for medical professionals with real-time patient monitoring and analytics.",
-    image: "/placeholder.svg?height=300&width=400",
-    technologies: ["Vue.js", "D3.js", "Python", "Docker"],
-    duration: "4 months",
-    teamSize: 6,
-    results: {
-      efficiency: "+35%",
-      errorReduction: "-50%",
-      userAdoption: "95%",
-    },
-    publishDate: "2024-01-05",
-    featured: false,
-    url: "https://medtech.com/dashboard",
-  },
-  {
-    id: 4,
-    title: "AI-Powered Analytics Platform",
-    client: "DataCorp",
-    category: "Data Science",
-    status: "Draft",
-    description:
-      "Advanced analytics platform with machine learning capabilities for business intelligence and predictive analytics.",
-    image: "/placeholder.svg?height=300&width=400",
-    technologies: ["Python", "TensorFlow", "React", "Kubernetes"],
-    duration: "10 months",
-    teamSize: 15,
-    results: {
-      accuracy: "94%",
-      processing: "+300%",
-      insights: "10x faster",
-    },
-    publishDate: null,
-    featured: false,
-    url: null,
+    _id: 3,
+    title: "Healthcare Patient Portal",
+    slug: "healthcare-patient-portal",
+    client: "Metropolitan Medical Center",
+    description: "Development of a comprehensive patient portal for appointment scheduling and medical records access",
+    shortDescription: "Patient portal for appointment scheduling and records access",
+    industry: "Healthcare",
+    services: ["Web Application Development", "Integration", "Security"],
+    challenge: "The medical center needed to streamline patient communication and record access.",
+    solution: "We developed a secure portal integrated with their existing systems.",
+    results: "70% reduction in phone calls, 85% patient adoption rate",
+    testimonial: "This portal has revolutionized how we interact with patients.",
+    featuredImage: "/placeholder.svg?height=400&width=600",
+    gallery: ["/placeholder.svg?height=300&width=400", "/placeholder.svg?height=300&width=400"],
+    status: "draft",
+    completionDate: "2023-11-10",
   },
 ]
 
-export default function CaseStudiesPage() {
+export default function CaseStudiesManagement() {
+  const router = useRouter()
   const [caseStudies, setCaseStudies] = useState(mockCaseStudies)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("All")
-  const [selectedStatus, setSelectedStatus] = useState("All")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [industryFilter, setIndustryFilter] = useState("all")
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-
-  const categories = [
-    "All",
-    "Web Development",
-    "Mobile Development",
-    "UI/UX Design",
-    "Data Science",
-    "Digital Marketing",
-  ]
-  const statuses = ["All", "Published", "Draft", "Archived"]
-
-  const filteredCaseStudies = caseStudies.filter((study) => {
-    const matchesSearch =
-      study.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      study.client.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "All" || study.category === selectedCategory
-    const matchesStatus = selectedStatus === "All" || study.status === selectedStatus
-    return matchesSearch && matchesCategory && matchesStatus
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [caseStudyToDelete, setCaseStudyToDelete] = useState(null)
+  const [formData, setFormData] = useState({
+    title: "",
+    slug: "",
+    client: "",
+    description: "",
+    shortDescription: "",
+    industry: "",
+    services: "",
+    challenge: "",
+    solution: "",
+    results: "",
+    testimonial: "",
+    completionDate: "",
+    status: "published",
+    featuredImage: null,
+    gallery: [],
   })
+  const [formErrors, setFormErrors] = useState({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Published":
-        return "bg-green-100 text-green-800 border-green-200"
-      case "Draft":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
-      case "Archived":
-        return "bg-gray-100 text-gray-800 border-gray-200"
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+  // Fetch case studies
+  useEffect(() => {
+    fetchCaseStudies()
+  }, [statusFilter, industryFilter, searchTerm])
+
+  const fetchCaseStudies = async () => {
+    try {
+      setLoading(true)
+      const queryParams = new URLSearchParams({
+        status: statusFilter !== "all" ? statusFilter : "",
+        industry: industryFilter !== "all" ? industryFilter : "",
+        search: searchTerm,
+      })
+
+      const response = await fetch(`/api/admin/case-studies?${queryParams}`)
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch case studies")
+      }
+
+      const data = await response.json()
+      setCaseStudies(data)
+    } catch (err) {
+      console.error("Error fetching case studies:", err)
+      setError("Failed to load case studies. Please try again.")
+    } finally {
+      setLoading(false)
     }
   }
 
-  const getCategoryColor = (category) => {
-    switch (category) {
-      case "Web Development":
-        return "bg-blue-100 text-blue-800"
-      case "Mobile Development":
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+
+    // Auto-generate slug from title
+    if (name === "title" && !formData.slug) {
+      const slug = value
+        .toLowerCase()
+        .replace(/[^\w\s]/gi, "")
+        .replace(/\s+/g, "-")
+      setFormData((prev) => ({ ...prev, slug }))
+    }
+
+    // Clear validation error when field is edited
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({ ...prev, [name]: "" }))
+    }
+  }
+
+  const handleFeaturedImageUpload = (imageData) => {
+    setFormData((prev) => ({
+      ...prev,
+      featuredImage: imageData,
+    }))
+  }
+
+  const validateForm = () => {
+    const errors = {}
+    if (!formData.title.trim()) errors.title = "Title is required"
+    if (!formData.client.trim()) errors.client = "Client name is required"
+    if (!formData.description.trim()) errors.description = "Description is required"
+    if (!formData.slug.trim()) errors.slug = "Slug is required"
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleCreateCaseStudy = async (e) => {
+    e.preventDefault()
+
+    if (!validateForm()) return
+
+    try {
+      setIsSubmitting(true)
+
+      // Format services as array if provided
+      const formattedData = {
+        ...formData,
+        services: formData.services
+          ? formData.services
+              .split(",")
+              .map((service) => service.trim())
+              .filter(Boolean)
+          : [],
+      }
+
+      const response = await fetch("/api/admin/case-studies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formattedData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to create case study")
+      }
+
+      const data = await response.json()
+
+      // Add new case study to state and close modal
+      setCaseStudies((prev) => [data.caseStudy, ...prev])
+      setIsCreateModalOpen(false)
+
+      // Reset form
+      setFormData({
+        title: "",
+        slug: "",
+        client: "",
+        description: "",
+        shortDescription: "",
+        industry: "",
+        services: "",
+        challenge: "",
+        solution: "",
+        results: "",
+        testimonial: "",
+        completionDate: "",
+        status: "published",
+        featuredImage: null,
+        gallery: [],
+      })
+    } catch (err) {
+      console.error("Error creating case study:", err)
+      setFormErrors((prev) => ({ ...prev, submit: err.message }))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteClick = (caseStudy) => {
+    setCaseStudyToDelete(caseStudy)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleDeleteCaseStudy = async () => {
+    if (!caseStudyToDelete) return
+
+    try {
+      setIsSubmitting(true)
+
+      const response = await fetch(`/api/admin/case-studies/${caseStudyToDelete._id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to delete case study")
+      }
+
+      // Remove case study from state
+      setCaseStudies((prev) => prev.filter((study) => study._id !== caseStudyToDelete._id))
+      setIsDeleteModalOpen(false)
+      setCaseStudyToDelete(null)
+    } catch (err) {
+      console.error("Error deleting case study:", err)
+      setError("Failed to delete case study. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "published":
         return "bg-green-100 text-green-800"
-      case "UI/UX Design":
-        return "bg-purple-100 text-purple-800"
-      case "Data Science":
-        return "bg-orange-100 text-orange-800"
-      case "Digital Marketing":
-        return "bg-pink-100 text-pink-800"
+      case "draft":
+        return "bg-yellow-100 text-yellow-800"
+      case "archived":
+        return "bg-gray-100 text-gray-800"
       default:
         return "bg-gray-100 text-gray-800"
     }
   }
 
+  // Get unique industries for filter
+  const industries = [...new Set(caseStudies.map((study) => study.industry).filter(Boolean))]
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Case Studies</h1>
-          <p className="text-gray-600 mt-1">Showcase your successful projects and client work</p>
+          <h1 className="text-3xl font-bold text-gray-900">Case Studies Management</h1>
+          <p className="text-gray-600 mt-1">Create, edit, and manage your case studies and client success stories</p>
         </div>
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#6529B2] hover:bg-[#5420A0] text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Case Study
+            <Button className="bg-purple-emperor hover:bg-purple-emperor/90">
+              <Plus className="h-4 w-4 mr-2" />
+              New Case Study
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Case Study</DialogTitle>
-              <DialogDescription>Add a new case study to showcase your work</DialogDescription>
+              <DialogDescription>Fill in the details to create a new case study</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="title">Project Title</Label>
-                  <Input id="title" placeholder="Enter project title" />
+
+            <form onSubmit={handleCreateCaseStudy} className="space-y-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">
+                    Title <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    placeholder="Enter case study title"
+                  />
+                  {formErrors.title && <p className="text-sm text-red-500">{formErrors.title}</p>}
                 </div>
-                <div>
-                  <Label htmlFor="client">Client Name</Label>
-                  <Input id="client" placeholder="Enter client name" />
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
-                    <option>Web Development</option>
-                    <option>Mobile Development</option>
-                    <option>UI/UX Design</option>
-                    <option>Data Science</option>
-                    <option>Digital Marketing</option>
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="duration">Duration</Label>
-                  <Input id="duration" placeholder="e.g., 6 months" />
-                </div>
-                <div>
-                  <Label htmlFor="teamSize">Team Size</Label>
-                  <Input id="teamSize" type="number" placeholder="e.g., 8" />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea id="description" placeholder="Describe the project and its objectives..." rows={3} />
-              </div>
-              <div>
-                <Label htmlFor="technologies">Technologies (comma-separated)</Label>
-                <Input id="technologies" placeholder="React, Node.js, PostgreSQL, AWS..." />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="result1">Key Result 1</Label>
-                  <Input id="result1" placeholder="e.g., +45% conversion rate" />
-                </div>
-                <div>
-                  <Label htmlFor="result2">Key Result 2</Label>
-                  <Input id="result2" placeholder="e.g., +60% page speed" />
-                </div>
-                <div>
-                  <Label htmlFor="result3">Key Result 3</Label>
-                  <Input id="result3" placeholder="e.g., 4.8/5 user satisfaction" />
+
+                <div className="space-y-2">
+                  <Label htmlFor="slug">
+                    Slug <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="slug"
+                    name="slug"
+                    value={formData.slug}
+                    onChange={handleInputChange}
+                    placeholder="enter-case-study-slug"
+                  />
+                  {formErrors.slug && <p className="text-sm text-red-500">{formErrors.slug}</p>}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="url">Project URL</Label>
-                  <Input id="url" placeholder="https://example.com" />
+
+              <div className="space-y-2">
+                <Label htmlFor="client">
+                  Client Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="client"
+                  name="client"
+                  value={formData.client}
+                  onChange={handleInputChange}
+                  placeholder="Enter client name"
+                />
+                {formErrors.client && <p className="text-sm text-red-500">{formErrors.client}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">
+                  Description <span className="text-red-500">*</span>
+                </Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Write your case study description here..."
+                  rows={6}
+                />
+                {formErrors.description && <p className="text-sm text-red-500">{formErrors.description}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="shortDescription">Short Description</Label>
+                <Textarea
+                  id="shortDescription"
+                  name="shortDescription"
+                  value={formData.shortDescription}
+                  onChange={handleInputChange}
+                  placeholder="Brief summary of the case study (optional)"
+                  rows={2}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="industry">Industry</Label>
+                  <Input
+                    id="industry"
+                    name="industry"
+                    value={formData.industry}
+                    onChange={handleInputChange}
+                    placeholder="e.g. Healthcare, Finance, Retail"
+                  />
                 </div>
-                <div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="services">Services (comma separated)</Label>
+                  <Input
+                    id="services"
+                    name="services"
+                    value={formData.services}
+                    onChange={handleInputChange}
+                    placeholder="e.g. Web Design, Development, SEO"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="challenge">Challenge</Label>
+                <Textarea
+                  id="challenge"
+                  name="challenge"
+                  value={formData.challenge}
+                  onChange={handleInputChange}
+                  placeholder="Describe the challenge the client faced"
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="solution">Solution</Label>
+                <Textarea
+                  id="solution"
+                  name="solution"
+                  value={formData.solution}
+                  onChange={handleInputChange}
+                  placeholder="Describe the solution you provided"
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="results">Results</Label>
+                <Textarea
+                  id="results"
+                  name="results"
+                  value={formData.results}
+                  onChange={handleInputChange}
+                  placeholder="Describe the results achieved"
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="testimonial">Client Testimonial</Label>
+                <Textarea
+                  id="testimonial"
+                  name="testimonial"
+                  value={formData.testimonial}
+                  onChange={handleInputChange}
+                  placeholder="Add a client testimonial (optional)"
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="completionDate">Completion Date</Label>
+                  <Input
+                    id="completionDate"
+                    name="completionDate"
+                    type="date"
+                    value={formData.completionDate}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
-                    <option>Published</option>
-                    <option>Draft</option>
-                    <option>Archived</option>
+                  <select
+                    id="status"
+                    name="status"
+                    value={formData.status}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                    <option value="archived">Archived</option>
                   </select>
                 </div>
               </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+
+              <div className="space-y-2">
+                <Label>Featured Image</Label>
+                <ImageUpload
+                  onImageUpload={handleFeaturedImageUpload}
+                  defaultImage={formData.featuredImage}
+                  label="Featured Image"
+                />
+              </div>
+
+              {formErrors.submit && (
+                <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">{formErrors.submit}</div>
+              )}
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
                   Cancel
                 </Button>
-                <Button className="bg-[#6529B2] hover:bg-[#5420A0] text-white">Create Case Study</Button>
-              </div>
-            </div>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Case Study"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Studies</p>
-                <p className="text-2xl font-bold text-gray-900">{caseStudies.length}</p>
-              </div>
-              <div className="p-3 bg-[#6529B2] bg-opacity-10 rounded-full">
-                <Award className="w-6 h-6 text-[#6529B2]" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Published</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {caseStudies.filter((s) => s.status === "Published").length}
-                </p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-full">
-                <Eye className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Featured</p>
-                <p className="text-2xl font-bold text-gray-900">{caseStudies.filter((s) => s.featured).length}</p>
-              </div>
-              <div className="p-3 bg-yellow-100 rounded-full">
-                <Award className="w-6 h-6 text-yellow-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Categories</p>
-                <p className="text-2xl font-bold text-gray-900">{new Set(caseStudies.map((s) => s.category)).size}</p>
-              </div>
-              <div className="p-3 bg-blue-100 rounded-full">
-                <TrendingUp className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Filters */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Search case studies..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search case studies..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
-            <div className="flex flex-wrap gap-2">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-              >
-                {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-emperor focus:border-transparent"
+            >
+              <option value="all">All Status</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+              <option value="archived">Archived</option>
+            </select>
+            <select
+              value={industryFilter}
+              onChange={(e) => setIndustryFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-emperor focus:border-transparent"
+            >
+              <option value="all">All Industries</option>
+              {industries.map((industry) => (
+                <option key={industry} value={industry}>
+                  {industry}
+                </option>
+              ))}
+            </select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Case Studies Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredCaseStudies.map((study) => (
-          <Card key={study.id} className="hover:shadow-lg transition-shadow">
-            <div className="aspect-video bg-gray-100 rounded-t-lg overflow-hidden relative">
-              <img src={study.image || "/placeholder.svg"} alt={study.title} className="w-full h-full object-cover" />
-              {study.featured && (
-                <div className="absolute top-4 left-4">
-                  <Badge className="bg-[#6529B2] text-white">Featured</Badge>
-                </div>
-              )}
-              <div className="absolute top-4 right-4">
-                <Badge className={getStatusColor(study.status)}>{study.status}</Badge>
-              </div>
-            </div>
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-xl text-gray-900 mb-1">{study.title}</h3>
-                  <p className="text-gray-600 mb-2">{study.client}</p>
-                  <Badge className={getCategoryColor(study.category)} variant="secondary">
-                    {study.category}
-                  </Badge>
-                </div>
-              </div>
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-emperor" />
+          <span className="ml-2 text-lg text-gray-600">Loading case studies...</span>
+        </div>
+      )}
 
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">{study.description}</p>
+      {/* Error State */}
+      {error && !loading && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+          <p>{error}</p>
+          <Button variant="outline" className="mt-2" onClick={fetchCaseStudies}>
+            Try Again
+          </Button>
+        </div>
+      )}
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="text-sm">
-                  <span className="text-gray-500">Duration:</span>
-                  <span className="font-medium ml-1">{study.duration}</span>
-                </div>
-                <div className="text-sm">
-                  <span className="text-gray-500">Team:</span>
-                  <span className="font-medium ml-1">{study.teamSize} members</span>
-                </div>
-              </div>
-
-              <div className="space-y-2 mb-4">
-                <h4 className="font-medium text-gray-900">Key Results:</h4>
-                <div className="grid grid-cols-3 gap-2 text-sm">
-                  {Object.entries(study.results).map(([key, value]) => (
-                    <div key={key} className="text-center p-2 bg-gray-50 rounded">
-                      <div className="font-semibold text-[#6529B2]">{value}</div>
-                      <div className="text-gray-600 capitalize">{key.replace(/([A-Z])/g, " $1").trim()}</div>
+      {/* Case Studies List */}
+      {!loading && !error && (
+        <div className="grid gap-6">
+          {caseStudies.map((caseStudy) => (
+            <Card key={caseStudy._id} className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900">{caseStudy.title}</h3>
+                      <Badge className={getStatusColor(caseStudy.status)}>{caseStudy.status}</Badge>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-1 mb-4">
-                {study.technologies.slice(0, 4).map((tech, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {tech}
-                  </Badge>
-                ))}
-                {study.technologies.length > 4 && (
-                  <Badge variant="secondary" className="text-xs">
-                    +{study.technologies.length - 4} more
-                  </Badge>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between pt-4 border-t">
-                <div className="text-sm text-gray-500">
-                  {study.publishDate ? (
-                    <>Published: {new Date(study.publishDate).toLocaleDateString()}</>
-                  ) : (
-                    "Not published"
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  {study.url && (
-                    <Button size="sm" variant="outline">
-                      <ExternalLink className="w-4 h-4 mr-1" />
-                      View
+                    <p className="text-gray-600 mb-4">
+                      {caseStudy.shortDescription || caseStudy.description.substring(0, 150) + "..."}
+                    </p>
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <Building className="h-4 w-4 mr-1" />
+                        <span>{caseStudy.client}</span>
+                      </div>
+                      {caseStudy.industry && <span>{caseStudy.industry}</span>}
+                      {caseStudy.completionDate && (
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          <span>
+                            {new Date(caseStudy.completionDate).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                            })}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 ml-4">
+                    <Button variant="ghost" size="icon" asChild>
+                      <Link href={`/case-studies/${caseStudy.slug}`} target="_blank">
+                        <Eye className="h-4 w-4" />
+                      </Link>
                     </Button>
-                  )}
-                  <Button size="sm" variant="outline">
-                    <Edit className="w-4 h-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                    <Button variant="ghost" size="icon" asChild>
+                      <Link href={`/admin/case-studies/${caseStudy._id}/edit`}>
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => handleDeleteClick(caseStudy)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      {filteredCaseStudies.length === 0 && (
+      {/* Empty State */}
+      {!loading && !error && caseStudies.length === 0 && (
         <Card>
           <CardContent className="p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <Award className="w-12 h-12 mx-auto" />
+            <div className="h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Building className="h-6 w-6 text-gray-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No case studies found</h3>
-            <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+            <p className="text-gray-600 mb-4">
+              {searchTerm || statusFilter !== "all" || industryFilter !== "all"
+                ? "Try adjusting your search or filters"
+                : "Get started by creating your first case study"}
+            </p>
+            <Button className="bg-purple-emperor hover:bg-purple-emperor/90" onClick={() => setIsCreateModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Case Study
+            </Button>
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the case study "{caseStudyToDelete?.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteCaseStudy} disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

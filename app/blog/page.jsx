@@ -1,73 +1,94 @@
-import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { getBlogPosts } from "../lib/data"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Calendar, User, Clock } from "lucide-react"
-import Footer from "../components/footer"
-// import { blogPosts } from "@/lib/data"
+import Link from "next/link"
+import { ArrowRight, Calendar, Clock } from "lucide-react"
 import Header from "../components/header"
-import { blogPosts } from "../lib/data"
+import Footer from "../components/footer"
 
-export default function BlogPage() {
+export const metadata = {
+  title: "Blog | Connected",
+  description: "Insights, news, and perspectives from our team on technology, innovation, and business.",
+}
+
+export default async function BlogPage() {
+  // Fetch blog posts data
+  const posts = await getBlogPosts()
+
   return (
     <>
       <Header />
-      <div className="min-h-screen pt-20 bg-gradient-to-br from-white to-purple-50">
-        <div className="container mx-auto px-4 py-12">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-primary mb-4 font-syne">Our Blog</h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Insights, stories, and updates from the Connected team. Discover the latest trends in technology,
-              entrepreneurship, and innovation.
-            </p>
+      <main className="min-h-screen">
+        {/* Hero Section */}
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-green-50 to-white">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl">Our Blog</h1>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed">
+                  Insights, news, and perspectives from our team on technology, innovation, and business.
+                </p>
+              </div>
+            </div>
           </div>
+        </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((post) => (
-              <Card key={post.id} className="hover:shadow-lg transition-shadow duration-300">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="secondary">{post.category}</Badge>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {post.readTime}
-                    </div>
-                  </div>
-                  <CardTitle className="text-xl hover:text-primary transition-colors">
-                    <Link href={`/blog/${post.slug}`}>{post.title}</Link>
-                  </CardTitle>
-                  <CardDescription>{post.excerpt}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center">
-                        <User className="h-4 w-4 mr-1" />
-                        {post.author}
+        {/* Blog Posts Grid */}
+        <section className="w-full py-12 md:py-24 bg-white">
+          <div className="container px-4 md:px-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {posts.length > 0 ? (
+                posts.map((post) => (
+                  <Card key={post.id} className="h-full hover:shadow-lg transition-shadow duration-300">
+                    <CardHeader>
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="outline">{post.category}</Badge>
+                        <span className="text-sm text-muted-foreground">{post.publishedAt}</span>
                       </div>
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        {new Date(post.publishedAt).toLocaleDateString()}
+                      <CardTitle className="text-xl">{post.title}</CardTitle>
+                      <CardDescription>{post.excerpt}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">{post.publishedAt}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">{post.readTime}</span>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {post.tags &&
+                            post.tags.slice(0, 3).map((tag) => (
+                              <Badge key={tag} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                        </div>
                       </div>
-                    </div>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href={`/blog/${post.slug}`}>
-                        Read More <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    </CardContent>
+                    <CardFooter>
+                      <Button asChild variant="outline" className="w-full">
+                        <Link href={`/blog/${post.slug}`}>
+                          Read More <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-lg text-muted-foreground">No blog posts found. Check back soon for updates!</p>
+                </div>
+              )}
+            </div>
           </div>
-
-          <div className="text-center mt-12">
-            <p className="text-muted-foreground">
-              Want to stay updated? Follow us on social media for the latest insights and updates.
-            </p>
-          </div>
-        </div>
-      </div>
+        </section>
+      </main>
       <Footer />
     </>
   )
