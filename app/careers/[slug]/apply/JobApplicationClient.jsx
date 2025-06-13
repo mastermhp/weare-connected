@@ -99,35 +99,58 @@ export default function JobApplicationClient({ job }) {
 
   const uploadFileToCloudinary = async (file, fileType) => {
     try {
+      console.log(`Starting upload for ${fileType}:`, {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+      })
+
       setUploadProgress((prev) => ({ ...prev, [fileType]: 0 }))
 
       // Convert file to base64
-      const base64 = await new Promise((resolve) => {
+      const base64 = await new Promise((resolve, reject) => {
         const reader = new FileReader()
         reader.onload = () => resolve(reader.result)
+        reader.onerror = (error) => reject(error)
         reader.readAsDataURL(file)
       })
 
+      console.log(`Base64 conversion complete for ${fileType}`)
+      setUploadProgress((prev) => ({ ...prev, [fileType]: 25 }))
+
+      const uploadData = {
+        image: base64,
+        folder: "job_applications",
+        requireAuth: false, // Don't require authentication for job applications
+      }
+
+      console.log(`Sending upload request for ${fileType}...`)
+
       const response = await fetch("/api/cloudinary/upload", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          image: base64,
-          folder: "job_applications",
-        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(uploadData),
       })
 
+      console.log(`Upload response status for ${fileType}:`, response.status)
+
       if (!response.ok) {
-        throw new Error("Failed to upload file")
+        const errorData = await response.json()
+        console.error(`Upload failed for ${fileType}:`, errorData)
+        throw new Error(errorData.error || `Failed to upload ${fileType}`)
       }
 
       const data = await response.json()
+      console.log(`Upload successful for ${fileType}:`, data.secure_url)
+
       setUploadProgress((prev) => ({ ...prev, [fileType]: 100 }))
       return data.secure_url
     } catch (error) {
-      console.error("Error uploading file:", error)
+      console.error(`Error uploading ${fileType}:`, error)
       setUploadProgress((prev) => ({ ...prev, [fileType]: 0 }))
-      throw error
+      throw new Error(`Failed to upload ${fileType}: ${error.message}`)
     }
   }
 

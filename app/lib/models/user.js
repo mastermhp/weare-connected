@@ -1,67 +1,90 @@
-import { ObjectId } from "mongodb"
-import clientPromise from "../mongodb"
+import { connectToDatabase } from "../mongodb"
 import bcrypt from "bcryptjs"
 
-export async function getUserCollection() {
-  const client = await clientPromise
-  return client.db(process.env.MONGODB_DB).collection("users")
-}
-
-export async function createUser({ name, email, password, profileImage = "" }) {
-  const users = await getUserCollection()
-
-  // Check if user already exists
-  const existingUser = await users.findOne({ email })
-  if (existingUser) {
-    throw new Error("User with this email already exists")
-  }
+export async function createUser(userData) {
+  const { db } = await connectToDatabase()
 
   // Hash password
-  const salt = await bcrypt.genSalt(10)
-  const hashedPassword = await bcrypt.hash(password, salt)
+  const hashedPassword = await bcrypt.hash(userData.password, 12)
 
-  // Create user
-  const result = await users.insertOne({
-    name,
-    email,
+  const user = {
+    name: userData.name,
+    email: userData.email,
     password: hashedPassword,
-    profileImage,
-    role: "user",
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    profileImage: userData.profileImage || null,
     isActive: true,
+    createdAt: new Date(),
     lastLogin: null,
-  })
+    updatedAt: new Date(),
+  }
 
-  return { id: result.insertedId, name, email, profileImage, role: "user" }
+  const result = await db.collection("users").insertOne(user)
+  return { ...user, _id: result.insertedId }
 }
 
-export async function findUserByEmail(email) {
-  const users = await getUserCollection()
-  return users.findOne({ email })
+export async function getUserByEmail(email) {
+  const { db } = await connectToDatabase()
+  return await db.collection("users").findOne({ email })
 }
 
-export async function findUserById(id) {
-  const users = await getUserCollection()
-  return users.findOne({ _id: new ObjectId(id) })
-}
+export async function getUserById(id) {
+  const { db } = await connectToDatabase()
+  const { ObjectId } = require("mongodb")
 
-export async function updateUserLastLogin(id) {
-  const users = await getUserCollection()
-  return users.updateOne({ _id: new ObjectId(id) }, { $set: { lastLogin: new Date(), updatedAt: new Date() } })
+  try {
+    return await db.collection("users").findOne({ _id: new ObjectId(id) })
+  } catch (error) {
+    // If ObjectId conversion fails, try string ID
+    return await db.collection("users").findOne({ _id: id })
+  }
 }
 
 export async function getAllUsers() {
-  const users = await getUserCollection()
-  return users.find({ role: "user" }).toArray()
+  const { db } = await connectToDatabase()
+  return await db.collection("users").find({}).sort({ createdAt: -1 }).toArray()
 }
 
-export async function updateUserStatus(id, isActive) {
-  const users = await getUserCollection()
-  return users.updateOne({ _id: new ObjectId(id) }, { $set: { isActive, updatedAt: new Date() } })
+export async function updateUserLastLogin(userId) {
+  const { db } = await connectToDatabase()
+  const { ObjectId } = require("mongodb")
+
+  try {
+    await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { lastLogin: new Date() } })
+  } catch (error) {
+    // If ObjectId conversion fails, try string ID
+    await db.collection("users").updateOne({ _id: userId }, { $set: { lastLogin: new Date() } })
+  }
 }
 
-export async function deleteUser(id) {
-  const users = await getUserCollection()
-  return users.deleteOne({ _id: new ObjectId(id) })
+export async function updateUser(userId, updateData) {
+  const { db } = await connectToDatabase()
+  const { ObjectId } = require("mongodb")
+
+  const update = {
+    ...updateData,
+    updatedAt: new Date(),
+  }
+
+  try {
+    const result = await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: update })
+    return result
+  } catch (error) {
+    // If ObjectId conversion fails, try string ID
+    const result = await db.collection("users").updateOne({ _id: userId }, { $set: update })
+    return result
+  }
+}
+
+export async function deleteUser(userId) {
+  const { db } = await connectToDatabase()
+  const { ObjectId } = require("mongodb")
+
+  try {
+    const result = await db.collection("users").deleteOne({ _id: new ObjectId(userId) })
+    return result
+  } catch (error) {
+    // If ObjectId conversion fails, try string ID
+    const result = await db.collection("users").deleteOne({ _id: userId })
+    return result
+  }
 }

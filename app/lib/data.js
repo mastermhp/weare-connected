@@ -45,6 +45,40 @@ const serializeJob = (job) => {
   }
 }
 
+// Helper function to serialize blog post data
+const serializeBlogPost = (post) => {
+  if (!post) return null
+
+  return {
+    id: post._id?.toString() || post.id,
+    slug: post.slug || post._id?.toString() || "",
+    title: post.title || "Untitled Post",
+    excerpt:
+      post.excerpt ||
+      post.shortDescription ||
+      (post.content ? post.content.substring(0, 150) + "..." : "No excerpt available"),
+    content: post.content || "No content available",
+    author: post.author || {
+      name: "Connected Team",
+      role: "Author",
+      image: "/placeholder.svg?height=40&width=40&text=A",
+    },
+    authorImage:
+      post.author?.image ||
+      "/placeholder.svg?height=80&width=80&text=" + encodeURIComponent(post.author?.name?.charAt(0) || "A"),
+    authorRole: post.author?.role || "Author",
+    publishedAt: post.publishedAt ? new Date(post.publishedAt).toISOString() : new Date().toISOString(),
+    image:
+      post.featuredImage?.url ||
+      post.image ||
+      "/placeholder.svg?height=400&width=600&text=" + encodeURIComponent(post.title || "Blog Post"),
+    tags: Array.isArray(post.tags) ? post.tags : ["Technology", "Innovation"],
+    category: post.category || "Technology",
+    readTime: post.readTime || "5 min read",
+    status: post.status || "published",
+  }
+}
+
 // Helper function to serialize service data
 const serializeService = (service) => {
   if (!service) return null
@@ -195,7 +229,7 @@ function getSampleJobs() {
   ]
 }
 
-// Get all blog posts
+// Get all blog posts - UPDATED TO FETCH REAL DATA
 export async function getBlogPosts() {
   try {
     if (!isMongoDBAvailable()) {
@@ -206,53 +240,55 @@ export async function getBlogPosts() {
     const { db } = await connectToDatabase()
     let posts = []
 
+    // Try 'blog' collection first
     try {
       posts = await db
-        .collection("blog_posts")
+        .collection("blog")
         .find({ status: "published" })
         .sort({ publishedAt: -1, createdAt: -1 })
         .toArray()
+
+      console.log(`Found ${posts.length} posts in 'blog' collection`)
     } catch (err) {
+      console.log("Blog collection not found, trying blog_posts...")
+    }
+
+    // If no posts found, try 'blog_posts' collection
+    if (posts.length === 0) {
       try {
         posts = await db
-          .collection("blog")
+          .collection("blog_posts")
           .find({ status: "published" })
           .sort({ publishedAt: -1, createdAt: -1 })
           .toArray()
-      } catch (err2) {
-        console.log("No blog collections found, returning sample data")
+
+        console.log(`Found ${posts.length} posts in 'blog_posts' collection`)
+      } catch (err) {
+        console.log("Blog_posts collection not found either...")
+      }
+    }
+
+    // If still no posts, try without status filter (in case status field is missing)
+    if (posts.length === 0) {
+      try {
+        posts = await db.collection("blog").find({}).sort({ publishedAt: -1, createdAt: -1 }).toArray()
+
+        console.log(`Found ${posts.length} posts in 'blog' collection (no status filter)`)
+      } catch (err) {
+        console.log("Error fetching all blog posts:", err.message)
       }
     }
 
     if (posts.length === 0) {
+      console.log("No blog posts found in database, returning sample data")
       return getSampleBlogPosts()
     }
 
-    return posts.map((post) => ({
-      id: post._id.toString(),
-      title: post.title || "Untitled Post",
-      slug: post.slug || post._id.toString(),
-      excerpt:
-        post.excerpt ||
-        post.shortDescription ||
-        (post.content ? post.content.substring(0, 150) + "..." : "No excerpt available"),
-      content: post.content || "No content available",
-      author: post.author || {
-        name: "Connected Team",
-        role: "Author",
-        image: "/placeholder.svg?height=40&width=40&text=" + encodeURIComponent(post.author?.name?.charAt(0) || "A"),
-      },
-      publishedAt: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : new Date().toLocaleDateString(),
-      image:
-        post.featuredImage?.url ||
-        post.image ||
-        "/placeholder.svg?height=400&width=600&text=" + encodeURIComponent(post.title || "Blog Post"),
-      tags: post.tags || ["Technology", "Innovation"],
-      category: post.category || "Technology",
-      readTime: post.readTime || "5 min read",
-    }))
+    console.log(`Returning ${posts.length} real blog posts from database`)
+    return posts.map((post) => serializeBlogPost(post))
   } catch (error) {
-    return handleDbError(error, getSampleBlogPosts(), "blog posts")
+    console.error("Error fetching blog posts:", error)
+    return getSampleBlogPosts()
   }
 }
 
@@ -293,51 +329,66 @@ function getSampleBlogPosts() {
   ]
 }
 
-// Get a single blog post by slug
+// Get a single blog post by slug - UPDATED TO FETCH REAL DATA
 export async function getBlogPostBySlug(slug) {
   try {
     if (!isMongoDBAvailable()) {
-      console.warn("MongoDB not available, returning null for blog post")
-      return null
+      console.warn("MongoDB not available, checking sample blog posts")
+      const samplePosts = getSampleBlogPosts()
+      return samplePosts.find((post) => post.slug === slug) || null
     }
 
     const { db } = await connectToDatabase()
     let post = null
 
+    // Try 'blog' collection first
     try {
-      post = await db.collection("blog_posts").findOne({ slug, status: "published" })
+      post = await db.collection("blog").findOne({ slug, status: "published" })
     } catch (err) {
+      console.log("Blog collection not found, trying blog_posts...")
+    }
+
+    // If not found, try 'blog_posts' collection
+    if (!post) {
       try {
-        post = await db.collection("blog").findOne({ slug, status: "published" })
-      } catch (err2) {
-        console.log("No blog collections found")
+        post = await db.collection("blog_posts").findOne({ slug, status: "published" })
+      } catch (err) {
+        console.log("Blog_posts collection not found either...")
       }
     }
 
-    if (!post) return null
-
-    return {
-      id: post._id.toString(),
-      title: post.title || "Untitled Post",
-      slug: post.slug,
-      excerpt: post.excerpt || post.shortDescription || "No excerpt available",
-      content: post.content || "No content available",
-      author: post.author || {
-        name: "Connected Team",
-        role: "Author",
-        image: "/placeholder.svg?height=40&width=40&text=A",
-      },
-      publishedAt: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : new Date().toLocaleDateString(),
-      image:
-        post.featuredImage?.url ||
-        post.image ||
-        "/placeholder.svg?height=400&width=600&text=" + encodeURIComponent(post.title || "Blog Post"),
-      tags: post.tags || ["Technology", "Innovation"],
-      category: post.category || "Technology",
-      readTime: post.readTime || "5 min read",
+    // If still not found, try without status filter
+    if (!post) {
+      try {
+        post = await db.collection("blog").findOne({ slug })
+      } catch (err) {
+        console.log("Error finding blog post without status filter:", err.message)
+      }
     }
+
+    // If still not found by slug, try by ID (in case slug is actually an ID)
+    if (!post && ObjectId.isValid(slug)) {
+      try {
+        post = await db.collection("blog").findOne({ _id: new ObjectId(slug) })
+      } catch (err) {
+        try {
+          post = await db.collection("blog_posts").findOne({ _id: new ObjectId(slug) })
+        } catch (err2) {
+          console.log("Error trying to find by ID:", err2.message)
+        }
+      }
+    }
+
+    if (!post) {
+      console.log(`Blog post with slug '${slug}' not found in database`)
+      return null
+    }
+
+    console.log(`Found blog post: ${post.title}`)
+    return serializeBlogPost(post)
   } catch (error) {
-    return handleDbError(error, null, `blog post with slug ${slug}`)
+    console.error(`Error fetching blog post with slug ${slug}:`, error)
+    return null
   }
 }
 

@@ -1,6 +1,5 @@
 import { cookies } from "next/headers"
 import jwt from "jsonwebtoken"
-// import { connectToDatabase } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
 import { connectToDatabase } from "./mongodb"
 
@@ -12,9 +11,14 @@ import { connectToDatabase } from "./mongodb"
 export async function verifyAuth(request) {
   try {
     // Get cookies
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const userToken = cookieStore.get("auth-token")?.value
     const adminToken = cookieStore.get("admin-token")?.value
+
+    console.log("Auth tokens:", {
+      hasUserToken: !!userToken,
+      hasAdminToken: !!adminToken,
+    }) // Debug logging
 
     if (!userToken && !adminToken) {
       return { authenticated: false, isAdmin: false }
@@ -27,6 +31,7 @@ export async function verifyAuth(request) {
     if (adminToken) {
       try {
         const decoded = jwt.verify(adminToken, jwtSecret)
+        console.log("Admin token decoded:", decoded) // Debug logging
 
         // Connect to database
         const { db } = await connectToDatabase()
@@ -39,6 +44,8 @@ export async function verifyAuth(request) {
           // If ObjectId conversion fails, try finding by string ID
           admin = await db.collection("admins").findOne({ _id: decoded.id })
         }
+
+        console.log("Admin found:", !!admin) // Debug logging
 
         if (!admin) {
           return { authenticated: false, isAdmin: false }
@@ -62,6 +69,7 @@ export async function verifyAuth(request) {
     if (userToken) {
       try {
         const decoded = jwt.verify(userToken, jwtSecret)
+        console.log("User token decoded:", decoded) // Debug logging
 
         // Connect to database
         const { db } = await connectToDatabase()
@@ -74,6 +82,8 @@ export async function verifyAuth(request) {
           // If ObjectId conversion fails, try finding by string ID
           user = await db.collection("users").findOne({ _id: decoded.id })
         }
+
+        console.log("User found:", !!user) // Debug logging
 
         if (!user) {
           return { authenticated: false, isAdmin: false }

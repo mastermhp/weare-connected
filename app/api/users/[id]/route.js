@@ -1,34 +1,45 @@
 import { NextResponse } from "next/server"
-// import { findUserById, updateUserStatus, deleteUser } from "@/lib/models/user"
+import { ObjectId } from "mongodb"
+import { connectToDatabase } from "@/app/lib/mongodb"
 import { verifyAuth } from "@/app/lib/auth"
-import { findUserById } from "@/app/lib/models/user"
-// import { verifyAuth } from "@/lib/auth"
 
 export async function GET(request, { params }) {
   try {
-    const { id } = params
+    const { id } = await params
 
-    // Verify authorization
+    // Verify admin authorization
     const authResult = await verifyAuth(request)
-    if (!authResult.isAuthenticated) {
+    if (!authResult.authenticated || !authResult.isAdmin) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    // Only allow admins or the user themselves to access user data
-    if (authResult.user.role !== "admin" && authResult.user.id !== id) {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 })
+    // Connect to database
+    const { db } = await connectToDatabase()
+
+    // Find user by ID
+    let user
+    try {
+      user = await db.collection("users").findOne({ _id: new ObjectId(id) })
+    } catch (error) {
+      user = await db.collection("users").findOne({ _id: id })
     }
 
-    // Get user
-    const user = await findUserById(id)
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 })
     }
 
     // Remove sensitive information
-    const { password, ...userWithoutPassword } = user
+    const sanitizedUser = {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      profileImage: user.profileImage,
+      isActive: user.isActive,
+      createdAt: user.createdAt?.toISOString(),
+      lastLogin: user.lastLogin?.toISOString(),
+    }
 
-    return NextResponse.json(userWithoutPassword)
+    return NextResponse.json(sanitizedUser)
   } catch (error) {
     console.error("Error fetching user:", error)
     return NextResponse.json({ message: "Error fetching user" }, { status: 500 })
@@ -37,37 +48,66 @@ export async function GET(request, { params }) {
 
 export async function PATCH(request, { params }) {
   try {
-    const { id } = params
-    const { isActive } = await request.json()
+    const { id } = await params
+    const body = await request.json()
 
     // Verify admin authorization
     const authResult = await verifyAuth(request)
-    if (!authResult.isAuthenticated || authResult.user.role !== "admin") {
+    if (!authResult.authenticated || !authResult.isAdmin) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    // Update user status
-    await updateUserStatus(id, isActive)
+    // Connect to database
+    const { db } = await connectToDatabase()
 
-    return NextResponse.json({ message: "User status updated successfully" })
+    // Handle different actions
+    if (body.action === "toggle-status") {
+      const result = await db.collection("users").updateOne(
+        { _id: new ObjectId(id) },
+        {
+          $set: {
+            isActive: body.isActive,
+            updatedAt: new Date(),
+          },
+        },
+      )
+
+      if (result.matchedCount === 0) {
+        return NextResponse.json({ message: "User not found" }, { status: 404 })
+      }
+
+      return NextResponse.json({
+        message: "User status updated successfully",
+        isActive: body.isActive,
+      })
+    }
+
+    return NextResponse.json({ message: "Invalid action" }, { status: 400 })
   } catch (error) {
-    console.error("Error updating user status:", error)
-    return NextResponse.json({ message: "Error updating user status" }, { status: 500 })
+    console.error("Error updating user:", error)
+    return NextResponse.json({ message: "Error updating user" }, { status: 500 })
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params
+    const { id } = await params
 
     // Verify admin authorization
     const authResult = await verifyAuth(request)
-    if (!authResult.isAuthenticated || authResult.user.role !== "admin") {
+    if (!authResult.authenticated || !authResult.isAdmin) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
+    // Connect to database
+    const { db } = await connectToDatabase()
+
     // Delete user
-    await deleteUser(id)
+    const result = await db.collection("users").deleteOne({ _id: new ObjectId(id) })
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 })
+    }
 
     return NextResponse.json({ message: "User deleted successfully" })
   } catch (error) {
