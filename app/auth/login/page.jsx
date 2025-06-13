@@ -59,7 +59,7 @@ export default function LoginPage() {
         setError(result.error || "Login failed. Please check your credentials.")
       } else {
         setSuccess("Login successful! Redirecting...")
-        router.push("/dashboard")
+        router.push("/")
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.")

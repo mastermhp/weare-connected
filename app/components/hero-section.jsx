@@ -37,7 +37,7 @@ export default function HeroSection({ data }) {
       {/* Grid Pattern Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
 
-      <div className="container px-4 md:px-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
         <div className="flex flex-col items-center space-y-8 text-center max-w-5xl mx-auto">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 px-6 py-3 text-sm font-medium backdrop-blur-sm">
@@ -49,9 +49,9 @@ export default function HeroSection({ data }) {
 
           {/* Main Heading */}
           <div className="space-y-6">
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-tight">
-              <span className="text-slate-900">We Build</span>
-              <br />
+            <h1 className="text-5xl md:text-7xl lg:text-5xl font-bold tracking-tight leading-tight">
+              <span className="text-slate-900">We Build </span>
+              {/* <br /> */}
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Connected
               </span>

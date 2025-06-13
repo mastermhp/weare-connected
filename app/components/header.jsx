@@ -44,19 +44,11 @@ export default function Header() {
           <div className="flex items-center">
             <Link href="/" className="flex">
               <span className="sr-only">Connected</span>
-              <div className="h-8 w-auto">
-                <svg width="150" height="30" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M20 10C14.477 10 10 14.477 10 20V30C10 35.523 14.477 40 20 40H30C35.523 40 40 35.523 40 30V20C40 14.477 35.523 10 30 10H20Z"
-                    fill="#4F46E5"
-                  />
-                  <path d="M50 15H55C58.866 15 62 18.134 62 22V28C62 31.866 58.866 35 55 35H50V15Z" fill="#4F46E5" />
-                  <path d="M70 15H75C78.866 15 82 18.134 82 22V28C82 31.866 78.866 35 75 35H70V15Z" fill="#4F46E5" />
-                  <path d="M90 15H95C98.866 15 102 18.134 102 22V28C102 31.866 98.866 35 95 35H90V15Z" fill="#4F46E5" />
-                </svg>
+              <div className="h-10 w-40">
+                <img src="logo.png" alt="" className="w-full"/>
               </div>
             </Link>
-            <div className="hidden ml-10 space-x-8 lg:block">
+            <div className="hidden ml-[30%] space-x-8 lg:block">
               {navigation.map((link) => (
                 <Link
                   key={link.name}
@@ -70,7 +62,7 @@ export default function Header() {
               ))}
             </div>
           </div>
-          <div className="hidden lg:flex lg:items-center lg:space-x-6">
+          <div className="hidden lg:flex lg:items-end lg:space-x-6">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
