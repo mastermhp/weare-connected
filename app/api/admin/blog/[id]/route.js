@@ -2,11 +2,16 @@ import { NextResponse } from "next/server"
 import { ObjectId } from "mongodb"
 import { verifyAuth } from "@/app/lib/auth"
 import { deleteImage } from "@/app/lib/cloudinary"
-import { connectToDatabase } from "@/app/lib/mongodb"
+import { connectToDatabase, isMongoDBAvailable } from "@/app/lib/mongodb"
 
 // GET a single blog post by ID
 export async function GET(request, { params }) {
   try {
+    // Check if MongoDB is available
+    if (!isMongoDBAvailable()) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 503 })
+    }
+
     // Verify admin authentication
     const { authenticated, isAdmin } = await verifyAuth(request)
 
@@ -14,20 +19,29 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid blog post ID" }, { status: 400 })
     }
 
     const { db } = await connectToDatabase()
-    const post = await db.collection("blog").findOne({ _id: new ObjectId(id) })
+    const post = await db.collection("blog_posts").findOne({ _id: new ObjectId(id) })
 
     if (!post) {
       return NextResponse.json({ error: "Blog post not found" }, { status: 404 })
     }
 
-    return NextResponse.json(post)
+    // Serialize the MongoDB object
+    const serializedPost = {
+      ...post,
+      _id: post._id.toString(),
+      createdAt: post.createdAt?.toISOString() || new Date().toISOString(),
+      updatedAt: post.updatedAt?.toISOString() || new Date().toISOString(),
+      publishedAt: post.publishedAt?.toISOString() || null,
+    }
+
+    return NextResponse.json(serializedPost)
   } catch (error) {
     console.error("Error fetching blog post:", error)
     return NextResponse.json({ error: "Failed to fetch blog post" }, { status: 500 })
@@ -37,6 +51,11 @@ export async function GET(request, { params }) {
 // PUT update a blog post
 export async function PUT(request, { params }) {
   try {
+    // Check if MongoDB is available
+    if (!isMongoDBAvailable()) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 503 })
+    }
+
     // Verify admin authentication
     const { authenticated, isAdmin } = await verifyAuth(request)
 
@@ -44,7 +63,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
     const data = await request.json()
 
     if (!ObjectId.isValid(id)) {
@@ -60,7 +79,10 @@ export async function PUT(request, { params }) {
 
     // Check if slug is being changed and if it already exists
     if (data.slug) {
-      const existingPost = await db.collection("blog").findOne({ slug: data.slug, _id: { $ne: new ObjectId(id) } })
+      const existingPost = await db.collection("blog_posts").findOne({
+        slug: data.slug,
+        _id: { $ne: new ObjectId(id) },
+      })
       if (existingPost) {
         return NextResponse.json({ error: "A post with this slug already exists" }, { status: 400 })
       }
@@ -74,13 +96,13 @@ export async function PUT(request, { params }) {
 
     // If status is changing to published, set publishedAt
     if (data.status === "published") {
-      const currentPost = await db.collection("blog").findOne({ _id: new ObjectId(id) })
-      if (currentPost.status !== "published") {
+      const currentPost = await db.collection("blog_posts").findOne({ _id: new ObjectId(id) })
+      if (currentPost && currentPost.status !== "published") {
         updateData.publishedAt = new Date()
       }
     }
 
-    const result = await db.collection("blog").updateOne({ _id: new ObjectId(id) }, { $set: updateData })
+    const result = await db.collection("blog_posts").updateOne({ _id: new ObjectId(id) }, { $set: updateData })
 
     if (result.matchedCount === 0) {
       return NextResponse.json({ error: "Blog post not found" }, { status: 404 })
@@ -99,6 +121,11 @@ export async function PUT(request, { params }) {
 // DELETE a blog post
 export async function DELETE(request, { params }) {
   try {
+    // Check if MongoDB is available
+    if (!isMongoDBAvailable()) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 503 })
+    }
+
     // Verify admin authentication
     const { authenticated, isAdmin } = await verifyAuth(request)
 
@@ -106,7 +133,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid blog post ID" }, { status: 400 })
@@ -115,7 +142,7 @@ export async function DELETE(request, { params }) {
     const { db } = await connectToDatabase()
 
     // Get post to check for images to delete
-    const post = await db.collection("blog").findOne({ _id: new ObjectId(id) })
+    const post = await db.collection("blog_posts").findOne({ _id: new ObjectId(id) })
 
     if (!post) {
       return NextResponse.json({ error: "Blog post not found" }, { status: 404 })
@@ -127,7 +154,7 @@ export async function DELETE(request, { params }) {
     }
 
     // Delete post from database
-    const result = await db.collection("blog").deleteOne({ _id: new ObjectId(id) })
+    const result = await db.collection("blog_posts").deleteOne({ _id: new ObjectId(id) })
 
     return NextResponse.json({ message: "Blog post deleted successfully" })
   } catch (error) {
