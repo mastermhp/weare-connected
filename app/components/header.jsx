@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAuth } from "../lib/auth-context"
@@ -14,16 +14,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Menu, X, User, LogOut, Settings, ChevronDown } from "lucide-react"
+import { cn } from "@/lib/utils"
+
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const { user, isAdmin, logout } = useAuth()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   const navigation = [
-    { name: "Home", href: "/" },
+    // { name: "Home", href: "/" },
     { name: "About", href: "/about" },
-    { name: "Services", href: "/services" },
+    // { name: "Services", href: "/services" },
     { name: "Ventures", href: "/ventures" },
     { name: "Careers", href: "/careers" },
     { name: "Blog", href: "/blog" },
@@ -37,31 +42,109 @@ export default function Header() {
     return pathname.startsWith(path)
   }
 
+ useEffect(() => {
+    setIsMounted(true)
+
+    const handleScroll = () => {
+      if (typeof window !== "undefined") {
+        setIsScrolled(window.scrollY > 20)
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("scroll", handleScroll)
+      return () => window.removeEventListener("scroll", handleScroll)
+    }
+  }, [])
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
+
+  if (!isMounted) {
+    return null
+  }
+
+
   return (
     <header className="bg-white shadow-sm">
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
+      <nav className="mx-auto container px-4 sm:px-6 lg:px-8" aria-label="Top">
         <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center">
-            <Link href="/" className="flex">
-              <span className="sr-only">Connected</span>
-              <div className="h-10 w-40">
-                <img src="logo.png" alt="" className="w-full"/>
-              </div>
-            </Link>
-            <div className="hidden ml-[30%] space-x-8 lg:block">
-              {navigation.map((link) => (
+          <div className="container mx-auto px-6">
+        <div className="flex h-20 items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center group shrink-0">
+            <div className="relative h-10 w-48 transition-transform duration-300 group-hover:scale-105">
+              <img src="/logo.png" alt="Connected"  className="object-cover" />
+            </div>
+          </Link>
+
+          {/* Combined Nav, Icon Divider, and CTA for Desktop */}
+          <div className="hidden lg:flex items-center space-x-6">
+            <nav className="flex items-center">
+              {[
+                { href: "/about", label: "About" },
+                { href: "/ventures", label: "Ventures" },
+                { href: "/blog", label: "Blog" },
+                { href: "/careers", label: "Careers" },
+                { href: "/contact", label: "Contact" },
+              ].map((item) => (
                 <Link
-                  key={link.name}
-                  href={link.href}
-                  className={`text-base font-medium ${
-                    isActive(link.href) ? "text-primary border-b-2 border-primary" : "text-gray-500 hover:text-gray-900"
-                  }`}
+                  key={item.href}
+                  href={item.href}
+                  className="font-satoshi relative px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary transition-all duration-300 group"
                 >
-                  {link.name}
+                  {item.label}
+                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-primary to-secondary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                 </Link>
               ))}
-            </div>
+            </nav>
+
+            {/* Vertical Line Separator */}
+            <div className="w-10 h-1 bg-gradient-to-r from-primary to-secondary rounded-full" />
+
+            {/* CTA Button */}
+            <Button
+              asChild
+              className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium px-6 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              <Link href="/contact">Get in Touch</Link>
+            </Button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden relative w-10 h-10 rounded-full hover:bg-gray-100 transition-colors duration-300"
+            onClick={toggleMenu}
+          >
+            <div className="relative w-6 h-6">
+              <span
+                className={cn(
+                  "absolute block h-0.5 w-6 bg-gray-700 transition-all duration-300",
+                  isMenuOpen ? "top-3 rotate-45" : "top-1",
+                )}
+              />
+              <span
+                className={cn(
+                  "absolute block h-0.5 w-6 bg-gray-700 transition-all duration-300",
+                  isMenuOpen ? "opacity-0" : "top-3",
+                )}
+              />
+              <span
+                className={cn(
+                  "absolute block h-0.5 w-6 bg-gray-700 transition-all duration-300",
+                  isMenuOpen ? "top-3 -rotate-45" : "top-5",
+                )}
+              />
+            </div>
+            <span className="sr-only">Toggle menu</span>
+          </Button>
+        </div>
+      </div>
+
+
           <div className="hidden lg:flex lg:items-end lg:space-x-6">
             {user ? (
               <DropdownMenu>

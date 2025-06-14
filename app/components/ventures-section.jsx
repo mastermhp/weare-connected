@@ -1,8 +1,18 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Calendar, Users, TrendingUp } from "lucide-react"
+import { motion } from "framer-motion"
+import { useInView } from "framer-motion"
+import { useRef } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
 export default function VenturesSection({ ventures = [] }) {
+
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true })
+
   // If no ventures are provided, use fallback data
   const venturesList =
     ventures.length > 0
@@ -38,16 +48,28 @@ export default function VenturesSection({ ventures = [] }) {
         ]
 
   return (
-    <section id="ventures" className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">Our Ventures</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We build and invest in innovative companies that are transforming industries and creating meaningful impact.
-          </p>
-        </div>
+    <section ref={ref} className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-purple-50 to-white">
+      <div className="container mx-auto px-4 md:px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
+        >
+          <div className="space-y-2">
+            <div className="inline-block rounded-lg bg-accent px-3 py-1 text-sm font-medium text-primary">
+              Our Ventures
+            </div>
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Building the Future</h2>
+            <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed">
+              Discover the innovative ventures we're building across various industries, each designed to solve
+              real-world problems and create lasting impact.
+            </p>
+          </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+
           {venturesList.map((venture) => (
             <Link href={`/ventures/${venture.slug}`} key={venture.slug} className="group">
               <div className="bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl h-full flex flex-col">
@@ -72,9 +94,9 @@ export default function VenturesSection({ ventures = [] }) {
                 </div>
                 <div className="p-6 flex-grow flex flex-col">
                   <h3 className="text-xl font-bold mb-1">{venture.name}</h3>
-                  <p className="text-sm text-emerald-600 font-medium mb-3">{venture.tagline}</p>
+                  <p className="text-sm text-primary font-medium mb-3">{venture.tagline}</p>
                   <p className="text-gray-600 mb-4 flex-grow">{venture.description}</p>
-                  <div className="flex items-center text-emerald-600 font-medium">
+                  <div className="flex items-center text-primary font-medium">
                     <span>Learn more</span>
                     <ArrowRight size={16} className="ml-2 transition-transform group-hover:translate-x-1" />
                   </div>
@@ -84,16 +106,25 @@ export default function VenturesSection({ ventures = [] }) {
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <Link
-            href="/ventures"
-            className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white font-medium rounded-md hover:bg-emerald-700 transition-colors"
-          >
-            View All Ventures
-            <ArrowRight size={16} className="ml-2" />
-          </Link>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-center"
+        >
+          <Button asChild size="lg">
+            <Link href="/ventures">
+              View All Ventures <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </motion.div>
       </div>
     </section>
   )
 }
+
+
+
+
+
+
