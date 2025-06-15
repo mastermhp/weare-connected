@@ -67,8 +67,8 @@ export default function Header() {
 
 
   return (
-    <header className="bg-white shadow-sm">
-      <nav className="mx-auto container px-4 sm:px-6 lg:px-8" aria-label="Top">
+    <header className=" bg-gradient-to-br from-gray-50 to-purple-50shadow-sm mt-4">
+      <nav className="mx-auto max-w-5xl border-2 border-[#6529B2] rounded-[20px] px-4 sm:px-6 lg:px-8" aria-label="Top">
         <div className="flex h-16 items-center justify-between">
           <div className="container mx-auto px-6">
         <div className="flex h-20 items-center justify-between">
@@ -101,15 +101,15 @@ export default function Header() {
             </nav>
 
             {/* Vertical Line Separator */}
-            <div className="w-10 h-1 bg-gradient-to-r from-primary to-secondary rounded-full" />
+            <div className="w-1 h-10 bg-gradient-to-r from-primary to-secondary rounded-full" />
 
             {/* CTA Button */}
-            <Button
+            {/* <Button
               asChild
               className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium px-6 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
               <Link href="/contact">Get in Touch</Link>
-            </Button>
+            </Button> */}
           </div>
 
           {/* Mobile Menu Button */}
