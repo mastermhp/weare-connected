@@ -66,7 +66,7 @@ export default function Home() {
       <InnovationEcosystemSection caseStudies={data.caseStudies} />
       <ContactSection />
       <Footer />
-      {process.env.NODE_ENV === "development" && (
+      {/* {process.env.NODE_ENV === "development" && (
         <button
           onClick={() => {
             // Find the AdminLoginModal component and open it
@@ -82,7 +82,7 @@ export default function Home() {
         >
           Admin Login (Dev Only)
         </button>
-      )}
+      )} */}
     </main>
   )
 }

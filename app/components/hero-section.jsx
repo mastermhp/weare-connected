@@ -2,578 +2,551 @@
 
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { motion, useScroll, useTransform } from "framer-motion"
-import { CreativeWordShuffle } from "./creative-word-shuffle"
-import { useEffect, useState, useRef } from "react"
-import { Sparkles, Zap, Target, ArrowRight, Play, Globe, Cpu, Network } from "lucide-react"
+import { motion, useAnimation } from "framer-motion"
+import { useEffect, useState } from "react"
+import { Settings, BarChart3, Circle } from "lucide-react"
 
-const words = [
-  "Connected",
-  "Innovative",
-  "Intelligent",
-  "Automated",
-  "Sustainable",
-  "Global",
-  "Decentralized",
-  "Personalized",
-  "Seamless",
-  "Secure",
-  "Empowering",
-]
-
-// 3D Floating Node Component
-const FloatingNode = ({ x, y, z, delay = 0, icon: Icon, label, color }) => (
-  <motion.div
-    className="absolute"
-    style={{
-      left: `${x}%`,
-      top: `${y}%`,
-      zIndex: z,
-    }}
-    initial={{ opacity: 0, scale: 0, rotateY: -180 }}
-    animate={{
-      opacity: 1,
-      scale: 1,
-      rotateY: 0,
-      y: [0, -20, 0],
-      rotateX: [0, 10, 0],
-    }}
-    transition={{
-      duration: 2,
-      delay,
-      y: {
-        duration: 4,
-        repeat: Number.POSITIVE_INFINITY,
-        ease: "easeInOut",
-        delay: delay + 1,
-      },
-      rotateX: {
-        duration: 6,
-        repeat: Number.POSITIVE_INFINITY,
-        ease: "easeInOut",
-        delay: delay + 0.5,
-      },
-    }}
-    whileHover={{
-      scale: 1.2,
-      rotateY: 15,
-      transition: { duration: 0.3 },
-    }}
-  >
-    <div className={`relative group cursor-pointer`}>
-      {/* Glow Effect */}
-      <div
-        className={`absolute inset-0 ${color} rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-300`}
-        style={{ transform: "scale(2)" }}
-      />
-
-      {/* Main Node */}
-      <div
-        className={`relative w-16 h-16 ${color.replace("bg-", "bg-gradient-to-br from-")} to-white/20 rounded-full border border-white/30 backdrop-blur-xl flex items-center justify-center shadow-2xl`}
-      >
-        <Icon className="w-8 h-8 text-white" />
-
-        {/* Pulse Ring */}
-        <motion.div
-          className="absolute inset-0 border-2 border-white/40 rounded-full"
-          animate={{ scale: [1, 2, 1], opacity: [0.8, 0, 0.8] }}
-          transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeOut" }}
-        />
-      </div>
-
-      {/* Label */}
-      <motion.div
-        className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        initial={{ y: 10 }}
-        whileHover={{ y: 0 }}
-      >
-        {label}
-      </motion.div>
-    </div>
-  </motion.div>
-)
-
-// 3D Connection Lines Component
-const ConnectionLines = ({ nodes }) => (
-  <svg className="absolute inset-0 w-full h-full pointer-events-none">
-    <defs>
-      <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="rgba(59, 130, 246, 0.8)" />
-        <stop offset="50%" stopColor="rgba(147, 51, 234, 0.6)" />
-        <stop offset="100%" stopColor="rgba(236, 72, 153, 0.4)" />
-      </linearGradient>
-      <filter id="glow">
-        <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-        <feMerge>
-          <feMergeNode in="coloredBlur" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-    </defs>
-
-    {nodes.map((node, i) =>
-      nodes.slice(i + 1).map((targetNode, j) => (
-        <motion.line
-          key={`${i}-${j}`}
-          x1={`${node.x}%`}
-          y1={`${node.y}%`}
-          x2={`${targetNode.x}%`}
-          y2={`${targetNode.y}%`}
-          stroke="url(#connectionGradient)"
-          strokeWidth="2"
-          filter="url(#glow)"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{
-            pathLength: [0, 1, 0],
-            opacity: [0, 0.8, 0],
-            strokeWidth: [1, 3, 1],
-          }}
-          transition={{
-            duration: 4,
-            delay: (i + j) * 0.2,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
-        />
-      )),
-    )}
-  </svg>
-)
-
-// Quantum Particles
-const QuantumParticle = ({ delay = 0 }) => (
-  <motion.div
-    className="absolute w-1 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"
-    style={{
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-    }}
-    animate={{
-      scale: [0, 1, 0],
-      opacity: [0, 1, 0],
-      x: [0, Math.random() * 200 - 100],
-      y: [0, Math.random() * 200 - 100],
-    }}
-    transition={{
-      duration: 3,
-      delay,
-      repeat: Number.POSITIVE_INFINITY,
-      ease: "easeOut",
-    }}
-  />
-)
-
-// 3D Holographic Display
-const HolographicDisplay = () => {
-  const [rotation, setRotation] = useState({ x: 0, y: 0 })
-  const displayRef = useRef(null)
-
-  const nodes = [
-    { x: 20, y: 30, icon: Globe, label: "Global Network", color: "bg-blue-500" },
-    { x: 80, y: 25, icon: Cpu, label: "AI Processing", color: "bg-purple-500" },
-    { x: 60, y: 60, icon: Network, label: "Connected Systems", color: "bg-pink-500" },
-    { x: 25, y: 75, icon: Zap, label: "Real-time Data", color: "bg-yellow-500" },
-    { x: 75, y: 80, icon: Target, label: "Precision Analytics", color: "bg-green-500" },
-    { x: 50, y: 15, icon: Sparkles, label: "Innovation Hub", color: "bg-indigo-500" },
-  ]
+export default function HeroSection() {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [animationCycle, setAnimationCycle] = useState(0)
+  const pulseControls = useAnimation()
+  const textControls = useAnimation()
+  const buttonControls = useAnimation()
 
   useEffect(() => {
     const handleMouseMove = (e) => {
-      if (displayRef.current) {
-        const rect = displayRef.current.getBoundingClientRect()
-        const centerX = rect.left + rect.width / 2
-        const centerY = rect.top + rect.height / 2
-
-        setRotation({
-          x: (e.clientY - centerY) / 20,
-          y: (e.clientX - centerX) / 20,
-        })
-      }
+      setMousePosition({
+        x: (e.clientX / window.innerWidth - 0.5) * 30,
+        y: (e.clientY / window.innerHeight - 0.5) * 30,
+      })
     }
 
     window.addEventListener("mousemove", handleMouseMove)
     return () => window.removeEventListener("mousemove", handleMouseMove)
   }, [])
 
+  // Main animation sequence
+  useEffect(() => {
+    const runAnimation = async () => {
+      // Reset everything
+      await Promise.all([
+        pulseControls.set({ pathLength: 0, opacity: 0 }),
+        textControls.set({ opacity: 0, y: 30 }),
+        buttonControls.set({ opacity: 0, scale: 0.8 }),
+      ])
+
+      // Wait for initial fade in
+      await new Promise((resolve) => setTimeout(resolve, 800))
+
+      // Start pulse line animation with multiple waves
+      await pulseControls.start({
+        pathLength: 1,
+        opacity: 1,
+        transition: { duration: 2.5, ease: "easeInOut" },
+      })
+
+      // Animate text in letter by letter
+      await textControls.start({
+        opacity: 1,
+        y: 0,
+        transition: { duration: 1.5, ease: "easeOut" },
+      })
+
+      // Animate button in
+      await buttonControls.start({
+        opacity: 1,
+        scale: 1,
+        transition: { duration: 0.8, ease: "easeOut" },
+      })
+
+      // Wait before next cycle
+      await new Promise((resolve) => setTimeout(resolve, 5000))
+      setAnimationCycle((prev) => prev + 1)
+    }
+
+    runAnimation()
+  }, [animationCycle, pulseControls, textControls, buttonControls])
+
+  // Enhanced background particles
+  const particles = Array.from({ length: 80 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 4 + 2,
+    delay: Math.random() * 8,
+    speed: Math.random() * 2 + 1,
+  }))
+
+  // Lightning bolts
+  const lightningBolts = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    angle: i * 30 + Math.random() * 15,
+    length: Math.random() * 300 + 200,
+    delay: Math.random() * 4,
+  }))
+
   return (
-    <motion.div
-      ref={displayRef}
-      className="relative w-full h-[600px] perspective-1000"
-      style={{
-        transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
-        transformStyle: "preserve-3d",
-      }}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 1.2, delay: 0.5 }}
-    >
-      {/* Main Holographic Container */}
-      <div className="relative w-full h-full rounded-3xl overflow-hidden">
-        {/* Background Layers */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-purple-900/80 to-slate-900/90 backdrop-blur-3xl border border-white/10 rounded-3xl" />
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-3xl" />
+    <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-800 to-blue-900 flex items-center justify-center">
+      {/* Enhanced Background with Lightning */}
+      <div className="absolute inset-0">
+        {/* Base gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-radial from-purple-600/20 via-blue-600/10 to-transparent" />
 
-        {/* Quantum Particles */}
-        <div className="absolute inset-0">
-          {Array.from({ length: 30 }).map((_, i) => (
-            <QuantumParticle key={i} delay={i * 0.1} />
-          ))}
-        </div>
-
-        {/* Connection Lines */}
-        <ConnectionLines nodes={nodes} />
-
-        {/* 3D Floating Nodes */}
-        {nodes.map((node, i) => (
-          <FloatingNode
-            key={i}
-            x={node.x}
-            y={node.y}
-            z={i + 1}
-            delay={i * 0.2}
-            icon={node.icon}
-            label={node.label}
-            color={node.color}
-          />
-        ))}
-
-        {/* Central Core */}
+        {/* Lightning Effects */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <motion.div
-            className="relative"
-            animate={{
-              rotateY: 360,
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              rotateY: { duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" },
-              scale: { duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" },
-            }}
-          >
-            {/* Outer Rings */}
-            {[0, 1, 2].map((i) => (
-              <motion.div
-                key={i}
-                className="absolute inset-0 m-auto rounded-full border border-gradient-to-r from-blue-400/40 to-purple-400/40"
-                style={{
-                  width: 100 + i * 50,
-                  height: 100 + i * 50,
-                  borderImage: "linear-gradient(45deg, rgba(59, 130, 246, 0.4), rgba(147, 51, 234, 0.4)) 1",
-                }}
-                animate={{
-                  rotate: i % 2 === 0 ? 360 : -360,
-                  scale: [1, 1.05, 1],
-                }}
-                transition={{
-                  rotate: { duration: 15 + i * 5, repeat: Number.POSITIVE_INFINITY, ease: "linear" },
-                  scale: { duration: 3 + i, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" },
-                }}
-              />
-            ))}
-
-            {/* Central Orb */}
+          {lightningBolts.map((bolt) => (
             <motion.div
-              className="relative w-24 h-24 rounded-full bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 shadow-2xl"
+              key={bolt.id}
+              className="absolute w-1 bg-gradient-to-t from-transparent via-blue-400 to-transparent origin-bottom"
               style={{
-                boxShadow: "0 0 50px rgba(147, 51, 234, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.2)",
+                height: `${bolt.length}px`,
+                transform: `rotate(${bolt.angle}deg)`,
+                filter: "drop-shadow(0 0 10px #3B82F6)",
               }}
               animate={{
-                boxShadow: [
-                  "0 0 50px rgba(147, 51, 234, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.2)",
-                  "0 0 80px rgba(59, 130, 246, 0.9), inset 0 0 30px rgba(255, 255, 255, 0.3)",
-                  "0 0 50px rgba(147, 51, 234, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.2)",
+                opacity: [0, 1, 0.3, 1, 0],
+                scaleY: [0.5, 1.5, 0.8, 1.2, 0.5],
+                filter: [
+                  "drop-shadow(0 0 10px #3B82F6)",
+                  "drop-shadow(0 0 30px #6529B2)",
+                  "drop-shadow(0 0 15px #3B82F6)",
                 ],
-              }}
-              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-            >
-              {/* Inner Glow */}
-              <div className="absolute inset-2 rounded-full bg-gradient-to-br from-white/30 to-transparent" />
-
-              {/* Core Symbol */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                >
-                  <Network className="w-8 h-8 text-white" />
-                </motion.div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-
-        {/* Data Flow Streams */}
-        <div className="absolute inset-0">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute h-px bg-gradient-to-r from-transparent via-blue-400/60 to-transparent"
-              style={{
-                width: "120%",
-                top: `${15 + i * 10}%`,
-                left: "-10%",
-                transform: `rotate(${i * 22.5}deg)`,
-                transformOrigin: "center",
-              }}
-              animate={{
-                opacity: [0, 1, 0],
-                scaleX: [0, 1, 0],
               }}
               transition={{
                 duration: 3,
-                delay: i * 0.3,
                 repeat: Number.POSITIVE_INFINITY,
+                delay: bolt.delay,
                 ease: "easeInOut",
               }}
             />
           ))}
         </div>
 
-        {/* Holographic Scan Lines */}
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(59, 130, 246, 0.03) 2px, rgba(59, 130, 246, 0.03) 4px)",
-          }}
-          animate={{ opacity: [0.3, 0.7, 0.3] }}
-          transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-        />
-      </div>
-    </motion.div>
-  )
-}
+        {/* Enhanced Particles */}
+        {particles.map((particle) => (
+          <motion.div
+            key={particle.id}
+            className="absolute rounded-full"
+            style={{
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
+              width: `${particle.size}px`,
+              height: `${particle.size}px`,
+              background: `radial-gradient(circle, ${
+                particle.id % 3 === 0 ? "#6529B2" : particle.id % 3 === 1 ? "#3B82F6" : "#8B5CF6"
+              }, transparent)`,
+              filter: `drop-shadow(0 0 ${particle.size * 2}px currentColor)`,
+            }}
+            animate={{
+              opacity: [0.3, 1, 0.5, 1, 0.3],
+              scale: [1, 1.8, 1.2, 2, 1],
+              x: [0, mousePosition.x * 0.8, mousePosition.x * 0.3, 0],
+              y: [0, mousePosition.y * 0.8, mousePosition.y * 0.3, 0],
+              rotate: [0, 180, 360],
+            }}
+            transition={{
+              duration: particle.speed * 3,
+              repeat: Number.POSITIVE_INFINITY,
+              delay: particle.delay,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
 
-export default function HeroSection() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const containerRef = useRef(null)
-  const { scrollY } = useScroll()
+        {/* Enhanced Network Lines */}
+        <svg className="absolute inset-0 w-full h-full opacity-40">
+          {particles.slice(0, 25).map((particle, i) => {
+            const connections = particles.slice(i + 1, i + 4)
+            return connections.map((connectedParticle, j) => (
+              <motion.line
+                key={`line-${i}-${j}`}
+                x1={`${particle.x}%`}
+                y1={`${particle.y}%`}
+                x2={`${connectedParticle.x}%`}
+                y2={`${connectedParticle.y}%`}
+                stroke="url(#networkGradient)"
+                strokeWidth="2"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{
+                  pathLength: [0, 1, 0.5, 1, 0],
+                  opacity: [0, 0.8, 0.4, 0.9, 0],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Number.POSITIVE_INFINITY,
+                  delay: (i + j) * 0.3,
+                  ease: "easeInOut",
+                }}
+              />
+            ))
+          })}
+          <defs>
+            <linearGradient id="networkGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#6529B2" stopOpacity="0" />
+              <stop offset="50%" stopColor="#3B82F6" stopOpacity="1" />
+              <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+        </svg>
 
-  const y1 = useTransform(scrollY, [0, 500], [0, -100])
-  const y2 = useTransform(scrollY, [0, 500], [0, -200])
-  const opacity = useTransform(scrollY, [0, 300], [1, 0])
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect()
-        setMousePosition({
-          x: (e.clientX - rect.left) / rect.width,
-          y: (e.clientY - rect.top) / rect.height,
-        })
-      }
-    }
-
-    const container = containerRef.current
-    if (container) {
-      container.addEventListener("mousemove", handleMouseMove)
-      return () => container.removeEventListener("mousemove", handleMouseMove)
-    }
-  }, [])
-
-  return (
-    <motion.section
-      ref={containerRef}
-      className="relative w-full min-h-screen flex items-center justify-center overflow-hidden"
-      style={{ opacity }}
-    >
-      {/* Ultra Dynamic Background */}
-      <div className="absolute inset-0">
-        {/* Base Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900" />
-
-        {/* Animated Mesh Gradient */}
-        <motion.div
-          className="absolute inset-0 opacity-60"
-          style={{
-            background: `
-              radial-gradient(circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, 
-                rgba(59, 130, 246, 0.3) 0%, 
-                rgba(147, 51, 234, 0.2) 25%, 
-                rgba(236, 72, 153, 0.1) 50%, 
-                transparent 70%)
-            `,
-          }}
-        />
-
-        {/* Dynamic Grid */}
+        {/* Parallax Background Elements */}
         <motion.div
           className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: `
-              linear-gradient(rgba(59, 130, 246, 0.3) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(59, 130, 246, 0.3) 1px, transparent 1px)
-            `,
-            backgroundSize: "60px 60px",
-            transform: `translate(${mousePosition.x * 30}px, ${mousePosition.y * 30}px) rotate(${mousePosition.x * 5}deg)`,
+            transform: `translate(${mousePosition.x * 0.2}px, ${mousePosition.y * 0.2}px)`,
+            background: `radial-gradient(600px circle at ${mousePosition.x + 50}% ${mousePosition.y + 50}%, rgba(101, 41, 178, 0.3), transparent 60%)`,
           }}
         />
-
-        {/* Floating Geometric Shapes */}
-        {Array.from({ length: 20 }).map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              width: Math.random() * 100 + 20,
-              height: Math.random() * 100 + 20,
-            }}
-            animate={{
-              rotate: 360,
-              scale: [1, 1.2, 1],
-              opacity: [0.1, 0.3, 0.1],
-            }}
-            transition={{
-              duration: 10 + Math.random() * 10,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "linear",
-              delay: i * 0.5,
-            }}
-          >
-            <div className="w-full h-full bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-3xl border border-white/5 rounded-2xl transform rotate-45" />
-          </motion.div>
-        ))}
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 md:px-6 relative z-10">
-        <div className="grid gap-16 lg:grid-cols-[1fr_600px] lg:gap-12 xl:grid-cols-[1fr_700px] items-center">
-          {/* Left Content */}
-          <motion.div
-            className="flex flex-col justify-center items-center text-center lg:items-start lg:text-left space-y-8"
-            style={{ y: y1 }}
+      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+        {/* Main Headline */}
+        <motion.div animate={textControls} className="mb-8">
+          <motion.h1
+            className="text-6xl md:text-8xl lg:text-9xl font-black text-white leading-none tracking-tight mb-6"
+            style={{
+              fontFamily: "Satoshi, system-ui, sans-serif",
+              textShadow: "0 0 40px rgba(255,255,255,0.3), 0 0 80px rgba(101,41,178,0.2)",
+            }}
           >
-            {/* Ultra Premium Badge */}
+            {"The Future is".split("").map((char, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0, y: 50, rotateX: -90 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  rotateX: 0,
+                  textShadow: [
+                    "0 0 20px rgba(255,255,255,0.3)",
+                    "0 0 40px rgba(255,255,255,0.6), 0 0 60px rgba(101,41,178,0.4)",
+                    "0 0 20px rgba(255,255,255,0.3)",
+                  ],
+                }}
+                transition={{
+                  duration: 0.15,
+                  delay: i * 0.08,
+                }}
+              >
+                {char === " " ? "\u00A0" : char}
+              </motion.span>
+            ))}
+            <br />
+            {"Connected.".split("").map((char, i) => (
+              <motion.span
+                key={i + 100}
+                className="bg-gradient-to-r from-purple-400 via-blue-400 to-purple-600 bg-clip-text text-transparent"
+                initial={{ opacity: 0, y: 50, rotateX: -90 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  rotateX: 0,
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{
+                  duration: 0.15,
+                  delay: (i + 15) * 0.08,
+                  backgroundPosition: {
+                    duration: 4,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut",
+                  },
+                }}
+                style={{
+                  filter: "drop-shadow(0 0 20px rgba(101,41,178,0.6))",
+                }}
+              >
+                {char === " " ? "\u00A0" : char}
+              </motion.span>
+            ))}
+          </motion.h1>
+
+          {/* Subheadline */}
+          <motion.p
+            className="text-2xl md:text-3xl text-white/90 font-light tracking-wide"
+            style={{
+              fontFamily: "Syne, system-ui, sans-serif",
+              textShadow: "0 0 20px rgba(255,255,255,0.2)",
+            }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 2.5 }}
+          >
+            Ventures. Vision. Velocity.
+          </motion.p>
+        </motion.div>
+
+        {/* Enhanced CTA Button */}
+        <motion.div animate={buttonControls} className="mb-16">
+          <Button
+            asChild
+            size="lg"
+            className="relative bg-transparent border-2 border-purple-400/60 text-white hover:bg-purple-600/30 px-12 py-6 text-xl font-bold rounded-full group overflow-hidden transition-all duration-500"
+            style={{ fontFamily: "Satoshi, system-ui, sans-serif" }}
+          >
+            <Link href="/ventures" className="relative z-10">
+              <span>Explore Ventures</span>
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-purple-600/30 to-blue-600/30 rounded-full"
+                initial={{ scale: 0, opacity: 0 }}
+                whileHover={{
+                  scale: 1.2,
+                  opacity: 1,
+                  transition: { duration: 0.4 },
+                }}
+              />
+              <motion.div
+                className="absolute inset-0 border-2 border-purple-400 rounded-full"
+                initial={{ scale: 1, opacity: 0 }}
+                whileHover={{
+                  scale: 1.3,
+                  opacity: 0.8,
+                  transition: { duration: 0.4 },
+                }}
+                animate={{
+                  boxShadow: [
+                    "0 0 20px rgba(101,41,178,0.3)",
+                    "0 0 40px rgba(101,41,178,0.6), 0 0 60px rgba(59,130,246,0.3)",
+                    "0 0 20px rgba(101,41,178,0.3)",
+                  ],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                }}
+              />
+            </Link>
+          </Button>
+        </motion.div>
+
+        {/* Enhanced Pulse Line with Icons */}
+        <div className="relative h-40 flex items-center justify-center">
+          {/* Multiple SVG Pulse Lines */}
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 120" style={{ overflow: "visible" }}>
+            <defs>
+              <linearGradient id="pulseGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#6529B2" stopOpacity="0" />
+                <stop offset="30%" stopColor="#3B82F6" stopOpacity="0.8" />
+                <stop offset="50%" stopColor="#8B5CF6" stopOpacity="1" />
+                <stop offset="70%" stopColor="#3B82F6" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#6529B2" stopOpacity="0" />
+              </linearGradient>
+              <linearGradient id="pulseGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#3B82F6" stopOpacity="0" />
+                <stop offset="50%" stopColor="#6529B2" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+
+            {/* Main Pulse Line */}
+            <motion.path
+              d="M 50 60 Q 150 30 250 60 Q 350 90 450 60 Q 550 30 650 60 Q 700 45 750 60"
+              stroke="url(#pulseGradient1)"
+              strokeWidth="4"
+              fill="none"
+              animate={pulseControls}
+              style={{
+                filter: "drop-shadow(0 0 15px #6529B2) drop-shadow(0 0 30px #3B82F6)",
+              }}
+            />
+
+            {/* Secondary Pulse Line */}
+            <motion.path
+              d="M 50 60 Q 200 40 300 60 T 550 60 Q 650 40 750 60"
+              stroke="url(#pulseGradient2)"
+              strokeWidth="2"
+              fill="none"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{
+                pathLength: [0, 1, 0],
+                opacity: [0, 0.8, 0],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Number.POSITIVE_INFINITY,
+                delay: 1,
+                ease: "easeInOut",
+              }}
+              style={{
+                filter: "drop-shadow(0 0 10px #8B5CF6)",
+              }}
+            />
+
+            {/* Pulse Waves */}
+            {[0, 1, 2].map((wave) => (
+              <motion.circle
+                key={wave}
+                cx="400"
+                cy="60"
+                r="5"
+                fill="none"
+                stroke="#3B82F6"
+                strokeWidth="2"
+                initial={{ r: 5, opacity: 0.8 }}
+                animate={{
+                  r: [5, 50, 100],
+                  opacity: [0.8, 0.4, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  delay: wave * 0.7 + 2,
+                  ease: "easeOut",
+                }}
+              />
+            ))}
+          </svg>
+
+          {/* Enhanced Icons with Better Animations */}
+          <div className="relative flex justify-between items-center w-full max-w-2xl px-8">
+            {/* Gear Icon */}
             <motion.div
-              initial={{ opacity: 0, y: -30, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 1, delay: 0.2 }}
-              className="relative group"
+              className="flex items-center justify-center w-20 h-20 rounded-full border-3 border-purple-400 bg-gradient-to-br from-purple-900/40 to-purple-600/20 backdrop-blur-lg"
+              initial={{ scale: 0, opacity: 0, rotateY: -180 }}
+              animate={{
+                scale: [0, 1.4, 1.1, 1],
+                opacity: [0, 1, 1, 1],
+                rotateY: [-180, 0, 0, 0],
+                boxShadow: [
+                  "0 0 20px rgba(101,41,178,0.3)",
+                  "0 0 40px rgba(101,41,178,0.8), 0 0 60px rgba(147,51,234,0.4)",
+                  "0 0 30px rgba(101,41,178,0.5)",
+                ],
+              }}
+              transition={{
+                duration: 1.2,
+                delay: 1.8,
+                ease: "easeOut",
+              }}
+              whileHover={{
+                scale: 1.2,
+                rotate: 360,
+                transition: { duration: 0.8 },
+              }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
-              <div className="relative bg-black/30 backdrop-blur-3xl border border-white/20 rounded-full px-8 py-4 flex items-center gap-3">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                >
-                  <Sparkles className="w-5 h-5 text-yellow-400" />
-                </motion.div>
-                <span className="text-white font-semibold text-base">Shaping Digital Reality</span>
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                >
-                  <Zap className="w-5 h-5 text-blue-400" />
-                </motion.div>
-              </div>
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+              >
+                <Settings className="w-10 h-10 text-purple-300" />
+              </motion.div>
             </motion.div>
 
-            {/* Epic Heading */}
-            <div className="space-y-8">
-              <motion.h1
-                className="text-4xl tracking-tighter md:text-5xl lg:text-6xl/none xl:text-7xl/none font-black text-white"
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.4 }}
-              >
-                The Future Is{" "}
-                <span className="inline-block align-bottom text-left min-w-[300px] sm:min-w-[400px] md:min-w-[500px] lg:min-w-[600px] xl:min-w-[700px]">
-                  <CreativeWordShuffle
-                    words={words}
-                    className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-                    shuffleInterval={2000}
-                    glitchDuration={800}
-                  />
-                </span>
-              </motion.h1>
-
-              <motion.p
-                className="font-light max-w-[500px] text-slate-200 text-lg md:text-xl mx-auto lg:mx-0 leading-relaxed"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.6 }}
-              >
-                Connected transcends boundaries — we architect digital ecosystems that revolutionize industries,
-                redefine experiences, and create tomorrow's reality. Join us in building the impossible.
-              </motion.p>
-            </div>
-
-            {/* Premium CTA Buttons */}
+            {/* Bar Chart Icon */}
             <motion.div
-              className="flex flex-col sm:flex-row gap-6"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.8 }}
+              className="flex items-center justify-center w-20 h-20 rounded-full border-3 border-blue-400 bg-gradient-to-br from-blue-900/40 to-blue-600/20 backdrop-blur-lg"
+              initial={{ scale: 0, opacity: 0, y: 100 }}
+              animate={{
+                scale: [0, 1.4, 1.1, 1],
+                opacity: [0, 1, 1, 1],
+                y: [100, -10, 5, 0],
+                boxShadow: [
+                  "0 0 20px rgba(59,130,246,0.3)",
+                  "0 0 40px rgba(59,130,246,0.8), 0 0 60px rgba(37,99,235,0.4)",
+                  "0 0 30px rgba(59,130,246,0.5)",
+                ],
+              }}
+              transition={{
+                duration: 1.2,
+                delay: 2.8,
+                ease: "easeOut",
+              }}
+              whileHover={{
+                scale: 1.2,
+                y: -10,
+                transition: { duration: 0.4 },
+              }}
             >
-              <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }} className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-lg opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
-                <Button
-                  asChild
-                  size="lg"
-                  className="relative bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-2xl px-8 py-6 text-lg font-bold rounded-full"
-                >
-                  <Link href="/about" className="flex items-center gap-3">
-                    Explore Universe
-                    <motion.div
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                    >
-                      <ArrowRight className="w-6 h-6" />
-                    </motion.div>
-                  </Link>
-                </Button>
-              </motion.div>
-
-              <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }} className="relative group">
-                <div className="absolute inset-0 bg-white/10 rounded-full blur-lg opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="relative border-2 border-white/30 bg-white/5 backdrop-blur-3xl text-white hover:bg-white/10 hover:border-white/50 px-8 py-6 text-lg font-bold rounded-full"
-                >
-                  <Play className="w-6 h-6 mr-3" />
-                  Experience Demo
-                </Button>
+              <motion.div
+                animate={{
+                  y: [0, -5, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                }}
+              >
+                <BarChart3 className="w-10 h-10 text-blue-300" />
               </motion.div>
             </motion.div>
-          </motion.div>
 
-          {/* Revolutionary 3D Display */}
-          <motion.div className="relative hidden lg:block" style={{ y: y2 }}>
-            <HolographicDisplay />
-          </motion.div>
+            {/* Circle Icon */}
+            <motion.div
+              className="flex items-center justify-center w-20 h-20 rounded-full border-3 border-purple-400 bg-gradient-to-br from-purple-900/40 to-indigo-600/20 backdrop-blur-lg"
+              initial={{ scale: 0, opacity: 0, rotateX: -180 }}
+              animate={{
+                scale: [0, 1.4, 1.1, 1],
+                opacity: [0, 1, 1, 1],
+                rotateX: [-180, 0, 0, 0],
+                boxShadow: [
+                  "0 0 20px rgba(139,92,246,0.3)",
+                  "0 0 40px rgba(139,92,246,0.8), 0 0 60px rgba(124,58,237,0.4)",
+                  "0 0 30px rgba(139,92,246,0.5)",
+                ],
+              }}
+              transition={{
+                duration: 1.2,
+                delay: 3.8,
+                ease: "easeOut",
+              }}
+              whileHover={{
+                scale: 1.2,
+                rotate: 720,
+                transition: { duration: 1.2 },
+              }}
+            >
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 180, 360],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                }}
+              >
+                <Circle className="w-10 h-10 text-purple-300" />
+              </motion.div>
+            </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* Ultra Smooth Scroll Indicator */}
+      {/* Enhanced Scroll Indicator */}
       <motion.div
-        className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 2 }}
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 5 }}
       >
         <motion.div
-          className="relative"
-          animate={{ y: [0, 15, 0] }}
-          transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+          className="w-8 h-12 border-2 border-white/40 rounded-full flex justify-center backdrop-blur-sm"
+          animate={{
+            y: [0, 10, 0],
+            boxShadow: [
+              "0 0 10px rgba(255,255,255,0.2)",
+              "0 0 20px rgba(101,41,178,0.4)",
+              "0 0 10px rgba(255,255,255,0.2)",
+            ],
+          }}
+          transition={{
+            duration: 2.5,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+          }}
         >
-          <div className="w-8 h-14 border-2 border-white/40 rounded-full flex justify-center backdrop-blur-sm bg-white/5">
-            <motion.div
-              className="w-2 h-6 bg-gradient-to-b from-blue-400 to-purple-400 rounded-full mt-2"
-              animate={{
-                opacity: [0.4, 1, 0.4],
-                height: [24, 32, 24],
-              }}
-              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-            />
-          </div>
-          <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-white/60 text-sm font-medium">
-            Scroll to Explore
-          </div>
+          <motion.div
+            className="w-2 h-4 bg-gradient-to-b from-purple-400 to-blue-400 rounded-full mt-2"
+            animate={{ y: [0, 16, 0] }}
+            transition={{ duration: 2.5, repeat: Number.POSITIVE_INFINITY }}
+          />
         </motion.div>
+        <p className="text-white/70 text-sm mt-3 text-center font-medium">Scroll to explore</p>
       </motion.div>
-    </motion.section>
+    </section>
   )
 }
