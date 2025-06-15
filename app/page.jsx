@@ -57,7 +57,7 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="min-h-screen">
+    <main className="relative min-h-screen">
       <Header/>
       <HeroSection {...data.heroData} />
       <AboutSection {...data.aboutData} />

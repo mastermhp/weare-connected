@@ -1,5 +1,4 @@
-import Footer from "./components/footer"
-import Header from "./components/header"
+
 import { ThemeProvider } from "./components/theme-provider"
 import "./globals.css"
 import { AuthProvider } from "./lib/auth-context"
