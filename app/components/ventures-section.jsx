@@ -1,55 +1,86 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight, Calendar, Users, TrendingUp } from "lucide-react"
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
 export default function VenturesSection({ ventures = [] }) {
-
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true })
 
-  // If no ventures are provided, use fallback data
+  // Enhanced fallback data with the new structure
   const venturesList =
     ventures.length > 0
-      ? ventures
+      ? ventures.map((venture) => ({
+          ...venture,
+          status: venture.status || "Active",
+          statusColor:
+            venture.status === "Active"
+              ? "bg-green-500"
+              : venture.status === "Scaling"
+                ? "bg-blue-500"
+                : "bg-purple-500",
+          category: venture.category || venture.industry || "Tech",
+          year: venture.foundedYear || venture.year || "2024",
+          teamMembers: venture.teamSize ? `${venture.teamSize} members` : "8 members",
+          growth: venture.growth || "+150%",
+          tags: venture.technologies || venture.tags || ["Technology", "Innovation"],
+        }))
       : [
           {
-            slug: "techflow",
-            name: "TechFlow",
-            tagline: "Workflow automation reimagined",
-            description:
-              "A comprehensive SaaS platform that revolutionizes how teams manage workflows and automate repetitive tasks.",
-            image: "/placeholder.svg?height=600&width=1200&text=TechFlow+Dashboard",
-            logo: "/placeholder.svg?height=120&width=120&text=TF",
+            slug: "ecotech-solutions",
+            name: "EcoTech Solutions",
+            tagline: "Sustainable technology platform for environmental monitoring and carbon tracking.",
+            description: "Sustainable technology platform for environmental monitoring and carbon tracking.",
+            image: "/placeholder.svg?height=600&width=1200&text=EcoTech+Solutions",
+            logo: "/placeholder.svg?height=120&width=120&text=ET",
+            status: "Active",
+            statusColor: "bg-green-500",
+            category: "CleanTech",
+            year: "2024",
+            teamMembers: "8 members",
+            growth: "+150%",
+            tags: ["Sustainability", "IoT", "Analytics"],
           },
           {
-            slug: "designhub",
-            name: "DesignHub",
-            tagline: "Creative solutions for modern brands",
-            description:
-              "A full-service design agency specializing in brand identity, digital experiences, and creative campaigns.",
-            image: "/placeholder.svg?height=600&width=1200&text=DesignHub+Portfolio",
-            logo: "/placeholder.svg?height=120&width=120&text=DH",
+            slug: "finflow",
+            name: "FinFlow",
+            tagline: "Next-generation financial management platform for small businesses and freelancers.",
+            description: "Next-generation financial management platform for small businesses and freelancers.",
+            image: "/placeholder.svg?height=600&width=1200&text=FinFlow+Platform",
+            logo: "/placeholder.svg?height=120&width=120&text=FF",
+            status: "Scaling",
+            statusColor: "bg-blue-500",
+            category: "FinTech",
+            year: "2023",
+            teamMembers: "12 members",
+            growth: "+200%",
+            tags: ["Finance", "SaaS", "AI"],
           },
           {
             slug: "healthhub",
             name: "HealthHub",
-            tagline: "Transforming patient care",
-            description:
-              "A digital health platform that connects patients, providers, and caregivers to improve healthcare outcomes.",
+            tagline: "Digital health platform connecting patients with healthcare providers seamlessly.",
+            description: "Digital health platform connecting patients with healthcare providers seamlessly.",
             image: "/placeholder.svg?height=600&width=1200&text=HealthHub+Platform",
             logo: "/placeholder.svg?height=120&width=120&text=HH",
+            status: "Development",
+            statusColor: "bg-purple-500",
+            category: "HealthTech",
+            year: "2024",
+            teamMembers: "6 members",
+            growth: "New",
+            tags: ["Healthcare", "Telemedicine", "Mobile"],
           },
         ]
 
   return (
     <section ref={ref} className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-purple-50 to-white">
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -69,40 +100,99 @@ export default function VenturesSection({ ventures = [] }) {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {venturesList.map((venture, index) => (
+            <motion.div
+              key={venture.slug}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, delay: index * 0.2 }}
+            >
+              <Link href={`/ventures/${venture.slug}`} className="group block">
+                <div className="bg-white rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl h-[500px] flex flex-col border border-gray-100">
+                  {/* Status Badge */}
+                  <div className="p-4 pb-0">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${venture.statusColor}`}
+                    >
+                      {venture.status}
+                    </span>
+                  </div>
 
-          {venturesList.map((venture) => (
-            <Link href={`/ventures/${venture.slug}`} key={venture.slug} className="group">
-              <div className="bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl h-full flex flex-col">
-                <div className="relative h-48 w-full overflow-hidden">
-                  <Image
-                    src={venture.image || "/placeholder.svg?height=600&width=1200&text=Venture"}
-                    alt={venture.name}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  {venture.logo && (
-                    <div className="absolute bottom-4 left-4 h-12 w-12 rounded-full bg-white shadow-md overflow-hidden">
-                      <Image
-                        src={venture.logo || "/placeholder.svg"}
-                        alt={`${venture.name} logo`}
-                        width={48}
-                        height={48}
-                        className="object-cover"
-                      />
+                  {/* Image Section */}
+                  <div className="relative h-48 w-full overflow-hidden mx-4 mt-3 rounded-lg">
+                    <Image
+                      src={
+                        venture.image ||
+                        venture.featuredImage?.url ||
+                        "/placeholder.svg?height=600&width=1200&text=Venture" ||
+                        "/placeholder.svg"
+                      }
+                      alt={venture.name}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    {venture.logo && (
+                      <div className="absolute bottom-3 left-3 h-10 w-10 rounded-full bg-white shadow-md overflow-hidden">
+                        <Image
+                          src={venture.logo || "/placeholder.svg"}
+                          alt={`${venture.name} logo`}
+                          width={40}
+                          height={40}
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="p-4 flex-grow flex flex-col">
+                    <div className="mb-3">
+                      <span className="text-sm text-gray-500 font-medium">{venture.category}</span>
                     </div>
-                  )}
-                </div>
-                <div className="p-6 flex-grow flex flex-col">
-                  <h3 className="text-xl font-bold mb-1">{venture.name}</h3>
-                  <p className="text-sm text-primary font-medium mb-3">{venture.tagline}</p>
-                  <p className="text-gray-600 mb-4 flex-grow">{venture.description}</p>
-                  <div className="flex items-center text-primary font-medium">
-                    <span>Learn more</span>
-                    <ArrowRight size={16} className="ml-2 transition-transform group-hover:translate-x-1" />
+
+                    <h3 className="text-xl font-bold mb-2 text-gray-900">{venture.name}</h3>
+                    <p className="text-gray-600 mb-4 flex-grow text-sm leading-relaxed line-clamp-3 overflow-hidden">
+                      {venture.description || venture.tagline}
+                    </p>
+
+                    {/* Metrics Section */}
+                    <div className="flex items-center justify-between mb-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <Calendar size={14} />
+                        <span>{venture.year}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users size={14} />
+                        <span>{venture.teamMembers}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <TrendingUp size={14} />
+                        <span className="font-medium text-green-600">{venture.growth}</span>
+                      </div>
+                    </div>
+
+                    {/* Tags Section */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {venture.tags?.slice(0, 3).map((tag, tagIndex) => (
+                        <span
+                          key={tagIndex}
+                          className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md font-medium"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Learn More Button */}
+                    <Button asChild variant="outline" className="w-full" size="sm">
+                      <Link href={`/ventures/${venture.slug}`}>
+                        Learn More <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                      </Link>
+                    </Button>
                   </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
+            </motion.div>
           ))}
         </div>
 
@@ -110,21 +200,17 @@ export default function VenturesSection({ ventures = [] }) {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-center"
+          className="text-center mx-auto max-w-md"
         >
-          <Button asChild size="lg">
-            <Link href="/ventures">
-              View All Ventures <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-6 shadow-lg">
+            <Button asChild size="lg" className="w-full sm:w-auto">
+              <Link href="/ventures">
+                View All Ventures <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </motion.div>
       </div>
     </section>
   )
 }
-
-
-
-
-
-

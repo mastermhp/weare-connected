@@ -16,6 +16,7 @@ export const metadata = {
 export default async function VenturesPage() {
   // Fetch ventures data
   const ventures = await getVentures()
+  console.log(ventures)
 
   // Stats data - you can make this dynamic later
   const stats = [

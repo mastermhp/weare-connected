@@ -57,12 +57,12 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="relative min-h-screen">
+    <main className="relative">
       <Header/>
       <HeroSection {...data.heroData} />
       <AboutSection {...data.aboutData} />
       <VenturesSection ventures={data.featuredVentures} />
-      <ServicesSection services={data.services} />
+      {/* <ServicesSection services={data.services} /> */}
       <InnovationEcosystemSection caseStudies={data.caseStudies} />
       <ContactSection />
       <Footer />

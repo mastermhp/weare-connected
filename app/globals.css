@@ -52,9 +52,9 @@
 
   /* Brand Colors */
   --purple-emperor: #6529b2;
-  --cobalite: #AA99FF;
-  --cyber-lavender: #E9E6FF;
-  --lynx-white: #F7F7F7;
+  --cobalite: #aa99ff;
+  --cyber-lavender: #e9e6ff;
+  --lynx-white: #f7f7f7;
   --pot-black: #161616;
 
   /* Light Theme */
@@ -134,6 +134,8 @@
     @apply bg-background text-foreground;
     perspective: 1000px;
     font-family: "Satoshi", system-ui, sans-serif;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   h1,
@@ -144,6 +146,11 @@
   h6 {
     font-family: "Syne", system-ui, sans-serif;
     font-weight: 600;
+  }
+
+  /* FORCE OVERRIDE ANY CONFLICTING STYLES */
+  [style*="position: fixed"] {
+    position: fixed !important;
   }
 
   /* Custom 3D animations */

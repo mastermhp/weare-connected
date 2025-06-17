@@ -1,34 +1,22 @@
-
-import { ThemeProvider } from "./components/theme-provider"
-import "./globals.css"
-import { AuthProvider } from "./lib/auth-context"
-// import { AuthProvider } from "@/lib/auth-context"
-// import { ThemeProvider } from "@/components/theme-provider"
-// import Header from "@/components/header"
-// import Footer from "@/components/footer"
+import React from "react";
+import "./globals.css";
+import { inter, satoshi, syne } from "@/lib/fonts";
 
 export const metadata = {
-  title: "Connected",
-  description: "Connected - Innovation & Ventures",
-}
+  title: "Connected - Empowering Bold Ideas",
+  description:
+    "Connected is a forward-thinking company that empowers bold ideas across tech, digital, and lifestyle industries.",
+  generator: "v0.dev",
+};
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-      </head>
-      <body>
-        <ThemeProvider attribute="class" defaultTheme="light">
-          <AuthProvider>
-            <div className="flex flex-col min-h-screen">
-              {/* <Header /> */}
-              <main className="flex-grow">{children}</main>
-              {/* <Footer /> */}
-            </div>
-          </AuthProvider>
-        </ThemeProvider>
+    <html lang="en" className="scroll-smooth">
+      <body
+        className={`${inter.variable} ${satoshi.variable} ${syne.variable} flex flex-col min-h-screen bg-white text-gray-900 antialiased`}
+      >
+        {children}
       </body>
     </html>
-  )
+  );
 }

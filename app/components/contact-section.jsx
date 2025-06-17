@@ -5,8 +5,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Mail, Phone, MapPin, Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
+import {
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  MapPin,
+  Mail,
+  Phone,
+  Instagram,
+  Twitter,
+  Linkedin,
+  Facebook,
+} from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function ContactSection() {
@@ -20,13 +30,12 @@ export default function ContactSection() {
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState(null) // 'success', 'error', or null
+  const [submitStatus, setSubmitStatus] = useState(null)
   const [errorMessage, setErrorMessage] = useState("")
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-    // Clear any previous error when user starts typing
     if (submitStatus === "error") {
       setSubmitStatus(null)
       setErrorMessage("")
@@ -40,18 +49,14 @@ export default function ContactSection() {
     setErrorMessage("")
 
     try {
-      // Validate required fields
       if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
         throw new Error("Please fill in all required fields")
       }
 
-      // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(formData.email)) {
         throw new Error("Please enter a valid email address")
       }
-
-      console.log("Submitting contact form:", formData)
 
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -74,9 +79,6 @@ export default function ContactSection() {
         throw new Error(result.error || "Failed to send message")
       }
 
-      console.log("Message sent successfully:", result)
-
-      // Success - clear form and show success message
       setFormData({
         name: "",
         email: "",
@@ -87,12 +89,10 @@ export default function ContactSection() {
       })
       setSubmitStatus("success")
 
-      // Auto-hide success message after 5 seconds
       setTimeout(() => {
         setSubmitStatus(null)
       }, 5000)
     } catch (error) {
-      console.error("Error submitting contact form:", error)
       setSubmitStatus("error")
       setErrorMessage(error.message || "Failed to send message. Please try again.")
     } finally {
@@ -101,205 +101,201 @@ export default function ContactSection() {
   }
 
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-primary/5 to-secondary/5">
+    <section className="w-full py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
-          <div className="space-y-2">
-            <div className="inline-block rounded-lg bg-accent px-3 py-1 text-sm font-medium text-primary">
-              Get in Touch
-            </div>
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Let's Build Something Amazing</h2>
-            <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed">
-              Have an idea? Want to partner with us? Or just curious about what we do? We'd love to hear from you.
-            </p>
-          </div>
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">Get in Touch</h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {/* Contact Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Send us a message</CardTitle>
-              <CardDescription>Fill out the form below and we'll get back to you within 24 hours.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* Success Message */}
-              {submitStatus === "success" && (
-                <Alert className="mb-6 border-green-200 bg-green-50">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <AlertDescription className="text-green-800">
-                    Thank you for your message! We've received your inquiry and will get back to you within 24 hours.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {/* Error Message */}
-              {submitStatus === "error" && (
-                <Alert className="mb-6 border-red-200 bg-red-50">
-                  <AlertCircle className="h-4 w-4 text-red-600" />
-                  <AlertDescription className="text-red-800">{errorMessage}</AlertDescription>
-                </Alert>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">
-                      Name <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      placeholder="Your full name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">
-                      Email <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone (Optional)</Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      placeholder="+1 (555) 123-4567"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company">Company (Optional)</Label>
-                    <Input
-                      id="company"
-                      name="company"
-                      placeholder="Your company name"
-                      value={formData.company}
-                      onChange={handleChange}
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Subject</Label>
-                  <Input
-                    id="subject"
-                    name="subject"
-                    placeholder="What's this about?"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    disabled={isSubmitting}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="message">
-                    Message <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea
-                    id="message"
-                    name="message"
-                    placeholder="Tell us about your project, idea, or how we can help you..."
-                    className="min-h-[120px]"
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                    disabled={isSubmitting}
-                  />
-                </div>
-
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending Message...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="mr-2 h-4 w-4" />
-                      Send Message
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Contact Information */}
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Mail className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Email</h3>
-                    <p className="text-muted-foreground">hello@connected.com</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Phone className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Phone</h3>
-                    <p className="text-muted-foreground">+1 (555) 123-4567</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <MapPin className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Office</h3>
-                    <p className="text-muted-foreground">
-                      123 Innovation Street
-                      <br />
-                      San Francisco, CA 94105
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="bg-gradient-to-r from-primary to-secondary p-6 rounded-lg text-white">
-              <h3 className="font-semibold mb-2">Ready to start a project?</h3>
-              <p className="text-sm opacity-90 mb-4">Let's discuss how we can help bring your vision to life.</p>
-              <Button variant="secondary" size="sm">
-                Schedule a Call
-              </Button>
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 max-w-6xl mx-auto">
+          {/* Left Column - Contact Info */}
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-2xl font-bold text-black mb-4">Let's Talk</h3>
+              <p className="text-gray-600 text-base leading-relaxed">
+                Whether you have a specific project in mind or just want to explore possibilities, we're here to help.
+                Our team of experts is ready to discuss your vision and provide tailored solutions.
+              </p>
             </div>
+
+            {/* Our Office */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <MapPin className="h-5 w-5 text-purple-600" />
+                <h4 className="font-semibold text-black">Our Office</h4>
+              </div>
+              <div className="ml-8 text-gray-600">
+                <p>1234 Innovation Drive, Suite 500</p>
+                <p>San Francisco, CA 94107</p>
+                <p>United States</p>
+              </div>
+            </div>
+
+            {/* Email Us */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <Mail className="h-5 w-5 text-purple-600" />
+                <h4 className="font-semibold text-black">Email Us</h4>
+              </div>
+              <div className="ml-8 text-gray-600 space-y-1">
+                <p>General: hello@connected.com</p>
+                <p>Business: business@connected.com</p>
+                <p>Careers: careers@connected.com</p>
+              </div>
+            </div>
+
+            {/* Call Us */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <Phone className="h-5 w-5 text-purple-600" />
+                <h4 className="font-semibold text-black">Call Us</h4>
+              </div>
+              <div className="ml-8 text-gray-600">
+                <p>+1 (415) 555-0164</p>
+                <p>Mon-Fri: 9:00 AM - 6:00 PM (PST)</p>
+              </div>
+            </div>
+
+            {/* Follow Us */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-black">Follow Us</h4>
+              <div className="flex space-x-4">
+                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-purple-100 transition-colors cursor-pointer">
+                  <Instagram className="h-5 w-5 text-gray-600 hover:text-purple-600" />
+                </div>
+                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-purple-100 transition-colors cursor-pointer">
+                  <Twitter className="h-5 w-5 text-gray-600 hover:text-purple-600" />
+                </div>
+                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-purple-100 transition-colors cursor-pointer">
+                  <Linkedin className="h-5 w-5 text-gray-600 hover:text-purple-600" />
+                </div>
+                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-purple-100 transition-colors cursor-pointer">
+                  <Facebook className="h-5 w-5 text-gray-600 hover:text-purple-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Contact Form */}
+          <div className="space-y-6">
+            {/* Success Message */}
+            {submitStatus === "success" && (
+              <Alert className="border-green-200 bg-green-50">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800">
+                  Thank you for your message! We've received your inquiry and will get back to you within 24 hours.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Error Message */}
+            {submitStatus === "error" && (
+              <Alert className="border-red-200 bg-red-50">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <AlertDescription className="text-red-800">{errorMessage}</AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Full Name */}
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium text-black">
+                  Full Name *
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="Your full name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
+                  className="h-12 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
+
+              {/* Email Address */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium text-black">
+                  Email Address *
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="your.email@company.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
+                  className="h-12 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
+
+              {/* Company Name */}
+              <div className="space-y-2">
+                <Label htmlFor="company" className="text-sm font-medium text-black">
+                  Company Name
+                </Label>
+                <Input
+                  id="company"
+                  name="company"
+                  placeholder="Your company name"
+                  value={formData.company}
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                  className="h-12 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
+
+              {/* Your Message */}
+              <div className="space-y-2">
+                <Label htmlFor="message" className="text-sm font-medium text-black">
+                  Your Message *
+                </Label>
+                <Textarea
+                  id="message"
+                  name="message"
+                  placeholder="Tell us about your inquiry, how we can help you, or share your message with us..."
+                  className="min-h-[120px] border-gray-300 focus:border-purple-500 focus:ring-purple-500 resize-none"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Send Message Button */}
+              <Button
+                type="submit"
+                className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white font-medium"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending Message...
+                  </>
+                ) : (
+                  "Send Message"
+                )}
+              </Button>
+
+              {/* Privacy Policy */}
+              <p className="text-xs text-gray-500 text-center">
+                By submitting this form, you agree to our{" "}
+                <a href="/privacy" className="text-purple-600 hover:underline">
+                  Privacy Policy
+                </a>{" "}
+                and{" "}
+                <a href="/terms" className="text-purple-600 hover:underline">
+                  Terms of Service
+                </a>
+                .
+              </p>
+            </form>
           </div>
         </div>
       </div>
