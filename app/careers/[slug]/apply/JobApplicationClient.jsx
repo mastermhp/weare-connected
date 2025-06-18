@@ -285,14 +285,14 @@ export default function JobApplicationClient({ job }) {
       </div>
 
       {/* DEBUG: Test button - remove after testing */}
-      <div className="bg-yellow-100 border border-yellow-400 p-4 rounded-md mb-4">
+      {/* <div className="bg-yellow-100 border border-yellow-400 p-4 rounded-md mb-4">
         <p className="text-sm text-yellow-800 mb-2">Debug Info:</p>
         <p className="text-xs text-yellow-700">Job Slug: {job.slug}</p>
         <p className="text-xs text-yellow-700">Current Path: /careers/{job.slug}/apply</p>
         <Button onClick={testNavigation} variant="outline" size="sm">
           Test Console Log
         </Button>
-      </div>
+      </div> */}
 
       {/* Application Form */}
       <div className="max-w-4xl mx-auto px-4 py-8">

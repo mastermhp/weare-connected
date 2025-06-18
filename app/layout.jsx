@@ -1,6 +1,7 @@
 import React from "react";
 import "./globals.css";
 import { inter, satoshi, syne } from "@/lib/fonts";
+import { AuthProvider } from "./lib/auth-context";
 
 export const metadata = {
   title: "Connected - Empowering Bold Ideas",
@@ -15,7 +16,8 @@ export default function RootLayout({ children }) {
       <body
         className={`${inter.variable} ${satoshi.variable} ${syne.variable} flex flex-col min-h-screen bg-white text-gray-900 antialiased`}
       >
-        {children}
+        <AuthProvider>{children}</AuthProvider>
+        
       </body>
     </html>
   );
