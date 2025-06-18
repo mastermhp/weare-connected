@@ -93,7 +93,7 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
     <>
       <div className="relative overflow-hidden">
         {/* Hero section background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-accent/40 to-secondary/30 -top-[120px] -mt-[120px] pt-[120px]">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-[#E9E6FF]/40 to-[#AA99FF]/30 -top-[120px] -mt-[120px] pt-[120px]">
           {/* Floating particles */}
           {[...Array(40)].map((_, i) => (
             <motion.div

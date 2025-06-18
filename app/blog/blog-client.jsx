@@ -14,7 +14,7 @@ export default function BlogClientPage({ posts }) {
     <>
       <div className="relative overflow-hidden">
         {/* Hero section background that extends behind header */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-accent/40 to-secondary/30 -top-[120px] -mt-[120px] pt-[120px]">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-[#E9E6FF]/40 to-[#AA99FF]/30 -top-[120px] -mt-[120px] pt-[120px]">
           {/* Animated mesh gradient - identical to hero */}
           {/* Floating particles */}
           {[...Array(50)].map((_, i) => (
