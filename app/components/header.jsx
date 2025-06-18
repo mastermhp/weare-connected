@@ -280,7 +280,7 @@ export default function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-sm font-medium font-satoshi text-gray-900 hover:text-gray-700 transition-all duration-300 relative group"
+                  className="text-sm font-bold font-satoshi text-gray-500 text-shadow-fuchsia-950 hover:text-gray-700 transition-all duration-300 relative group"
                 >
                   {item.name}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-900/30 group-hover:w-full transition-all duration-300"></span>

@@ -13,7 +13,7 @@ import { motion } from "framer-motion"
 // Fallback data in case database is empty
 const fallbackVentures = [
   {
-    id: "techflow",
+    slug: "techflow",
     name: "TechFlow",
     tagline: "Workflow automation reimagined",
     description:
@@ -27,7 +27,7 @@ const fallbackVentures = [
     website: "https://techflow.com",
   },
   {
-    id: "designhub",
+    slug: "designhub",
     name: "DesignHub",
     tagline: "Creative solutions for modern brands",
     description:
@@ -41,7 +41,7 @@ const fallbackVentures = [
     website: "https://designhub.com",
   },
   {
-    id: "marketpulse",
+    slug: "marketpulse",
     name: "MarketPulse",
     tagline: "Data-driven marketing intelligence",
     description:
@@ -55,7 +55,7 @@ const fallbackVentures = [
     website: "https://marketpulse.com",
   },
   {
-    id: "ecolife",
+    slug: "ecolife",
     name: "EcoLife",
     tagline: "Sustainable living made simple",
     description:
@@ -75,7 +75,7 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
   const ventures =
     dbVentures.length > 0
       ? dbVentures.map((venture) => ({
-          id: venture.slug || venture.id,
+          slug: venture.slug || venture.id,
           name: venture.name,
           tagline: venture.tagline || venture.shortDescription,
           description: venture.description,
@@ -140,7 +140,7 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 max-w-6xl mx-auto">
             {ventures.map((venture, index) => (
               <Card
-                key={venture.id}
+                key={venture.slug}
                 className="overflow-hidden hover:shadow-lg transition-shadow duration-300 mx-auto w-full"
               >
                 <div className="relative h-[300px] -mt-6">
