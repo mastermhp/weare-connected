@@ -58,7 +58,8 @@ export default function CareersClientPage({ jobs = [] }) {
 
   return (
     <>
-      <div className="relative overflow-hidden">
+    <Header />
+      <div className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden -mt-[80px] sm:-mt-[100px] md:-mt-[120px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
         {/* Hero section background */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-[#E9E6FF]/40 to-[#AA99FF]/30 -top-[120px] -mt-[120px] pt-[120px]">
           {/* Floating particles */}
@@ -85,7 +86,7 @@ export default function CareersClientPage({ jobs = [] }) {
           <div className="absolute inset-0 bg-[linear-gradient(rgba(101,41,178,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(101,41,178,0.05)_1px,transparent_1px)] bg-[size:100px_100px]" />
         </div>
 
-        <Header />
+        
         <div className="pt-32 pb-8 relative z-10">
           <div className="container mx-auto px-4 sm:px-6 md:px-8 py-8 max-w-7xl">
             <div className="text-center mb-12 mx-auto max-w-4xl">
