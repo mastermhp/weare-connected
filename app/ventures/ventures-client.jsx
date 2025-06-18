@@ -91,7 +91,7 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
 
   return (
     <>
-     <Header />
+      <Header />
       <div className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden -mt-[80px] sm:-mt-[100px] md:-mt-[120px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
         {/* Hero section background */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-[#E9E6FF]/40 to-[#AA99FF]/30 -top-[120px] -mt-[120px] pt-[120px]">
@@ -119,7 +119,6 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
           <div className="absolute inset-0 bg-[linear-gradient(rgba(101,41,178,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(101,41,178,0.05)_1px,transparent_1px)] bg-[size:100px_100px]" />
         </div>
 
-       
         <div className="pt-32 pb-8 relative z-10">
           <div className="container mx-auto px-4 sm:px-6 md:px-8 py-8 max-w-7xl">
             <div className="text-center mb-12 mx-auto max-w-4xl">
@@ -144,7 +143,12 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
                 className="overflow-hidden hover:shadow-lg transition-shadow duration-300 mx-auto w-full"
               >
                 <div className="relative h-[300px] -mt-6">
-                  <Image src={venture.image || "/placeholder.svg"} alt={venture.name} fill className="object-cover w-full h-full" />
+                  <Image
+                    src={venture.image || "/placeholder.svg"}
+                    alt={venture.name}
+                    fill
+                    className="object-cover w-full h-full"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <div className="flex items-center gap-2 mb-2">
@@ -190,7 +194,7 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
                   </div>
 
                   <Button asChild className="w-full bg-[#6529b2]">
-                    <Link href={`/ventures/${venture.id}`}>
+                    <Link href={`/ventures/${venture.slug}`}>
                       Learn More <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>

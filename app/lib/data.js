@@ -585,6 +585,7 @@ export async function getVentures() {
     return ventures.map((venture) => ({
       ...venture,
       id: venture._id.toString(),
+      slug: venture.slug || venture._id.toString(), // Ensure slug is always available
       image:
         venture.featuredImage?.url ||
         venture.image ||
@@ -624,6 +625,28 @@ function getSampleVentures() {
       logo: "/placeholder.svg?height=120&width=120&text=DH",
       status: "active",
     },
+    {
+      id: "3",
+      slug: "marketpulse",
+      name: "MarketPulse",
+      tagline: "Data-driven marketing intelligence",
+      description:
+        "Advanced analytics platform providing real-time market insights and competitive intelligence for businesses.",
+      image: "/placeholder.svg?height=600&width=1200&text=MarketPulse",
+      logo: "/placeholder.svg?height=120&width=120&text=MP",
+      status: "active",
+    },
+    {
+      id: "4",
+      slug: "ecolife",
+      name: "EcoLife",
+      tagline: "Sustainable living made simple",
+      description:
+        "A lifestyle platform connecting eco-conscious consumers with sustainable products and green living solutions.",
+      image: "/placeholder.svg?height=600&width=1200&text=EcoLife",
+      logo: "/placeholder.svg?height=120&width=120&text=EL",
+      status: "active",
+    },
   ]
 }
 
@@ -631,18 +654,33 @@ function getSampleVentures() {
 export async function getVentureBySlug(slug) {
   try {
     if (!isMongoDBAvailable()) {
-      console.warn("MongoDB not available, returning null for venture")
-      return null
+      console.warn("MongoDB not available, checking fallback ventures")
+      const fallbackVentures = getSampleVentures()
+      return fallbackVentures.find((venture) => venture.slug === slug) || null
     }
 
     const { db } = await connectToDatabase()
-    const venture = await db.collection("ventures").findOne({ slug })
+    let venture = await db.collection("ventures").findOne({ slug })
 
-    if (!venture) return null
+    // If not found by slug, try by ID (in case slug is actually an ID)
+    if (!venture && ObjectId.isValid(slug)) {
+      try {
+        venture = await db.collection("ventures").findOne({ _id: new ObjectId(slug) })
+      } catch (err) {
+        console.log("Error trying to find by ID:", err.message)
+      }
+    }
+
+    if (!venture) {
+      // Check fallback ventures as last resort
+      const fallbackVentures = getSampleVentures()
+      return fallbackVentures.find((v) => v.slug === slug) || null
+    }
 
     return {
       ...venture,
       id: venture._id.toString(),
+      slug: venture.slug || venture._id.toString(),
       image:
         venture.featuredImage?.url ||
         venture.image ||
@@ -654,7 +692,9 @@ export async function getVentureBySlug(slug) {
     }
   } catch (error) {
     console.error(`Error fetching venture with slug ${slug}:`, error)
-    return null
+    // Return fallback venture if available
+    const fallbackVentures = getSampleVentures()
+    return fallbackVentures.find((venture) => venture.slug === slug) || null
   }
 }
 
