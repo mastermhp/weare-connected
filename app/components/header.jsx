@@ -288,13 +288,14 @@ export default function Header() {
               ))}
 
               {/* CTA Button */}
+              <Link href='/contact'>
               <Button
                 variant="outline"
                 size="sm"
                 className="ml-4 bg-[#6529b2] border-[#6529b2] text-white hover:bg-[#5a24a0] hover:border-[#5a24a0] transition-all duration-300 font-satoshi"
               >
                 Let's Talk
-              </Button>
+              </Button></Link>
             </nav>
 
             {/* Mobile Menu Button */}

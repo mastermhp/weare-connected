@@ -92,7 +92,7 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
   return (
     <>
       <Header />
-      <div className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden -mt-[80px] sm:-mt-[100px] md:-mt-[120px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
+      <div className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden -mt-[100px] sm:-mt-[120px] md:-mt-[140px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
         {/* Hero section background */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-[#E9E6FF]/40 to-[#AA99FF]/30 -top-[120px] -mt-[120px] pt-[120px]">
           {/* Floating particles */}
@@ -140,7 +140,7 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
             {ventures.map((venture, index) => (
               <Card
                 key={venture.slug}
-                className="overflow-hidden hover:shadow-lg transition-shadow duration-300 mx-auto w-full"
+                className="overflow-hidden hover:shadow-lg transition-shadow duration-300 mx-auto w-full bg-white"
               >
                 <div className="relative h-[300px] -mt-6">
                   <Image
@@ -152,7 +152,7 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge variant={venture.status === "Active" ? "default" : "secondary"}>{venture.status}</Badge>
+                      <Badge variant={venture.status === "Active" ? "default" : "secondary"} className='bg-[#6529b2] text-white font-semibold'>{venture.status}</Badge>
                       <Badge variant="outline" className="bg-white/20 text-white border-white/30">
                         {venture.category}
                       </Badge>
@@ -160,7 +160,7 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
                   </div>
                 </div>
 
-                <CardHeader className="pb-4">
+                <CardHeader className="pb-0">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-xl sm:text-2xl font-syne mb-2">{venture.name}</CardTitle>
@@ -178,7 +178,7 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
                 </CardHeader>
 
                 <CardContent className="pt-0">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-6">
+                  <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground mb-6">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
                       <span>Founded {venture.founded}</span>
@@ -193,7 +193,7 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
                     </div>
                   </div>
 
-                  <Button asChild className="w-full bg-[#6529b2]">
+                  <Button asChild className="w-full h-11 bg-[#6529b2]">
                     <Link href={`/ventures/${venture.slug}`}>
                       Learn More <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>

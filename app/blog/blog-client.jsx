@@ -13,7 +13,7 @@ export default function BlogClientPage({ posts }) {
   return (
     <>
     <Header />
-      <div className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden -mt-[80px] sm:-mt-[100px] md:-mt-[120px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
+      <div className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden -mt-[100px] sm:-mt-[120px] md:-mt-[140px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
         {/* Hero section background that extends behind header */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-[#E9E6FF]/40 to-[#AA99FF]/30 -top-[120px] -mt-[120px] pt-[120px]">
           {/* Animated mesh gradient - identical to hero */}
@@ -65,11 +65,11 @@ export default function BlogClientPage({ posts }) {
               posts.map((post) => (
                 <Card
                   key={post.id}
-                  className="hover:shadow-lg transition-shadow duration-300 mx-auto w-full max-w-sm md:max-w-none"
+                  className="hover:shadow-lg transition-shadow duration-300 mx-auto w-full max-w-sm md:max-w-none bg-white"
                 >
                   <CardHeader>
                     <div className="flex items-center justify-between mb-2">
-                      <Badge variant="secondary">{post.category}</Badge>
+                      <Badge variant="secondary" className='bg-[#a9f] text-black'>{post.category}</Badge>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <Clock className="h-4 w-4 mr-1" />
                         {post.readTime}
@@ -82,7 +82,7 @@ export default function BlogClientPage({ posts }) {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center">
                           <User className="h-4 w-4 mr-1" />
                           {post.author}
@@ -92,11 +92,14 @@ export default function BlogClientPage({ posts }) {
                           {post.date}
                         </div>
                       </div>
-                      <Button asChild variant="outline" className="w-full">
+                      <div className="flex items-center justify-center">
+
+                        <Button asChild variant="outline" className="w-[60%]">
                         <Link href={`/blog/${post.slug}`}>
                           Read More <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
                       </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

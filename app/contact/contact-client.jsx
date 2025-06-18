@@ -1,38 +1,16 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Mail,
-  Phone,
-  MapPin,
-  Clock,
-  Send,
-  CheckCircle,
-  AlertCircle,
-  Loader2,
-} from "lucide-react";
-import Header from "../components/header";
-import Footer from "../components/footer";
-import { motion } from "framer-motion";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Mail, Phone, MapPin, Clock, Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
+import Header from "../components/header"
+import Footer from "../components/footer"
+import { motion } from "framer-motion"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function ContactPageClient() {
   const [formData, setFormData] = useState({
@@ -41,31 +19,41 @@ export default function ContactPageClient() {
     company: "",
     subject: "",
     message: "",
-  });
+  })
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState(null)
+  const [errorMessage, setErrorMessage] = useState("")
+  const [particles, setParticles] = useState([])
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Generate particles on client side only
+  useEffect(() => {
+    const generatedParticles = [...Array(30)].map((_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: Math.random() * 10 + 10,
+      delay: Math.random() * 10,
+    }))
+    setParticles(generatedParticles)
+    setIsMounted(true)
+  }, [])
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitStatus(null);
-    setErrorMessage("");
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus(null)
+    setErrorMessage("")
 
     try {
-      if (
-        !formData.name.trim() ||
-        !formData.email.trim() ||
-        !formData.message.trim() ||
-        !formData.subject.trim()
-      ) {
-        throw new Error("Please fill in all required fields");
+      if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim() || !formData.subject.trim()) {
+        throw new Error("Please fill in all required fields")
       }
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(formData.email)) {
-        throw new Error("Please enter a valid email address");
+        throw new Error("Please enter a valid email address")
       }
 
       const response = await fetch("/api/contact", {
@@ -80,12 +68,12 @@ export default function ContactPageClient() {
           subject: formData.subject.trim(),
           message: formData.message.trim(),
         }),
-      });
+      })
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to send message");
+        throw new Error(result.error || "Failed to send message")
       }
 
       setFormData({
@@ -94,56 +82,55 @@ export default function ContactPageClient() {
         company: "",
         subject: "",
         message: "",
-      });
-      setSubmitStatus("success");
+      })
+      setSubmitStatus("success")
 
       setTimeout(() => {
-        setSubmitStatus(null);
-      }, 5000);
+        setSubmitStatus(null)
+      }, 5000)
     } catch (error) {
-      setSubmitStatus("error");
-      setErrorMessage(
-        error.message || "Failed to send message. Please try again."
-      );
+      setSubmitStatus("error")
+      setErrorMessage(error.message || "Failed to send message. Please try again.")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }))
     if (submitStatus === "error") {
-      setSubmitStatus(null);
-      setErrorMessage("");
+      setSubmitStatus(null)
+      setErrorMessage("")
     }
-  };
+  }
 
   return (
     <>
       <Header />
-      <div className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden -mt-[80px] sm:-mt-[100px] md:-mt-[120px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
+      <div className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden -mt-[100px] sm:-mt-[120px] md:-mt-[140px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
         {/* Hero section background */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-[#E9E6FF]/40 to-[#AA99FF]/30 -top-[120px] -mt-[120px] pt-[120px]">
-          {/* Floating particles */}
-          {[...Array(30)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-primary/30 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                y: [0, -100, 0],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: Math.random() * 10 + 10,
-                repeat: Number.POSITIVE_INFINITY,
-                delay: Math.random() * 10,
-              }}
-            />
-          ))}
+          {/* Floating particles - only render after mount */}
+          {isMounted &&
+            particles.map((particle) => (
+              <motion.div
+                key={particle.id}
+                className="absolute w-1 h-1 bg-primary/30 rounded-full"
+                style={{
+                  left: `${particle.left}%`,
+                  top: `${particle.top}%`,
+                }}
+                animate={{
+                  y: [0, -100, 0],
+                  opacity: [0, 1, 0],
+                }}
+                transition={{
+                  duration: particle.duration,
+                  repeat: Number.POSITIVE_INFINITY,
+                  delay: particle.delay,
+                }}
+              />
+            ))}
           <div className="absolute inset-0 bg-primary/8" />
           <div className="absolute inset-0 bg-[linear-gradient(rgba(101,41,178,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(101,41,178,0.05)_1px,transparent_1px)] bg-[size:100px_100px]" />
         </div>
@@ -151,12 +138,9 @@ export default function ContactPageClient() {
         <div className="pt-32 pb-8 relative z-10">
           <div className="container mx-auto px-4 sm:px-6 md:px-8 py-8 max-w-7xl">
             <div className="text-center mb-12 mx-auto max-w-4xl">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-pot-black mb-6 font-syne">
-                Get in Touch
-              </h1>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-pot-black mb-6 font-syne">Get in Touch</h1>
               <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Ready to start your next venture or have questions about our
-                services? We'd love to hear from you.
+                Ready to start your next venture or have questions about our services? We'd love to hear from you.
               </p>
             </div>
           </div>
@@ -168,15 +152,10 @@ export default function ContactPageClient() {
         <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
             {/* Contact Form */}
-            <Card className="mx-auto w-full bg-white">
+            <Card className="mx-auto w-full bg-white relative z-10">
               <CardHeader>
-                <CardTitle className="text-2xl font-syne">
-                  Send us a message
-                </CardTitle>
-                <CardDescription>
-                  Fill out the form below and we'll get back to you within 24
-                  hours.
-                </CardDescription>
+                <CardTitle className="text-2xl font-syne">Send us a message</CardTitle>
+                <CardDescription>Fill out the form below and we'll get back to you within 24 hours.</CardDescription>
               </CardHeader>
               <CardContent>
                 {/* Success Message */}
@@ -184,8 +163,7 @@ export default function ContactPageClient() {
                   <Alert className="border-green-200 bg-green-50 mb-6">
                     <CheckCircle className="h-4 w-4 text-green-600" />
                     <AlertDescription className="text-green-800">
-                      Thank you for your message! We've received your inquiry
-                      and will get back to you within 24 hours.
+                      Thank you for your message! We've received your inquiry and will get back to you within 24 hours.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -194,13 +172,11 @@ export default function ContactPageClient() {
                 {submitStatus === "error" && (
                   <Alert className="border-red-200 bg-red-50 mb-6">
                     <AlertCircle className="h-4 w-4 text-red-600" />
-                    <AlertDescription className="text-red-800">
-                      {errorMessage}
-                    </AlertDescription>
+                    <AlertDescription className="text-red-800">{errorMessage}</AlertDescription>
                   </Alert>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-6 px-14">
+                <form onSubmit={handleSubmit} className="space-y-6 px-14" style={{ scrollBehavior: "auto" }}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Name *</Label>
@@ -240,25 +216,24 @@ export default function ContactPageClient() {
 
                   <div className="space-y-2">
                     <Label htmlFor="subject">Subject *</Label>
-                    <Select
+                    <select
+                      id="subject"
                       value={formData.subject}
-                      onValueChange={(value) => handleChange("subject", value)}
+                      onChange={(e) => handleChange("subject", e.target.value)}
+                      required
                       disabled={isSubmitting}
+                      className="flex h-11 w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <SelectTrigger className="border-gray-300 focus:border-purple-500 focus:ring-purple-500">
-                        <SelectValue placeholder="Select a subject" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="general">General Inquiry</SelectItem>
-                        <SelectItem value="partnership">Partnership</SelectItem>
-                        <SelectItem value="investment">
-                          Investment Opportunity
-                        </SelectItem>
-                        <SelectItem value="careers">Careers</SelectItem>
-                        <SelectItem value="press">Press & Media</SelectItem>
-                        <SelectItem value="support">Support</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="" disabled>
+                        Select a subject
+                      </option>
+                      <option value="general">General Inquiry</option>
+                      <option value="partnership">Partnership</option>
+                      <option value="investment">Investment Opportunity</option>
+                      <option value="careers">Careers</option>
+                      <option value="press">Press & Media</option>
+                      <option value="support">Support</option>
+                    </select>
                   </div>
 
                   <div className="space-y-2">
@@ -270,7 +245,7 @@ export default function ContactPageClient() {
                       onChange={(e) => handleChange("message", e.target.value)}
                       required
                       disabled={isSubmitting}
-                      className="border-gray-300 focus:border-purple-500 focus:ring-purple-500 resize-none h-56"
+                      className="border-gray-300 focus:border-purple-500 focus:ring-purple-500 resize-none h-52"
                       placeholder="Tell us about your inquiry, how we can help you, or share your message with us..."
                     />
                   </div>
@@ -300,20 +275,14 @@ export default function ContactPageClient() {
             {/* Contact Information */}
             <div className="space-y-8 mx-auto w-full">
               <div>
-                <h2 className="text-2xl font-bold text-pot-black mb-6 font-syne">
-                  Contact Information
-                </h2>
+                <h2 className="text-2xl font-bold text-pot-black mb-6 font-syne">Contact Information</h2>
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
                     <Mail className="h-6 w-6 text-primary mt-1" />
                     <div>
                       <h3 className="font-semibold mb-1">Email</h3>
-                      <p className="text-muted-foreground">
-                        hello@weareconnected.io
-                      </p>
-                      <p className="text-muted-foreground">
-                        press@weareconnected.io
-                      </p>
+                      <p className="text-muted-foreground">hello@weareconnected.io</p>
+                      <p className="text-muted-foreground">press@weareconnected.io</p>
                     </div>
                   </div>
 
@@ -355,17 +324,13 @@ export default function ContactPageClient() {
 
               {/* Quick Contact Cards */}
               <div className="space-y-4">
-                <h3 className="text-xl font-bold text-pot-black font-syne">
-                  Quick Contact
-                </h3>
+                <h3 className="text-xl font-bold text-pot-black font-syne">Quick Contact</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
                   <Card className="hover:shadow-md transition-shadow cursor-pointer bg-white">
                     <CardContent className="p-4 text-center">
                       <Mail className="h-8 w-8 text-primary mx-auto mb-2" />
                       <h4 className="font-semibold mb-1">General Inquiries</h4>
-                      <p className="text-sm text-muted-foreground">
-                        hello@weareconnected.io
-                      </p>
+                      <p className="text-sm text-muted-foreground">hello@weareconnected.io</p>
                     </CardContent>
                   </Card>
 
@@ -373,9 +338,7 @@ export default function ContactPageClient() {
                     <CardContent className="p-4 text-center">
                       <Phone className="h-8 w-8 text-primary mx-auto mb-2" />
                       <h4 className="font-semibold mb-1">Call Us</h4>
-                      <p className="text-sm text-muted-foreground">
-                        +1 (415) 555-0123
-                      </p>
+                      <p className="text-sm text-muted-foreground">+1 (415) 555-0123</p>
                     </CardContent>
                   </Card>
                 </div>
@@ -389,9 +352,7 @@ export default function ContactPageClient() {
       <section className="py-16 sm:py-20 bg-lynx-white">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-7xl">
           <div className="text-center mb-12 mx-auto max-w-4xl">
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
-              Visit Our Office
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">Visit Our Office</h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
               Located in the heart of San Francisco's innovation district.
             </p>
@@ -402,9 +363,7 @@ export default function ContactPageClient() {
               <div className="aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border  rounded-2xl">
                 <div className="text-center">
                   <MapPin className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <h3 className="text-xl font-bold mb-2">
-                    San Francisco Office
-                  </h3>
+                  <h3 className="text-xl font-bold mb-2">San Francisco Office</h3>
                   <p className="text-muted-foreground">
                     1234 Innovation Drive, Suite 500
                     <br />
@@ -419,5 +378,5 @@ export default function ContactPageClient() {
 
       <Footer />
     </>
-  );
+  )
 }

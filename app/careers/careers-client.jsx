@@ -59,7 +59,7 @@ export default function CareersClientPage({ jobs = [] }) {
   return (
     <>
     <Header />
-      <div className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden -mt-[80px] sm:-mt-[100px] md:-mt-[120px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
+      <div className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden -mt-[100px] sm:-mt-[120px] md:-mt-[140px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
         {/* Hero section background */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-[#E9E6FF]/40 to-[#AA99FF]/30 -top-[120px] -mt-[120px] pt-[120px]">
           {/* Floating particles */}
@@ -161,13 +161,13 @@ export default function CareersClientPage({ jobs = [] }) {
 
             <div className="space-y-6">
               {filteredJobs.map((job) => (
-                <Card key={job.id} className="hover:shadow-md transition-shadow">
+                <Card key={job.id} className="hover:shadow-md transition-shadow bg-white">
                   <CardHeader>
                     <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                       <div className="flex-1">
                         <CardTitle className="text-xl sm:text-2xl mb-2">{job.title}</CardTitle>
                         <div className="flex flex-wrap gap-2 mb-3">
-                          <Badge variant="secondary">{job.department}</Badge>
+                          <Badge variant="secondary" className='bg-[#a9f] text-black'>{job.department}</Badge>
                           <Badge variant="outline">{job.type}</Badge>
                         </div>
                         <CardDescription className="text-sm sm:text-base leading-relaxed">
@@ -183,7 +183,7 @@ export default function CareersClientPage({ jobs = [] }) {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                    <div className="flex items-center justify-center gap-6 text-sm">
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-muted-foreground" />
                         <span>{job.location}</span>
@@ -199,8 +199,8 @@ export default function CareersClientPage({ jobs = [] }) {
                     </div>
                     {job.requirements && job.requirements.length > 0 && (
                       <div className="mt-4">
-                        <p className="text-sm font-medium mb-2">Key Requirements:</p>
-                        <div className="flex flex-wrap gap-2">
+                        <p className="text-sm text-center font-semibold text-gray-500 mb-2">Key Requirements:</p>
+                        <div className="flex items-center justify-center text-black flex-wrap gap-2">
                           {job.requirements.map((req, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
                               {req}
@@ -245,7 +245,7 @@ export default function CareersClientPage({ jobs = [] }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
             {benefits.map((benefit, index) => (
-              <Card key={index} className="text-center border-none shadow-sm mx-auto w-full max-w-sm lg:max-w-none">
+              <Card key={index} className="text-center border-none shadow-sm mx-auto w-full max-w-sm lg:max-w-none bg-white">
                 <CardContent className="p-6">
                   <Users className="h-8 w-8 text-primary mx-auto mb-4" />
                   <p className="font-medium">{benefit}</p>

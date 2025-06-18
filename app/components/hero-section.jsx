@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden -mt-[80px] sm:-mt-[100px] md:-mt-[120px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden -mt-[90px] sm:-mt-[140px] md:-mt-[140px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
       {/* Dynamic Background - extends up to cover header area */}
       <div className="absolute inset-0 -top-[80px] sm:-top-[100px] md:-top-[120px] bg-gradient-to-br from-gray-100 via-[#E9E6FF]/50 to-[#AA99FF]/40">
         {/* Animated mesh gradient */}

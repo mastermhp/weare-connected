@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Target, Lightbulb, Linkedin, Twitter, Mail } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Target, Lightbulb, Linkedin, Twitter, Mail } from "lucide-react";
 // import Header from "@/components/header"
-import Footer from "../components/footer"
-import Image from "next/image"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import Header from "../components/header"
+import Footer from "../components/footer";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import Header from "../components/header";
 
 const teamMembers = [
   {
@@ -65,16 +65,14 @@ const teamMembers = [
     twitter: "#",
     email: "shafin@connected.com",
   },
-]
+];
 
 export default function AboutPageClient() {
   return (
     <>
-    <Header />
+      <Header />
       {/* Hero Section */}
-      <div className="relative overflow-hidden min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center -mt-[80px] sm:-mt-[100px] md:-mt-[120px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
-
-
+      <div className="relative overflow-hidden min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center -mt-[100px] sm:-mt-[120px] md:-mt-[140px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
         {/* Hero section background */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-[#E9E6FF]/40 to-[#AA99FF]/30 -top-[120px] -mt-[120px] pt-[120px]">
           {/* Floating particles */}
@@ -101,7 +99,6 @@ export default function AboutPageClient() {
           <div className="absolute inset-0 bg-[linear-gradient(rgba(101,41,178,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(101,41,178,0.05)_1px,transparent_1px)] bg-[size:100px_100px]" />
         </div>
 
-        
         <div className="pt-32 pb-8 relative z-10">
           <div className="container mx-auto px-4 sm:px-6 md:px-8 py-8 max-w-7xl">
             <motion.div
@@ -114,11 +111,14 @@ export default function AboutPageClient() {
                 About Connected
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
-                <span className="text-pot-black font-semibold">Connected isn't just a name — it's a philosophy.</span>
+                <span className="text-pot-black font-semibold">
+                  Connected isn't just a name — it's a philosophy.
+                </span>
               </p>
               <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
-                We are a modern venture ecosystem that builds, launches, and scales high-impact businesses across
-                digital, tech, media, consumer goods, and beyond.
+                We are a modern venture ecosystem that builds, launches, and
+                scales high-impact businesses across digital, tech, media,
+                consumer goods, and beyond.
               </p>
               <p className="text-lg sm:text-xl text-pot-black font-medium max-w-3xl mx-auto leading-relaxed">
                 We don't follow the market. We build what the market follows.
@@ -161,11 +161,17 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto text-center"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-8 font-syne">Who We Are</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-8 font-syne">
+              Who We Are
+            </h2>
             <p className="text-lg sm:text-xl text-gray-600 leading-relaxed mb-8 max-w-3xl mx-auto">
-              Connected is a multi-vertical venture company that operates at the intersection of{" "}
-              <span className="text-pot-black font-semibold">innovation, creativity, and execution.</span> We design
-              ventures from the ground up — powering ideas with infrastructure, capital, and world-class teams.
+              Connected is a multi-vertical venture company that operates at the
+              intersection of{" "}
+              <span className="text-pot-black font-semibold">
+                innovation, creativity, and execution.
+              </span>{" "}
+              We design ventures from the ground up — powering ideas with
+              infrastructure, capital, and world-class teams.
             </p>
             <motion.p
               initial={{ opacity: 0, scale: 0.95 }}
@@ -177,8 +183,8 @@ export default function AboutPageClient() {
               We don't just launch brands. We build machines that scale.
             </motion.p>
             <p className="text-base text-gray-600 leading-relaxed max-w-3xl mx-auto">
-              From stealth-mode tools to high-visibility consumer brands, everything we create is tied together by one
-              vision:{" "}
+              From stealth-mode tools to high-visibility consumer brands,
+              everything we create is tied together by one vision:{" "}
               <span className="text-pot-black font-semibold">
                 To shape how the next generation lives, works, and grows.
               </span>
@@ -204,10 +210,15 @@ export default function AboutPageClient() {
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mb-4 mx-auto lg:mx-0">
                     <Target className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-pot-black mb-4 font-syne">Our Mission</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-pot-black mb-4 font-syne">
+                    Our Mission
+                  </h3>
                   <p className="text-base text-gray-600 leading-relaxed">
-                    To empower bold ideas and ambitious founders by providing the systems, strategy, and scale needed to{" "}
-                    <span className="text-pot-black font-semibold">dominate their industries.</span>
+                    To empower bold ideas and ambitious founders by providing
+                    the systems, strategy, and scale needed to{" "}
+                    <span className="text-pot-black font-semibold">
+                      dominate their industries.
+                    </span>
                   </p>
                 </CardContent>
               </Card>
@@ -224,7 +235,9 @@ export default function AboutPageClient() {
                   <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mb-4 mx-auto lg:mx-0">
                     <Lightbulb className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-pot-black mb-4 font-syne">Our Vision</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-pot-black mb-4 font-syne">
+                    Our Vision
+                  </h3>
                   <p className="text-base text-gray-600 leading-relaxed">
                     To become the most influential venture ecosystem in Asia —{" "}
                     <span className="text-pot-black font-semibold">
@@ -248,9 +261,13 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto text-center mb-12"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-8 font-syne">What We Do</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-8 font-syne">
+              What We Do
+            </h2>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+
+          {/* Cards Container with Flex Wrap */}
+          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
             {[
               "Build and operate ventures in-house from concept to execution",
               "Provide growth infrastructure — media, marketing, tech, and brand strategy",
@@ -265,11 +282,14 @@ export default function AboutPageClient() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -5 }}
+                className="w-full sm:w-[48%] lg:w-[30%]" // 3 cards per row at lg
               >
-                <Card className="text-center border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
+                <Card className="text-center border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white h-full">
                   <CardContent className="p-6">
                     <div className="w-3 h-3 bg-primary rounded-full mx-auto mb-4"></div>
-                    <p className="text-sm text-gray-600 leading-relaxed font-medium">{item}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed font-medium">
+                      {item}
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -288,17 +308,22 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto text-center mb-12"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">Our Ecosystem</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
+              Our Ecosystem
+            </h2>
             <p className="text-lg text-gray-600 mb-8">
-              <span className="text-pot-black font-semibold">We don't reveal everything we build.</span> But here's a
-              glimpse of the industries we touch:
+              <span className="text-pot-black font-semibold">
+                We don't reveal everything we build.
+              </span>{" "}
+              But here's a glimpse of the industries we touch:
             </p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[
               {
                 title: "Digital Advertising & Media",
-                description: "Performance marketing, creative assets, content automation, and monetization systems.",
+                description:
+                  "Performance marketing, creative assets, content automation, and monetization systems.",
               },
               {
                 title: "Tech & SaaS Infrastructure",
@@ -317,7 +342,8 @@ export default function AboutPageClient() {
               },
               {
                 title: "Food & Urban Experience",
-                description: "Fast, modern, and scalable food brands with focus on convenience, culture, and branding.",
+                description:
+                  "Fast, modern, and scalable food brands with focus on convenience, culture, and branding.",
               },
             ].map((ecosystem, index) => (
               <motion.div
@@ -331,8 +357,12 @@ export default function AboutPageClient() {
                 <Card className="text-center border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
                   <CardContent className="p-6">
                     <div className="w-4 h-4 bg-primary rounded-full mx-auto mb-4"></div>
-                    <h3 className="font-bold text-lg mb-3 text-pot-black">{ecosystem.title}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">{ecosystem.description}</p>
+                    <h3 className="font-bold text-lg mb-3 text-pot-black">
+                      {ecosystem.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {ecosystem.description}
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -346,9 +376,12 @@ export default function AboutPageClient() {
             className="text-center mt-12 max-w-2xl mx-auto"
           >
             <p className="text-base text-gray-600 leading-relaxed">
-              <span className="text-pot-black font-semibold">Each venture is unique. Each one stands on its own.</span>
+              <span className="text-pot-black font-semibold">
+                Each venture is unique. Each one stands on its own.
+              </span>
               <br />
-              But behind all of them is one root system: <span className="text-pot-black font-bold">Connected.</span>
+              But behind all of them is one root system:{" "}
+              <span className="text-pot-black font-bold">Connected.</span>
             </p>
           </motion.div>
         </div>
@@ -358,9 +391,13 @@ export default function AboutPageClient() {
       <section className="py-16 sm:py-20 bg-white">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-7xl">
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">What Makes Us Different</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
+              What Makes Us Different
+            </h2>
             <p className="text-lg text-gray-600 mb-8">
-              <span className="text-pot-black font-semibold">We don't just talk ideas — we execute them.</span>
+              <span className="text-pot-black font-semibold">
+                We don't just talk ideas — we execute them.
+              </span>
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -379,7 +416,9 @@ export default function AboutPageClient() {
                 className="flex items-start space-x-4"
               >
                 <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-base text-gray-600 leading-relaxed">{item}</p>
+                <p className="text-base text-gray-600 leading-relaxed">
+                  {item}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -393,7 +432,9 @@ export default function AboutPageClient() {
             <p className="text-lg font-medium text-pot-black">
               No middlemen. No wasted time. No vanity metrics.
               <br />
-              <span className="font-bold">Just results, impact, and ownership.</span>
+              <span className="font-bold">
+                Just results, impact, and ownership.
+              </span>
             </p>
           </motion.div>
         </div>
@@ -403,12 +444,16 @@ export default function AboutPageClient() {
       <section className="py-16 sm:py-20 bg-lynx-white">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-7xl">
           <div className="text-center mb-12 mx-auto max-w-4xl">
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">Leadership</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
+              Leadership
+            </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-4">
               Our leadership blends strategy, execution, and creative firepower.
             </p>
             <p className="text-base font-medium text-pot-black">
-              <span className="font-bold">We don't run companies. We launch weapons.</span>
+              <span className="font-bold">
+                We don't run companies. We launch weapons.
+              </span>
             </p>
           </div>
 
@@ -432,21 +477,50 @@ export default function AboutPageClient() {
                         className="object-cover rounded-full"
                       />
                     </div>
-                    <h3 className="font-bold text-lg mb-1 text-pot-black">{member.name}</h3>
-                    <p className="text-primary font-medium mb-3">{member.role}</p>
-                    <p className="text-sm text-gray-600 mb-4 leading-relaxed">{member.bio}</p>
+                    <h3 className="font-bold text-lg mb-1 text-pot-black">
+                      {member.name}
+                    </h3>
+                    <p className="text-primary font-medium mb-3">
+                      {member.role}
+                    </p>
+                    <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                      {member.bio}
+                    </p>
                     <div className="flex justify-center space-x-3">
-                      <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10">
-                        <a href={member.linkedin} target="_blank" rel="noopener noreferrer">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="hover:bg-primary/10"
+                      >
+                        <a
+                          href={member.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           <Linkedin className="h-4 w-4 text-gray-600" />
                         </a>
                       </Button>
-                      <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10">
-                        <a href={member.twitter} target="_blank" rel="noopener noreferrer">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="hover:bg-primary/10"
+                      >
+                        <a
+                          href={member.twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           <Twitter className="h-4 w-4 text-gray-600" />
                         </a>
                       </Button>
-                      <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="hover:bg-primary/10"
+                      >
                         <a href={`mailto:${member.email}`}>
                           <Mail className="h-4 w-4 text-gray-600" />
                         </a>
@@ -470,10 +544,14 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="text-center mb-12 mx-auto max-w-4xl"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">Our Impact</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
+              Our Impact
+            </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
               Numbers that reflect our commitment to{" "}
-              <span className="text-pot-black font-semibold">building successful ventures.</span>
+              <span className="text-pot-black font-semibold">
+                building successful ventures.
+              </span>
             </p>
           </motion.div>
 
@@ -522,8 +600,12 @@ export default function AboutPageClient() {
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary mb-2 group-hover:text-secondary transition-colors duration-300">
                   {stat.number}
                 </div>
-                <div className="text-sm sm:text-base font-medium text-pot-black mb-1">{stat.label}</div>
-                <div className="text-xs sm:text-sm text-gray-600">{stat.description}</div>
+                <div className="text-sm sm:text-base font-medium text-pot-black mb-1">
+                  {stat.label}
+                </div>
+                <div className="text-xs sm:text-sm text-gray-600">
+                  {stat.description}
+                </div>
               </motion.div>
             ))}
           </div>
@@ -534,9 +616,13 @@ export default function AboutPageClient() {
       <section className="py-16 sm:py-20 bg-lynx-white">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-7xl">
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">Our Culture</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
+              Our Culture
+            </h2>
             <p className="text-lg text-gray-600 mb-8">
-              <span className="text-pot-black font-semibold">Connected is not a 9-to-5 company. It's a mindset.</span>
+              <span className="text-pot-black font-semibold">
+                Connected is not a 9-to-5 company. It's a mindset.
+              </span>
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
@@ -555,7 +641,9 @@ export default function AboutPageClient() {
                 className="flex items-start space-x-4"
               >
                 <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-base text-gray-600 leading-relaxed">{item}</p>
+                <p className="text-base text-gray-600 leading-relaxed">
+                  {item}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -567,10 +655,13 @@ export default function AboutPageClient() {
             className="text-center max-w-3xl mx-auto"
           >
             <p className="text-lg text-gray-600 mb-4">
-              We're building a home for the smartest minds, wildest thinkers, and most relentless builders.
+              We're building a home for the smartest minds, wildest thinkers,
+              and most relentless builders.
             </p>
             <p className="text-lg font-medium text-pot-black">
-              <span className="font-bold">If you can't stand the average — you'll love it here.</span>
+              <span className="font-bold">
+                If you can't stand the average — you'll love it here.
+              </span>
             </p>
           </motion.div>
         </div>
@@ -586,7 +677,11 @@ export default function AboutPageClient() {
           <div className="absolute top-1/3 right-1/4 w-12 h-12 bg-accent/20 rounded-full animate-ping"></div>
 
           {/* Curved lines */}
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1000 400" fill="none">
+          <svg
+            className="absolute inset-0 w-full h-full"
+            viewBox="0 0 1000 400"
+            fill="none"
+          >
             <path
               d="M0,200 Q250,100 500,200 T1000,200"
               stroke="url(#gradient1)"
@@ -744,12 +839,20 @@ export default function AboutPageClient() {
               <motion.div
                 className="absolute -top-2 -left-2 w-6 h-6 bg-gradient-to-br from-primary to-secondary rounded-sm"
                 animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                transition={{
+                  duration: 8,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "linear",
+                }}
               />
               <motion.div
                 className="absolute -bottom-2 -right-2 w-6 h-6 bg-gradient-to-br from-secondary to-accent rounded-sm"
                 animate={{ rotate: -360 }}
-                transition={{ duration: 6, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                transition={{
+                  duration: 6,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "linear",
+                }}
               />
 
               {/* Funky inner pattern with animation */}
@@ -785,18 +888,31 @@ export default function AboutPageClient() {
                 What's Coming Next
               </h2>
               <p className="text-lg sm:text-xl mb-8 text-gray-700 max-w-2xl mx-auto relative z-10">
-                We're just getting started. More ventures. More firepower. More disruption. More ways to win.
+                We're just getting started. More ventures. More firepower. More
+                disruption. More ways to win.
               </p>
               <p className="text-lg font-medium text-pot-black mb-8 relative z-10">
-                <span className="font-bold">We don't ask for permission. We just build.</span>
+                <span className="font-bold">
+                  We don't ask for permission. We just build.
+                </span>
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 shadow-lg" asChild>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    size="lg"
+                    className="bg-primary hover:bg-primary/90 shadow-lg"
+                    asChild
+                  >
                     <Link href="/contact">Get in Touch</Link>
                   </Button>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <Button
                     size="lg"
                     variant="outline"
@@ -814,5 +930,5 @@ export default function AboutPageClient() {
 
       <Footer />
     </>
-  )
+  );
 }
