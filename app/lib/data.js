@@ -567,7 +567,7 @@ export async function getService(slug) {
   return getServiceBySlug(slug)
 }
 
-// Get all ventures
+// Get all ventures - FIXED TO RETURN ALL VENTURES
 export async function getVentures() {
   try {
     if (!isMongoDBAvailable()) {
@@ -576,9 +576,30 @@ export async function getVentures() {
     }
 
     const { db } = await connectToDatabase()
-    const ventures = await db.collection("ventures").find({ status: "active" }).sort({ createdAt: -1 }).toArray()
+
+    // First try to get all ventures regardless of status to debug
+    console.log("Fetching all ventures from database...")
+    const allVentures = await db.collection("ventures").find({}).sort({ createdAt: -1 }).toArray()
+    console.log(`Found ${allVentures.length} total ventures in database`)
+
+    // Log each venture's status for debugging
+    allVentures.forEach((venture) => {
+      console.log(`Venture: ${venture.name}, Status: ${venture.status}`)
+    })
+
+    // Get ventures with active or scaling status (include both)
+    const ventures = await db
+      .collection("ventures")
+      .find({
+        $or: [{ status: "active" }, { status: "scaling" }],
+      })
+      .sort({ createdAt: -1 })
+      .toArray()
+
+    console.log(`Found ${ventures.length} active/scaling ventures`)
 
     if (ventures.length === 0) {
+      console.log("No ventures found, returning sample ventures")
       return getSampleVentures()
     }
 

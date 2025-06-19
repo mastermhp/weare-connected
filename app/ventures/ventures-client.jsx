@@ -152,7 +152,12 @@ export default function VenturesClientPage({ ventures: dbVentures = [] }) {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge variant={venture.status === "Active" ? "default" : "secondary"} className='bg-[#6529b2] text-white font-semibold'>{venture.status}</Badge>
+                      <Badge
+                        variant={venture.status === "Active" ? "default" : "secondary"}
+                        className="bg-[#6529b2] text-white font-semibold"
+                      >
+                        {venture.status}
+                      </Badge>
                       <Badge variant="outline" className="bg-white/20 text-white border-white/30">
                         {venture.category}
                       </Badge>

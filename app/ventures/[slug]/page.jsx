@@ -39,14 +39,35 @@ export default async function VentureDetailPage({ params }) {
     notFound()
   }
 
-  // Map icon components to metric icons
-  const iconMap = {
-    Users: Users,
-    Target: Target,
-    Zap: Zap,
-    Award: Award,
-    TrendingUp: TrendingUp,
-    Calendar: Calendar,
+  // Map icon components to metric icons with better logic
+  const getMetricIcon = (metric) => {
+    const label = metric.label.toLowerCase()
+
+    if (label.includes("user") || label.includes("client") || label.includes("people") || label.includes("team")) {
+      return Users
+    } else if (label.includes("product") || label.includes("project") || label.includes("service")) {
+      return Target
+    } else if (
+      label.includes("co2") ||
+      label.includes("energy") ||
+      label.includes("speed") ||
+      label.includes("performance")
+    ) {
+      return Zap
+    } else if (
+      label.includes("award") ||
+      label.includes("partner") ||
+      label.includes("brand") ||
+      label.includes("achievement")
+    ) {
+      return Award
+    } else if (label.includes("growth") || label.includes("revenue") || label.includes("profit")) {
+      return TrendingUp
+    } else if (label.includes("year") || label.includes("time") || label.includes("date")) {
+      return Calendar
+    } else {
+      return Target // default icon
+    }
   }
 
   return (
@@ -71,7 +92,7 @@ export default async function VentureDetailPage({ params }) {
               <div className="space-y-6">
                 {/* Badges */}
                 <div className="flex gap-3">
-                  <Badge className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-full">
+                  <Badge className="bg-[#6529b2] hover:bg-purple-700 text-white px-3 py-1 rounded-full">
                     {venture.status || "Active"}
                   </Badge>
                   <Badge variant="outline" className="px-3 py-1 rounded-full border-gray-300">
@@ -115,7 +136,7 @@ export default async function VentureDetailPage({ params }) {
                 {/* Buttons */}
                 <div className="flex gap-4 pt-2">
                   {venture.website && (
-                    <Button className="bg-purple-600 hover:bg-purple-700 rounded-lg" asChild>
+                    <Button className="bg-[#6529b2] hover:bg-purple-700 rounded-lg" asChild>
                       <a href={venture.website} target="_blank" rel="noopener noreferrer">
                         Visit Website <ExternalLink className="h-4 w-4 ml-2" />
                       </a>
@@ -161,46 +182,46 @@ export default async function VentureDetailPage({ params }) {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
               {venture.metrics && venture.metrics.length > 0 ? (
                 venture.metrics.map((metric, index) => {
-                  const IconComponent = iconMap[metric.icon] || Target
+                  const IconComponent = getMetricIcon(metric)
                   return (
                     <div key={index} className="text-center">
                       <div className="mb-4">
-                        <IconComponent className="h-10 w-10 text-purple-600 mx-auto" />
+                        <IconComponent className="h-10 w-10 text-[#6529b2] mx-auto" />
                       </div>
-                      <div className="text-2xl font-bold text-purple-600 mb-2">{metric.value}</div>
+                      <div className="text-2xl font-bold text-[#6529b2] mb-2">{metric.value}</div>
                       <div className="text-gray-600 text-sm">{metric.label}</div>
                     </div>
                   )
                 })
               ) : (
-                // Default metrics
+                // Keep existing default metrics with appropriate icons
                 <>
                   <div className="text-center">
                     <div className="mb-4">
-                      <Users className="h-10 w-10 text-purple-600 mx-auto" />
+                      <Users className="h-10 w-10 text-[#6529b2] mx-auto" />
                     </div>
-                    <div className="text-2xl font-bold text-purple-600 mb-2">200+</div>
+                    <div className="text-2xl font-bold text-[#6529b2] mb-2">200+</div>
                     <div className="text-gray-600 text-sm">Happy Clients</div>
                   </div>
                   <div className="text-center">
                     <div className="mb-4">
-                      <Target className="h-10 w-10 text-purple-600 mx-auto" />
+                      <Target className="h-10 w-10 text-[#6529b2] mx-auto" />
                     </div>
-                    <div className="text-2xl font-bold text-purple-600 mb-2">500+</div>
+                    <div className="text-2xl font-bold text-[#6529b2] mb-2">500+</div>
                     <div className="text-gray-600 text-sm">Projects Completed</div>
                   </div>
                   <div className="text-center">
                     <div className="mb-4">
-                      <Award className="h-10 w-10 text-purple-600 mx-auto" />
+                      <Award className="h-10 w-10 text-[#6529b2] mx-auto" />
                     </div>
-                    <div className="text-2xl font-bold text-purple-600 mb-2">15</div>
+                    <div className="text-2xl font-bold text-[#6529b2] mb-2">15</div>
                     <div className="text-gray-600 text-sm">Awards Won</div>
                   </div>
                   <div className="text-center">
                     <div className="mb-4">
-                      <Zap className="h-10 w-10 text-purple-600 mx-auto" />
+                      <Zap className="h-10 w-10 text-[#6529b2] mx-auto" />
                     </div>
-                    <div className="text-2xl font-bold text-purple-600 mb-2">4.9/5</div>
+                    <div className="text-2xl font-bold text-[#6529b2] mb-2">4.9/5</div>
                     <div className="text-gray-600 text-sm">Client Satisfaction</div>
                   </div>
                 </>
@@ -220,7 +241,7 @@ export default async function VentureDetailPage({ params }) {
                   {venture.features && venture.features.length > 0 ? (
                     venture.features.map((feature, index) => (
                       <div key={index} className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="w-2 h-2 bg-[#6529b2] rounded-full mt-2 flex-shrink-0"></div>
                         <span className="text-gray-700">{feature}</span>
                       </div>
                     ))
@@ -228,27 +249,27 @@ export default async function VentureDetailPage({ params }) {
                     // Default features
                     <>
                       <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="w-2 h-2 bg-[#6529b2] rounded-full mt-2 flex-shrink-0"></div>
                         <span className="text-gray-700">Brand identity design</span>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="w-2 h-2 bg-[#6529b2] rounded-full mt-2 flex-shrink-0"></div>
                         <span className="text-gray-700">Website and app design</span>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="w-2 h-2 bg-[#6529b2] rounded-full mt-2 flex-shrink-0"></div>
                         <span className="text-gray-700">Marketing campaigns</span>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="w-2 h-2 bg-[#6529b2] rounded-full mt-2 flex-shrink-0"></div>
                         <span className="text-gray-700">Packaging design</span>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="w-2 h-2 bg-[#6529b2] rounded-full mt-2 flex-shrink-0"></div>
                         <span className="text-gray-700">Motion graphics</span>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="w-2 h-2 bg-[#6529b2] rounded-full mt-2 flex-shrink-0"></div>
                         <span className="text-gray-700">Design system creation</span>
                       </div>
                     </>
@@ -306,7 +327,7 @@ export default async function VentureDetailPage({ params }) {
               {venture.achievements && venture.achievements.length > 0 ? (
                 venture.achievements.map((achievement, index) => (
                   <div key={index} className="flex items-center gap-4">
-                    <Award className="h-6 w-6 text-purple-600 flex-shrink-0" />
+                    <Award className="h-6 w-6 text-[#6529b2] flex-shrink-0" />
                     <span className="text-gray-700">{achievement}</span>
                   </div>
                 ))
@@ -314,19 +335,19 @@ export default async function VentureDetailPage({ params }) {
                 // Default achievements
                 <>
                   <div className="flex items-center gap-4">
-                    <Award className="h-6 w-6 text-purple-600 flex-shrink-0" />
+                    <Award className="h-6 w-6 text-[#6529b2] flex-shrink-0" />
                     <span className="text-gray-700">Awwwards Site of the Day (3 times)</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <Award className="h-6 w-6 text-purple-600 flex-shrink-0" />
+                    <Award className="h-6 w-6 text-[#6529b2] flex-shrink-0" />
                     <span className="text-gray-700">Dribbble Team of the Year 2023</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <Award className="h-6 w-6 text-purple-600 flex-shrink-0" />
+                    <Award className="h-6 w-6 text-[#6529b2] flex-shrink-0" />
                     <span className="text-gray-700">Featured in Design Week Magazine</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <Award className="h-6 w-6 text-purple-600 flex-shrink-0" />
+                    <Award className="h-6 w-6 text-[#6529b2] flex-shrink-0" />
                     <span className="text-gray-700">Helped 50+ startups establish their brand identity</span>
                   </div>
                 </>
@@ -383,7 +404,7 @@ export default async function VentureDetailPage({ params }) {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 bg-purple-600 text-white">
+        <section className="py-16 bg-[#6529b2] text-white">
           <div className="container px-4 md:px-6 mx-auto text-center max-w-7xl">
             <h2 className="text-3xl font-bold mb-4">Interested in {venture.name}?</h2>
             <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
@@ -398,7 +419,7 @@ export default async function VentureDetailPage({ params }) {
                   variant="outline"
                   size="lg"
                   asChild
-                  className="border-white text-white hover:bg-white hover:text-purple-600 rounded-lg"
+                  className="border-white text-white hover:bg-white hover:text-[#6529b2] rounded-lg"
                 >
                   <a href={venture.website} target="_blank" rel="noopener noreferrer">
                     Visit {venture.name}

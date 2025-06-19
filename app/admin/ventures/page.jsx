@@ -1,25 +1,25 @@
 "use client"
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+  DialogOverlay,
+  DialogPortal,
+} from "@/components/ui/dialog"
+
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog"
-import { Plus, Search, Edit, Trash2, Eye, Loader2, Building } from "lucide-react"
+import { Search, Edit, Trash2, Eye, Loader2, Building, Plus } from "lucide-react"
 import Link from "next/link"
-import ImageUpload from "@/app/components/admin/image-upload"
 
 const mockVentures = [
   {
@@ -74,37 +74,8 @@ export default function VenturesPage() {
   const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [ventureToDelete, setVentureToDelete] = useState(null)
-  const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    description: "",
-    tagline: "",
-    category: "SaaS",
-    status: "active",
-    foundedYear: "",
-    teamSize: "",
-    growth: "",
-    website: "",
-    metrics: [
-      { label: "Active Users", value: "" },
-      { label: "Projects", value: "" },
-      { label: "Time Saved", value: "" },
-    ],
-    technologies: [],
-    keyFeatures: [],
-    achievements: [],
-    testimonials: [],
-    logo: null,
-    featuredImage: null,
-  })
-  const [techInput, setTechInput] = useState("")
-  const [featureInput, setFeatureInput] = useState("")
-  const [achievementInput, setAchievementInput] = useState("")
-  const [testimonialInput, setTestimonialInput] = useState("")
-  const [formErrors, setFormErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Fetch ventures
@@ -133,197 +104,6 @@ export default function VenturesPage() {
       setError("Failed to load ventures. Please try again.")
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-
-    // Auto-generate slug from name
-    if (name === "name" && !formData.slug) {
-      const slug = value
-        .toLowerCase()
-        .replace(/[^\w\s]/gi, "")
-        .replace(/\s+/g, "-")
-      setFormData((prev) => ({ ...prev, slug }))
-    }
-
-    // Clear validation error when field is edited
-    if (formErrors[name]) {
-      setFormErrors((prev) => ({ ...prev, [name]: "" }))
-    }
-  }
-
-  const handleMetricChange = (index, field, value) => {
-    const updatedMetrics = [...formData.metrics]
-    updatedMetrics[index] = { ...updatedMetrics[index], [field]: value }
-    setFormData((prev) => ({ ...prev, metrics: updatedMetrics }))
-  }
-
-  const addMetric = () => {
-    setFormData((prev) => ({
-      ...prev,
-      metrics: [...prev.metrics, { label: "", value: "" }],
-    }))
-  }
-
-  const removeMetric = (index) => {
-    const updatedMetrics = [...formData.metrics]
-    updatedMetrics.splice(index, 1)
-    setFormData((prev) => ({ ...prev, metrics: updatedMetrics }))
-  }
-
-  const handleAddTechnology = () => {
-    if (techInput.trim() && !formData.technologies.includes(techInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        technologies: [...prev.technologies, techInput.trim()],
-      }))
-      setTechInput("")
-    }
-  }
-
-  const removeTechnology = (tech) => {
-    setFormData((prev) => ({
-      ...prev,
-      technologies: prev.technologies.filter((t) => t !== tech),
-    }))
-  }
-
-  const handleAddFeature = () => {
-    if (featureInput.trim() && !formData.keyFeatures.includes(featureInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        keyFeatures: [...prev.keyFeatures, featureInput.trim()],
-      }))
-      setFeatureInput("")
-    }
-  }
-
-  const removeFeature = (feature) => {
-    setFormData((prev) => ({
-      ...prev,
-      keyFeatures: prev.keyFeatures.filter((f) => f !== feature),
-    }))
-  }
-
-  const handleAddAchievement = () => {
-    if (achievementInput.trim() && !formData.achievements.includes(achievementInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        achievements: [...prev.achievements, achievementInput.trim()],
-      }))
-      setAchievementInput("")
-    }
-  }
-
-  const removeAchievement = (achievement) => {
-    setFormData((prev) => ({
-      ...prev,
-      achievements: prev.achievements.filter((a) => a !== achievement),
-    }))
-  }
-
-  const handleAddTestimonial = () => {
-    if (testimonialInput.trim() && !formData.testimonials.includes(testimonialInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        testimonials: [...prev.testimonials, testimonialInput.trim()],
-      }))
-      setTestimonialInput("")
-    }
-  }
-
-  const removeTestimonial = (testimonial) => {
-    setFormData((prev) => ({
-      ...prev,
-      testimonials: prev.testimonials.filter((t) => t !== testimonial),
-    }))
-  }
-
-  const handleLogoUpload = (imageData) => {
-    setFormData((prev) => ({
-      ...prev,
-      logo: imageData,
-    }))
-  }
-
-  const handleFeaturedImageUpload = (imageData) => {
-    setFormData((prev) => ({
-      ...prev,
-      featuredImage: imageData,
-    }))
-  }
-
-  const validateForm = () => {
-    const errors = {}
-    if (!formData.name.trim()) errors.name = "Name is required"
-    if (!formData.description.trim()) errors.description = "Description is required"
-    if (!formData.slug.trim()) errors.slug = "Slug is required"
-    if (!formData.tagline.trim()) errors.tagline = "Tagline is required"
-
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
-
-  const handleCreateVenture = async (e) => {
-    e.preventDefault()
-
-    if (!validateForm()) return
-
-    try {
-      setIsSubmitting(true)
-
-      const response = await fetch("/api/admin/ventures", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to create venture")
-      }
-
-      const data = await response.json()
-
-      // Add new venture to state and close modal
-      setVentures((prev) => [data.venture, ...prev])
-      setIsCreateModalOpen(false)
-
-      // Reset form
-      setFormData({
-        name: "",
-        slug: "",
-        description: "",
-        tagline: "",
-        category: "SaaS",
-        status: "active",
-        foundedYear: "",
-        teamSize: "",
-        growth: "",
-        website: "",
-        metrics: [
-          { label: "Active Users", value: "" },
-          { label: "Projects", value: "" },
-          { label: "Time Saved", value: "" },
-        ],
-        technologies: [],
-        keyFeatures: [],
-        achievements: [],
-        testimonials: [],
-        logo: null,
-        featuredImage: null,
-      })
-    } catch (err) {
-      console.error("Error creating venture:", err)
-      setFormErrors((prev) => ({ ...prev, submit: err.message }))
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
@@ -377,359 +157,12 @@ export default function VenturesPage() {
           <h1 className="text-3xl font-bold text-gray-900">Ventures Management</h1>
           <p className="text-gray-600 mt-1">Create, edit, and manage your ventures and portfolio companies</p>
         </div>
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-purple-emperor hover:bg-purple-emperor/90">
-              <Plus className="h-4 w-4 mr-2" />
-              New Venture
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Create New Venture</DialogTitle>
-              <DialogDescription>Fill in the details to add a new venture to your portfolio</DialogDescription>
-            </DialogHeader>
-
-            <form onSubmit={handleCreateVenture} className="space-y-6 mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Basic Information */}
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Basic Information</h3>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">
-                          Name <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="name"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleInputChange}
-                          placeholder="Enter venture name"
-                        />
-                        {formErrors.name && <p className="text-sm text-red-500">{formErrors.name}</p>}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="slug">
-                          Slug <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="slug"
-                          name="slug"
-                          value={formData.slug}
-                          onChange={handleInputChange}
-                          placeholder="enter-venture-slug"
-                        />
-                        {formErrors.slug && <p className="text-sm text-red-500">{formErrors.slug}</p>}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="tagline">
-                          Tagline <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="tagline"
-                          name="tagline"
-                          value={formData.tagline}
-                          onChange={handleInputChange}
-                          placeholder="Brief tagline (e.g. Workflow automation reimagined)"
-                        />
-                        {formErrors.tagline && <p className="text-sm text-red-500">{formErrors.tagline}</p>}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="description">
-                          Description <span className="text-red-500">*</span>
-                        </Label>
-                        <Textarea
-                          id="description"
-                          name="description"
-                          value={formData.description}
-                          onChange={handleInputChange}
-                          placeholder="Comprehensive description of the venture"
-                          rows={4}
-                        />
-                        {formErrors.description && <p className="text-sm text-red-500">{formErrors.description}</p>}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Details</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="category">Category</Label>
-                        <Input
-                          id="category"
-                          name="category"
-                          value={formData.category}
-                          onChange={handleInputChange}
-                          placeholder="e.g. SaaS, Fintech"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="status">Status</Label>
-                        <select
-                          id="status"
-                          name="status"
-                          value={formData.status}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        >
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
-                          <option value="scaling">Scaling</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="foundedYear">Founded Year</Label>
-                        <Input
-                          id="foundedYear"
-                          name="foundedYear"
-                          value={formData.foundedYear}
-                          onChange={handleInputChange}
-                          placeholder="e.g. 2022"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="teamSize">Team Size</Label>
-                        <Input
-                          id="teamSize"
-                          name="teamSize"
-                          value={formData.teamSize}
-                          onChange={handleInputChange}
-                          placeholder="e.g. 12"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="growth">Growth</Label>
-                        <Input
-                          id="growth"
-                          name="growth"
-                          value={formData.growth}
-                          onChange={handleInputChange}
-                          placeholder="e.g. +150% YoY"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="website">Website</Label>
-                        <Input
-                          id="website"
-                          name="website"
-                          value={formData.website}
-                          onChange={handleInputChange}
-                          placeholder="https://example.com"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Metrics, Technologies, and Images */}
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Metrics</h3>
-                    <div className="space-y-4">
-                      {formData.metrics.map((metric, index) => (
-                        <div key={index} className="grid grid-cols-5 gap-2 items-center">
-                          <div className="col-span-2">
-                            <Input
-                              placeholder="Label (e.g. Active Users)"
-                              value={metric.label}
-                              onChange={(e) => handleMetricChange(index, "label", e.target.value)}
-                            />
-                          </div>
-                          <div className="col-span-2">
-                            <Input
-                              placeholder="Value (e.g. 10K+)"
-                              value={metric.value}
-                              onChange={(e) => handleMetricChange(index, "value", e.target.value)}
-                            />
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-500"
-                            onClick={() => removeMetric(index)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button type="button" variant="outline" size="sm" onClick={addMetric}>
-                        <Plus className="h-4 w-4 mr-2" /> Add Metric
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Technologies</h3>
-                    <div className="space-y-4">
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Add technology (e.g. React)"
-                          value={techInput}
-                          onChange={(e) => setTechInput(e.target.value)}
-                          onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTechnology())}
-                        />
-                        <Button type="button" onClick={handleAddTechnology}>
-                          Add
-                        </Button>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {formData.technologies.map((tech) => (
-                          <Badge key={tech} variant="secondary" className="px-2 py-1">
-                            {tech}
-                            <button
-                              type="button"
-                              className="ml-2 text-gray-500 hover:text-gray-700"
-                              onClick={() => removeTechnology(tech)}
-                            >
-                              ×
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Key Features</h3>
-                    <div className="space-y-4">
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Add key feature"
-                          value={featureInput}
-                          onChange={(e) => setFeatureInput(e.target.value)}
-                          onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddFeature())}
-                        />
-                        <Button type="button" onClick={handleAddFeature}>
-                          Add
-                        </Button>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {formData.keyFeatures.map((feature) => (
-                          <Badge key={feature} variant="secondary" className="px-2 py-1">
-                            {feature}
-                            <button
-                              type="button"
-                              className="ml-2 text-gray-500 hover:text-gray-700"
-                              onClick={() => removeFeature(feature)}
-                            >
-                              ×
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Achievements</h3>
-                    <div className="space-y-4">
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Add achievement"
-                          value={achievementInput}
-                          onChange={(e) => setAchievementInput(e.target.value)}
-                          onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddAchievement())}
-                        />
-                        <Button type="button" onClick={handleAddAchievement}>
-                          Add
-                        </Button>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {formData.achievements.map((achievement) => (
-                          <Badge key={achievement} variant="secondary" className="px-2 py-1">
-                            {achievement}
-                            <button
-                              type="button"
-                              className="ml-2 text-gray-500 hover:text-gray-700"
-                              onClick={() => removeAchievement(achievement)}
-                            >
-                              ×
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Testimonials</h3>
-                    <div className="space-y-4">
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Add testimonial"
-                          value={testimonialInput}
-                          onChange={(e) => setTestimonialInput(e.target.value)}
-                          onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTestimonial())}
-                        />
-                        <Button type="button" onClick={handleAddTestimonial}>
-                          Add
-                        </Button>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {formData.testimonials.map((testimonial) => (
-                          <Badge key={testimonial} variant="secondary" className="px-2 py-1">
-                            {testimonial}
-                            <button
-                              type="button"
-                              className="ml-2 text-gray-500 hover:text-gray-700"
-                              onClick={() => removeTestimonial(testimonial)}
-                            >
-                              ×
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Images</h3>
-                    <div className="grid grid-cols-1 gap-4">
-                      <ImageUpload onImageUpload={handleLogoUpload} defaultImage={formData.logo} label="Company Logo" />
-                      <ImageUpload
-                        onImageUpload={handleFeaturedImageUpload}
-                        defaultImage={formData.featuredImage}
-                        label="Featured Image"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {formErrors.submit && (
-                <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">{formErrors.submit}</div>
-              )}
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create Venture"
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button className="bg-purple-emperor hover:bg-purple-emperor/90" asChild>
+          <Link href="/admin/ventures/new">
+            <Plus className="h-4 w-4 mr-2" />
+            New Venture
+          </Link>
+        </Button>
       </div>
 
       {/* Filters */}
@@ -788,12 +221,18 @@ export default function VenturesPage() {
                   <div className="w-full md:w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
                     {venture.logo ? (
                       <img
-                        src={venture.logo || "/placeholder.svg"}
+                        src={venture.logo?.url || venture.logo || "/placeholder.svg"}
                         alt={`${venture.name} logo`}
                         className="w-full h-full object-contain"
+                        onError={(e) => {
+                          e.target.style.display = "none"
+                          e.target.nextSibling.style.display = "flex"
+                        }}
                       />
                     ) : (
-                      <Building className="h-12 w-12 text-gray-300" />
+                      <div className="w-full h-full items-center justify-center">
+                        <Building className="h-12 w-12 text-gray-300" />
+                      </div>
                     )}
                   </div>
 
@@ -909,9 +348,11 @@ export default function VenturesPage() {
                 ? "Try adjusting your search or filters"
                 : "Get started by creating your first venture"}
             </p>
-            <Button className="bg-purple-emperor hover:bg-purple-emperor/90" onClick={() => setIsCreateModalOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Venture
+            <Button className="bg-purple-emperor hover:bg-purple-emperor/90" asChild>
+              <Link href="/admin/ventures/new">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Venture
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -919,29 +360,26 @@ export default function VenturesPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete the venture "{ventureToDelete?.name}"? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteVenture} disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
+        <DialogPortal>
+          <DialogOverlay />
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Deletion</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete the venture "{ventureToDelete?.name}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <Button variant="destructive" onClick={handleDeleteVenture} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </DialogPortal>
       </Dialog>
     </div>
   )

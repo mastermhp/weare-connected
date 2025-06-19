@@ -11,6 +11,13 @@ export const metadata = {
 function serializeVentures(ventures) {
   return ventures.map((venture) => ({
     id: venture._id?.toString() || venture.id || Math.random().toString(),
+    slug:
+      venture.slug ||
+      venture.name
+        ?.toLowerCase()
+        .replace(/[^\w\s]/gi, "")
+        .replace(/\s+/g, "-") ||
+      "venture",
     name: venture.name || "Untitled Venture",
     tagline: venture.tagline || venture.description?.substring(0, 50) + "..." || "Innovative solutions",
     description: venture.description || "No description available",
