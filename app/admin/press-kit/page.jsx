@@ -79,11 +79,12 @@ export default function PressKitManagement() {
   const [itemToDelete, setItemToDelete] = useState(null)
   const [formData, setFormData] = useState({
     title: "",
-    type: "document",
+    category: "",
     description: "",
     file: null,
     fileSize: "",
     fileType: "",
+    published: true,
     dimensions: "",
     format: "",
     pages: "",
@@ -143,7 +144,7 @@ export default function PressKitManagement() {
   const validateForm = () => {
     const errors = {}
     if (!formData.title.trim()) errors.title = "Title is required"
-    if (!formData.type) errors.type = "Type is required"
+    if (!formData.category) errors.category = "Category is required"
     if (!formData.file) errors.file = "File is required"
 
     setFormErrors(errors)
@@ -178,11 +179,12 @@ export default function PressKitManagement() {
       // Reset form
       setFormData({
         title: "",
-        type: "document",
+        category: "",
         description: "",
         file: null,
         fileSize: "",
         fileType: "",
+        published: true,
         dimensions: "",
         format: "",
         pages: "",
@@ -291,22 +293,37 @@ export default function PressKitManagement() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="type">
-                  Type <span className="text-red-500">*</span>
+                <Label htmlFor="category">
+                  Category <span className="text-red-500">*</span>
                 </Label>
                 <select
-                  id="type"
-                  name="type"
-                  value={formData.type}
+                  id="category"
+                  name="category"
+                  value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
-                  <option value="document">Document</option>
-                  <option value="image">Image</option>
-                  <option value="logo">Logo</option>
-                  <option value="other">Other</option>
+                  <option value="">Select Category</option>
+                  <option value="logos">Logos</option>
+                  <option value="brand-guidelines">Brand Guidelines</option>
+                  <option value="company-info">Company Info</option>
+                  <option value="photos">Photos</option>
+                  <option value="videos">Videos</option>
+                  <option value="web-assets">Web Assets</option>
                 </select>
-                {formErrors.type && <p className="text-sm text-red-500">{formErrors.type}</p>}
+                {formErrors.category && <p className="text-sm text-red-500">{formErrors.category}</p>}
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="published"
+                  name="published"
+                  checked={formData.published}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, published: e.target.checked }))}
+                  className="rounded"
+                />
+                <Label htmlFor="published">Published (visible on press kit page)</Label>
               </div>
 
               <div className="space-y-2">

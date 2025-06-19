@@ -38,6 +38,9 @@ export default function EditVenture({ params }) {
     technologies: [],
     logo: null,
     featuredImage: null,
+    features: [],
+    achievements: [],
+    testimonials: [],
   })
   const [techInput, setTechInput] = useState("")
   const [formErrors, setFormErrors] = useState({})
@@ -88,6 +91,9 @@ export default function EditVenture({ params }) {
         technologies: venture.technologies || [],
         logo: venture.logo || null,
         featuredImage: venture.featuredImage || null,
+        features: venture.features || [],
+        achievements: venture.achievements || [],
+        testimonials: venture.testimonials || [],
       })
     } catch (err) {
       console.error("Error fetching venture:", err)
@@ -198,6 +204,51 @@ export default function EditVenture({ params }) {
     } finally {
       setSaving(false)
     }
+  }
+
+  const addFeature = () => {
+    setFormData((prev) => ({
+      ...prev,
+      features: [...prev.features, ""],
+    }))
+  }
+
+  const removeFeature = (index) => {
+    const updatedFeatures = [...formData.features]
+    updatedFeatures.splice(index, 1)
+    setFormData((prev) => ({ ...prev, features: updatedFeatures }))
+  }
+
+  const addAchievement = () => {
+    setFormData((prev) => ({
+      ...prev,
+      achievements: [...prev.achievements, ""],
+    }))
+  }
+
+  const removeAchievement = (index) => {
+    const updatedAchievements = [...formData.achievements]
+    updatedAchievements.splice(index, 1)
+    setFormData((prev) => ({ ...prev, achievements: updatedAchievements }))
+  }
+
+  const addTestimonial = () => {
+    setFormData((prev) => ({
+      ...prev,
+      testimonials: [...prev.testimonials, { quote: "", author: "", role: "", company: "", image: null }],
+    }))
+  }
+
+  const removeTestimonial = (index) => {
+    const updatedTestimonials = [...formData.testimonials]
+    updatedTestimonials.splice(index, 1)
+    setFormData((prev) => ({ ...prev, testimonials: updatedTestimonials }))
+  }
+
+  const handleTestimonialChange = (index, field, value) => {
+    const updatedTestimonials = [...formData.testimonials]
+    updatedTestimonials[index] = { ...updatedTestimonials[index], [field]: value }
+    setFormData((prev) => ({ ...prev, testimonials: updatedTestimonials }))
   }
 
   if (loading) {
@@ -414,6 +465,72 @@ export default function EditVenture({ params }) {
                     </div>
                   </div>
                 </div>
+
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Key Features</h3>
+                  <div className="space-y-4">
+                    {formData.features.map((feature, index) => (
+                      <div key={index} className="grid grid-cols-5 gap-2 items-center">
+                        <div className="col-span-4">
+                          <Input
+                            placeholder="Feature"
+                            value={feature}
+                            onChange={(e) => {
+                              const updatedFeatures = [...formData.features]
+                              updatedFeatures[index] = e.target.value
+                              setFormData((prev) => ({ ...prev, features: updatedFeatures }))
+                            }}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500"
+                          onClick={() => removeFeature(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm" onClick={addFeature}>
+                      <Plus className="h-4 w-4 mr-2" /> Add Feature
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Achievements</h3>
+                  <div className="space-y-4">
+                    {formData.achievements.map((achievement, index) => (
+                      <div key={index} className="grid grid-cols-5 gap-2 items-center">
+                        <div className="col-span-4">
+                          <Input
+                            placeholder="Achievement"
+                            value={achievement}
+                            onChange={(e) => {
+                              const updatedAchievements = [...formData.achievements]
+                              updatedAchievements[index] = e.target.value
+                              setFormData((prev) => ({ ...prev, achievements: updatedAchievements }))
+                            }}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500"
+                          onClick={() => removeAchievement(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm" onClick={addAchievement}>
+                      <Plus className="h-4 w-4 mr-2" /> Add Achievement
+                    </Button>
+                  </div>
+                </div>
               </div>
 
               {/* Metrics, Technologies, and Images */}
@@ -482,6 +599,75 @@ export default function EditVenture({ params }) {
                         </Badge>
                       ))}
                     </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Testimonials</h3>
+                  <div className="space-y-4">
+                    {formData.testimonials.map((testimonial, index) => (
+                      <div key={index} className="space-y-2 border rounded-md p-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`quote-${index}`}>Quote</Label>
+                          <Textarea
+                            id={`quote-${index}`}
+                            placeholder="Testimonial Quote"
+                            value={testimonial.quote}
+                            onChange={(e) => handleTestimonialChange(index, "quote", e.target.value)}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor={`author-${index}`}>Author</Label>
+                            <Input
+                              id={`author-${index}`}
+                              placeholder="Author Name"
+                              value={testimonial.author}
+                              onChange={(e) => handleTestimonialChange(index, "author", e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor={`role-${index}`}>Role</Label>
+                            <Input
+                              id={`role-${index}`}
+                              placeholder="Author's Role"
+                              value={testimonial.role}
+                              onChange={(e) => handleTestimonialChange(index, "role", e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor={`company-${index}`}>Company</Label>
+                            <Input
+                              id={`company-${index}`}
+                              placeholder="Company Name"
+                              value={testimonial.company}
+                              onChange={(e) => handleTestimonialChange(index, "company", e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor={`image-${index}`}>Image URL</Label>
+                            <Input
+                              id={`image-${index}`}
+                              placeholder="Image URL"
+                              value={testimonial.image}
+                              onChange={(e) => handleTestimonialChange(index, "image", e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500"
+                          onClick={() => removeTestimonial(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm" onClick={addTestimonial}>
+                      <Plus className="h-4 w-4 mr-2" /> Add Testimonial
+                    </Button>
                   </div>
                 </div>
 

@@ -14,7 +14,7 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url)
     const search = searchParams.get("search") || ""
-    const type = searchParams.get("type") || ""
+    const category = searchParams.get("category") || ""
 
     const { db } = await connectToDatabase()
 
@@ -23,7 +23,7 @@ export async function GET(request) {
     if (search) {
       query.$or = [{ title: { $regex: search, $options: "i" } }, { description: { $regex: search, $options: "i" } }]
     }
-    if (type) query.type = type
+    if (category) query.category = category
 
     const pressKitItems = await db.collection("press_kit").find(query).sort({ createdAt: -1 }).toArray()
 
@@ -47,15 +47,24 @@ export async function POST(request) {
     const data = await request.json()
 
     // Validate required fields
-    if (!data.title || !data.type) {
-      return NextResponse.json({ error: "Title and type are required" }, { status: 400 })
+    if (!data.title || !data.category) {
+      return NextResponse.json({ error: "Title and category are required" }, { status: 400 })
     }
 
     const { db } = await connectToDatabase()
 
     // Create press kit item with timestamps
     const pressKitItem = {
-      ...data,
+      title: data.title,
+      category: data.category,
+      description: data.description || "",
+      file: data.file || null,
+      fileSize: data.fileSize || "",
+      fileType: data.fileType || "",
+      published: data.published !== undefined ? data.published : true,
+      dimensions: data.dimensions || "",
+      format: data.format || "",
+      pages: data.pages || "",
       createdAt: new Date(),
       updatedAt: new Date(),
     }

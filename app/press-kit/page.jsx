@@ -1,368 +1,450 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Download, ExternalLink, Calendar, Users, Award, TrendingUp } from "lucide-react"
-import Header from "../components/header"
-import Footer from "../components/footer"
-
-export const metadata = {
-  title: "Press Kit | Connected",
-  description: "Media resources, company information, and press materials for Connected.",
-}
-
-const pressReleases = [
-  {
-    title: "Connected Announces $50M Series B Funding Round",
-    date: "June 1, 2024",
-    excerpt: "Funding will accelerate expansion of innovation ecosystem and support for portfolio companies.",
-    category: "Funding",
-  },
-  {
-    title: "Connected Portfolio Company TechFlow Reaches $50M Valuation",
-    date: "May 15, 2024",
-    excerpt: "Workflow automation platform achieves major milestone with Series A funding.",
-    category: "Portfolio",
-  },
-  {
-    title: "Connected Named 'Innovation Hub of the Year' by Tech Awards",
-    date: "April 20, 2024",
-    excerpt: "Recognition highlights Connected's impact on startup ecosystem and innovation.",
-    category: "Awards",
-  },
-  {
-    title: "Connected Launches Sustainability Initiative for Portfolio Companies",
-    date: "March 10, 2024",
-    excerpt: "New program helps startups integrate sustainable practices from day one.",
-    category: "Sustainability",
-  },
-]
-
-const mediaAssets = [
-  {
-    title: "Company Logos",
-    description: "High-resolution logos in various formats",
-    items: ["PNG", "SVG", "EPS"],
-    size: "2.5 MB",
-  },
-  {
-    title: "Executive Photos",
-    description: "Professional headshots of leadership team",
-    items: ["High-res", "Web-ready", "Black & white"],
-    size: "15 MB",
-  },
-  {
-    title: "Product Screenshots",
-    description: "Screenshots of our platform and services",
-    items: ["Dashboard", "Analytics", "Mobile app"],
-    size: "8 MB",
-  },
-  {
-    title: "Brand Guidelines",
-    description: "Complete brand identity guidelines",
-    items: ["Colors", "Typography", "Usage rules"],
-    size: "5 MB",
-  },
-]
-
-const keyStats = [
-  { label: "Portfolio Companies", value: "25+", icon: TrendingUp },
-  { label: "Total Funding Raised", value: "$500M+", icon: Award },
-  { label: "Team Members", value: "75+", icon: Users },
-  { label: "Years in Operation", value: "4+", icon: Calendar },
-]
+import { Card, CardContent } from "@/components/ui/card"
+import { Download, FileText, ImageIcon, Video, Globe, Palette, Building, ExternalLink, AlertCircle } from "lucide-react"
+import Header from "@/app/components/header"
+import Footer from "@/app/components/footer"
 
 export default function PressKitPage() {
-  return (
-    <>
-      <Header />
-      <div className="min-h-screen pt-20">
-        {/* Hero Section */}
-        <section className="py-20 bg-gradient-to-br from-primary/10 to-secondary/10">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-4xl md:text-6xl font-bold text-primary mb-6 font-syne">Press Kit</h1>
-              <p className="text-xl text-muted-foreground mb-8">
-                Media resources, company information, and press materials for journalists, partners, and stakeholders.
-              </p>
-              <Button size="lg" asChild>
-                <a href="/press-kit-download.zip" download>
-                  <Download className="mr-2 h-5 w-5" />
-                  Download Complete Press Kit
-                </a>
-              </Button>
-            </div>
+  const [pressKitData, setPressKitData] = useState({
+    items: [],
+    grouped: {},
+  })
+  const [loading, setLoading] = useState(true)
+  const [downloadingItems, setDownloadingItems] = useState(new Set())
+
+  useEffect(() => {
+    fetchPressKitData()
+  }, [])
+
+  const fetchPressKitData = async () => {
+    try {
+      const response = await fetch("/api/content/press-kit")
+      if (response.ok) {
+        const data = await response.json()
+        setPressKitData(data)
+      }
+    } catch (error) {
+      console.error("Error fetching press kit data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDownload = async (item) => {
+    if (!item.file) {
+      alert("File not available for download")
+      return
+    }
+
+    setDownloadingItems((prev) => new Set(prev).add(item._id))
+
+    try {
+      // Use the direct download API route
+      window.open(`/api/content/press-kit/file/${item._id}`, "_blank")
+
+      // Also track the download
+      await fetch("/api/content/press-kit/download", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itemId: item._id }),
+      })
+    } catch (error) {
+      console.error("Error downloading file:", error)
+      alert("Error downloading file. Please try again or contact support.")
+    } finally {
+      setTimeout(() => {
+        setDownloadingItems((prev) => {
+          const newSet = new Set(prev)
+          newSet.delete(item._id)
+          return newSet
+        })
+      }, 2000) // Reset loading state after 2 seconds
+    }
+  }
+
+  const handleCompleteKitDownload = async () => {
+    try {
+      // Try to download the complete press kit
+      const response = await fetch("/api/content/press-kit/complete-download")
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement("a")
+        link.href = url
+        link.download = "Connected-Press-Kit-Complete.zip"
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } else {
+        // Fallback: try to download from public folder
+        window.open("/press-kit-complete.zip", "_blank")
+      }
+    } catch (error) {
+      console.error("Error downloading complete press kit:", error)
+      alert("Complete press kit not available. Please contact support.")
+    }
+  }
+
+  const getCategoryIcon = (category) => {
+    switch (category) {
+      case "logos":
+        return <ImageIcon className="h-6 w-6 text-[#6529b2]" />
+      case "brand-guidelines":
+        return <Palette className="h-6 w-6 text-blue-600" />
+      case "company-info":
+        return <Building className="h-6 w-6 text-red-600" />
+      case "photos":
+        return <ImageIcon className="h-6 w-6 text-green-600" />
+      case "videos":
+        return <Video className="h-6 w-6 text-orange-600" />
+      case "web-assets":
+        return <Globe className="h-6 w-6 text-indigo-600" />
+      default:
+        return <FileText className="h-6 w-6 text-gray-600" />
+    }
+  }
+
+  const getCategoryTitle = (category) => {
+    switch (category) {
+      case "logos":
+        return "Logos"
+      case "brand-guidelines":
+        return "Brand Guidelines"
+      case "company-info":
+        return "Company Info"
+      case "photos":
+        return "Photos"
+      case "videos":
+        return "Videos"
+      case "web-assets":
+        return "Web Assets"
+      default:
+        return category
+    }
+  }
+
+  const getCategoryDescription = (category) => {
+    switch (category) {
+      case "logos":
+        return "Official Connected logos in various formats"
+      case "brand-guidelines":
+        return "Official brand standards and usage guidelines"
+      case "company-info":
+        return "Official company information and fact sheets"
+      case "photos":
+        return "High-resolution company and team photos"
+      case "videos":
+        return "Company videos and promotional content"
+      case "web-assets":
+        return "Digital assets for online use"
+      default:
+        return "Download specific assets as needed"
+    }
+  }
+
+  const getDefaultAssets = (category) => {
+    switch (category) {
+      case "logos":
+        return [
+          { name: "Primary Logo (SVG)", fileType: "svg" },
+          { name: "Logo Mark (PNG)", fileType: "png" },
+          { name: "White Version (SVG)", fileType: "svg" },
+          { name: "Black Version (SVG)", fileType: "svg" },
+        ]
+      case "brand-guidelines":
+        return [
+          { name: "Brand Guidelines (PDF)", fileType: "pdf" },
+          { name: "Color Palette (PDF)", fileType: "pdf" },
+          { name: "Typography Guide (PDF)", fileType: "pdf" },
+        ]
+      case "company-info":
+        return [
+          { name: "Company Fact Sheet", fileType: "pdf" },
+          { name: "Executive Bios", fileType: "pdf" },
+          { name: "Company Timeline", fileType: "pdf" },
+        ]
+      case "photos":
+        return [
+          { name: "Office Photos (ZIP)", fileType: "zip" },
+          { name: "Team Photos (ZIP)", fileType: "zip" },
+          { name: "Event Photos (ZIP)", fileType: "zip" },
+        ]
+      case "videos":
+        return [
+          { name: "Company Overview", fileType: "mp4" },
+          { name: "CEO Interview", fileType: "mp4" },
+          { name: "Office Tour", fileType: "mp4" },
+        ]
+      case "web-assets":
+        return [
+          { name: "Social Media Kit", fileType: "zip" },
+          { name: "Banner Images", fileType: "zip" },
+          { name: "Favicon Package", fileType: "zip" },
+        ]
+      default:
+        return []
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex justify-center items-center py-20">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6529b2] mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading press kit...</p>
           </div>
-        </section>
-
-        {/* Company Overview */}
-        <section className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <h2 className="text-3xl font-bold mb-6 font-syne">About Connected</h2>
-                <div className="space-y-4 text-muted-foreground">
-                  <p>
-                    Connected is a leading innovation and technology company that bridges the gap between groundbreaking
-                    ideas and market-ready solutions. Founded in 2020, we specialize in building, investing in, and
-                    scaling technology ventures across multiple industries.
-                  </p>
-                  <p>
-                    Our mission is to empower entrepreneurs and businesses with the resources, expertise, and
-                    connections they need to transform innovative ideas into successful ventures that create lasting
-                    impact.
-                  </p>
-                  <p>
-                    With a portfolio of 25+ companies and over $500M in total funding raised, Connected has established
-                    itself as a key player in the startup ecosystem, helping companies scale from MVP to market leaders.
-                  </p>
-                </div>
-              </div>
-              <div className="relative h-[400px] rounded-xl overflow-hidden shadow-xl">
-                <Image
-                  src="/placeholder.svg?height=800&width=1200&text=Connected+Office"
-                  alt="Connected Office"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Key Statistics */}
-        <section className="py-20 bg-lynx-white">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 font-syne">Key Statistics</h2>
-              <p className="text-xl text-muted-foreground">Numbers that showcase our impact and growth</p>
-            </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-              {keyStats.map((stat, index) => {
-                const Icon = stat.icon
-                return (
-                  <Card key={index} className="text-center border-none shadow-sm">
-                    <CardContent className="p-6">
-                      <Icon className="h-8 w-8 text-primary mx-auto mb-4" />
-                      <div className="text-3xl font-bold text-primary mb-2">{stat.value}</div>
-                      <div className="text-sm text-muted-foreground">{stat.label}</div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Recent Press Releases */}
-        <section className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 font-syne">Recent Press Releases</h2>
-              <p className="text-xl text-muted-foreground">Latest news and announcements from Connected</p>
-            </div>
-
-            <div className="max-w-4xl mx-auto space-y-6">
-              {pressReleases.map((release, index) => (
-                <Card key={index} className="hover:shadow-md transition-shadow duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <Badge variant="outline">{release.category}</Badge>
-                          <span className="text-sm text-muted-foreground">{release.date}</span>
-                        </div>
-                        <h3 className="text-xl font-semibold mb-2 hover:text-primary cursor-pointer">
-                          {release.title}
-                        </h3>
-                        <p className="text-muted-foreground">{release.excerpt}</p>
-                      </div>
-                      <ExternalLink className="h-5 w-5 text-muted-foreground ml-4" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <div className="text-center mt-8">
-              <Button variant="outline">
-                View All Press Releases <ExternalLink className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        {/* Media Assets */}
-        <section className="py-20 bg-lynx-white">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 font-syne">Media Assets</h2>
-              <p className="text-xl text-muted-foreground">High-quality assets for media coverage and partnerships</p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {mediaAssets.map((asset, index) => (
-                <Card key={index} className="border-none shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{asset.title}</CardTitle>
-                    <CardDescription>{asset.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap gap-1">
-                        {asset.items.map((item) => (
-                          <Badge key={item} variant="secondary" className="text-xs">
-                            {item}
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">{asset.size}</span>
-                        <Button size="sm" variant="outline">
-                          <Download className="h-4 w-4 mr-1" />
-                          Download
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Leadership Team */}
-        <section className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 font-syne">Leadership Team</h2>
-              <p className="text-xl text-muted-foreground">Meet the executives leading Connected's vision</p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {[
-                {
-                  name: "Sarah Johnson",
-                  role: "CEO & Founder",
-                  bio: "Former tech executive with 15+ years of experience in scaling startups and building innovation ecosystems.",
-                  image: "/placeholder.svg?height=300&width=300&text=SJ",
-                },
-                {
-                  name: "Michael Chen",
-                  role: "CTO",
-                  bio: "Technology innovator with expertise in AI, machine learning, and software architecture.",
-                  image: "/placeholder.svg?height=300&width=300&text=MC",
-                },
-                {
-                  name: "Emily Rodriguez",
-                  role: "COO",
-                  bio: "Operations expert specializing in business development and strategic partnerships.",
-                  image: "/placeholder.svg?height=300&width=300&text=ER",
-                },
-              ].map((member, index) => (
-                <Card key={index} className="border-none shadow-sm overflow-hidden">
-                  <div className="relative h-64">
-                    <Image src={member.image || "/placeholder.svg"} alt={member.name} fill className="object-cover" />
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-1">{member.name}</h3>
-                    <p className="text-primary font-medium mb-3">{member.role}</p>
-                    <p className="text-muted-foreground text-sm">{member.bio}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Contact Information */}
-        <section className="py-20 bg-lynx-white">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 font-syne">Media Contact</h2>
-              <p className="text-xl text-muted-foreground">For press inquiries and media requests</p>
-            </div>
-
-            <div className="max-w-2xl mx-auto">
-              <Card className="border-none shadow-sm">
-                <CardContent className="p-8 text-center">
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-xl font-semibold mb-2">Press Relations</h3>
-                      <p className="text-muted-foreground">
-                        For all media inquiries, interview requests, and press-related questions
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <p>
-                        <strong>Email:</strong> press@connected.com
-                      </p>
-                      <p>
-                        <strong>Phone:</strong> +1 (555) 123-4567
-                      </p>
-                      <p>
-                        <strong>Response Time:</strong> Within 24 hours
-                      </p>
-                    </div>
-                    <div className="pt-4">
-                      <Button asChild>
-                        <Link href="mailto:press@connected.com">Contact Press Team</Link>
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Usage Guidelines */}
-        <section className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 font-syne">Usage Guidelines</h2>
-              <p className="text-xl text-muted-foreground">
-                Please follow these guidelines when using our brand assets
-              </p>
-            </div>
-
-            <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
-              <Card className="border-none shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-green-600">Do</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-muted-foreground">
-                    <li>• Use our official logos and brand colors</li>
-                    <li>• Maintain proper spacing around logos</li>
-                    <li>• Use high-resolution images for print</li>
-                    <li>• Credit Connected in all media coverage</li>
-                    <li>• Contact us for approval of major usage</li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className="border-none shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-red-600">Don't</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-muted-foreground">
-                    <li>• Modify or distort our logos</li>
-                    <li>• Use outdated brand assets</li>
-                    <li>• Place logos on busy backgrounds</li>
-                    <li>• Use our brand for endorsements</li>
-                    <li>• Combine our logo with other brands</li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
+        </div>
+        <Footer />
       </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+
+      {/* Hero Section */}
+      <section className="bg-[#f3f1fd] text-white py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-[#6529b2]">Press Kit</h1>
+          <p className="text-xl text-gray-500 max-w-2xl mx-auto">
+            Download our official brand assets, logos, and company information for media use.
+          </p>
+        </div>
+      </section>
+
+      {/* Quick Downloads Section */}
+      <section className="py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Quick Downloads</h2>
+            <p className="text-gray-600 text-lg">Get everything you need in one package</p>
+          </div>
+
+          <div className="max-w-md mx-auto">
+            <Card className="border border-gray-200 hover:border-purple-300 bg-white transition-colors">
+              <CardContent className="p-8 text-center">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Complete Press Kit</h3>
+                <p className="text-gray-600 mb-6">
+                  Includes all logos, brand guidelines, company information, and high-resolution images
+                </p>
+                <Button
+                  className="bg-[#6529b2] hover:bg-purple-700 text-white px-6 py-3"
+                  onClick={handleCompleteKitDownload}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Full Press Kit (25MB)
+                </Button>
+                <p className="text-sm text-gray-500 mt-4">Last updated: January 2024 • ZIP format</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Individual Assets Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Individual Assets</h2>
+            <p className="text-gray-600 text-lg">Download specific assets as needed</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Show categories with real data */}
+            {Object.entries(pressKitData.grouped).map(([category, items]) => (
+              <Card key={category} className="border-[1px] border-gray-50 hover:shadow-lg bg-white transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center mb-4">
+                    {getCategoryIcon(category)}
+                    <h3 className="text-lg font-semibold text-gray-900 ml-3">{getCategoryTitle(category)}</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm mb-6">{getCategoryDescription(category)}</p>
+
+                  <div className="space-y-3">
+                    {items.map((item) => (
+                      <div
+                        key={item._id}
+                        className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">{item.title}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            {item.fileType && (
+                              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                {item.fileType.toUpperCase()}
+                              </span>
+                            )}
+                            {item.fileSize && <span className="text-xs text-gray-500">{item.fileSize}</span>}
+                            {item.file ? (
+                              <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">Available</span>
+                            ) : (
+                              <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded flex items-center gap-1">
+                                <AlertCircle className="h-3 w-3" />
+                                No File
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          {item.file ? (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-[#6529b2] hover:text-purple-700 hover:bg-purple-50"
+                                onClick={() => handleDownload(item)}
+                                disabled={downloadingItems.has(item._id)}
+                              >
+                                {downloadingItems.has(item._id) ? (
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-[#6529b2]"></div>
+                                ) : (
+                                  <Download className="h-3 w-3" />
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
+                                asChild
+                              >
+                                <a href={item.file} target="_blank" rel="noopener noreferrer">
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              </Button>
+                            </>
+                          ) : (
+                            <Button variant="ghost" size="sm" className="text-gray-400 cursor-not-allowed" disabled>
+                              <Download className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {/* Show default categories when no data or fill missing categories */}
+            {["logos", "brand-guidelines", "company-info", "photos", "videos", "web-assets"].map((categoryKey) => {
+              if (pressKitData.grouped[categoryKey]) return null // Skip if we have real data
+
+              const defaultAssets = getDefaultAssets(categoryKey)
+              return (
+                <Card key={categoryKey} className="border border-gray-100 bg-white hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-center mb-4">
+                      {getCategoryIcon(categoryKey)}
+                      <h3 className="text-lg font-semibold text-gray-900 ml-3">{getCategoryTitle(categoryKey)}</h3>
+                    </div>
+                    <p className="text-gray-600 text-sm mb-6">{getCategoryDescription(categoryKey)}</p>
+
+                    <div className="space-y-3">
+                      {defaultAssets.map((asset, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
+                        >
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-500">{asset.name}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded">
+                                {asset.fileType.toUpperCase()}
+                              </span>
+                              <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">
+                                Coming Soon
+                              </span>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="sm" className="text-gray-400 cursor-not-allowed" disabled>
+                            <Download className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Usage Guidelines Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Usage Guidelines</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Do's */}
+            <Card className="bg-green-50 border-green-200">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold text-green-800 mb-4 flex items-center">
+                  <span className="text-green-600 mr-2">✓</span>
+                  Do
+                </h3>
+                <ul className="space-y-2 text-sm text-green-700">
+                  <li>• Use official logos and colors</li>
+                  <li>• Maintain proper spacing around logos</li>
+                  <li>• Use high-resolution images</li>
+                  <li>• Follow brand guidelines</li>
+                  <li>• Credit Connected appropriately</li>
+                  <li>• Contact us for custom requests</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Don'ts */}
+            <Card className="bg-red-50 border-red-200">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold text-red-800 mb-4 flex items-center">
+                  <span className="text-red-600 mr-2">✗</span>
+                  Don't
+                </h3>
+                <ul className="space-y-2 text-sm text-red-700">
+                  <li>• Modify or distort logos</li>
+                  <li>• Use unauthorized colors</li>
+                  <li>• Place logos on busy backgrounds</li>
+                  <li>• Use low-resolution images</li>
+                  <li>• Misrepresent our company</li>
+                  <li>• Use assets for commercial purposes without permission</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Media Contact Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Media Contact</h2>
+          <p className="text-gray-600 text-lg mb-8">Need additional assets or have questions about usage?</p>
+
+          <Card className="max-w-md mx-auto bg-white">
+            <CardContent className="p-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Press Relations</h3>
+              <p className="text-gray-600 mb-2">press@connected.com</p>
+              <p className="text-gray-600 mb-6">+1 (415) 555-0123</p>
+              <Button className="bg-[#6529b2] hover:bg-purple-700 text-white" asChild>
+                <Link href="mailto:press@connected.com">Contact Media Team</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       <Footer />
-    </>
+    </div>
   )
 }

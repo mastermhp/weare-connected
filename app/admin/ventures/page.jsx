@@ -94,10 +94,16 @@ export default function VenturesPage() {
       { label: "Time Saved", value: "" },
     ],
     technologies: [],
+    keyFeatures: [],
+    achievements: [],
+    testimonials: [],
     logo: null,
     featuredImage: null,
   })
   const [techInput, setTechInput] = useState("")
+  const [featureInput, setFeatureInput] = useState("")
+  const [achievementInput, setAchievementInput] = useState("")
+  const [testimonialInput, setTestimonialInput] = useState("")
   const [formErrors, setFormErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -188,6 +194,57 @@ export default function VenturesPage() {
     }))
   }
 
+  const handleAddFeature = () => {
+    if (featureInput.trim() && !formData.keyFeatures.includes(featureInput.trim())) {
+      setFormData((prev) => ({
+        ...prev,
+        keyFeatures: [...prev.keyFeatures, featureInput.trim()],
+      }))
+      setFeatureInput("")
+    }
+  }
+
+  const removeFeature = (feature) => {
+    setFormData((prev) => ({
+      ...prev,
+      keyFeatures: prev.keyFeatures.filter((f) => f !== feature),
+    }))
+  }
+
+  const handleAddAchievement = () => {
+    if (achievementInput.trim() && !formData.achievements.includes(achievementInput.trim())) {
+      setFormData((prev) => ({
+        ...prev,
+        achievements: [...prev.achievements, achievementInput.trim()],
+      }))
+      setAchievementInput("")
+    }
+  }
+
+  const removeAchievement = (achievement) => {
+    setFormData((prev) => ({
+      ...prev,
+      achievements: prev.achievements.filter((a) => a !== achievement),
+    }))
+  }
+
+  const handleAddTestimonial = () => {
+    if (testimonialInput.trim() && !formData.testimonials.includes(testimonialInput.trim())) {
+      setFormData((prev) => ({
+        ...prev,
+        testimonials: [...prev.testimonials, testimonialInput.trim()],
+      }))
+      setTestimonialInput("")
+    }
+  }
+
+  const removeTestimonial = (testimonial) => {
+    setFormData((prev) => ({
+      ...prev,
+      testimonials: prev.testimonials.filter((t) => t !== testimonial),
+    }))
+  }
+
   const handleLogoUpload = (imageData) => {
     setFormData((prev) => ({
       ...prev,
@@ -256,6 +313,9 @@ export default function VenturesPage() {
           { label: "Time Saved", value: "" },
         ],
         technologies: [],
+        keyFeatures: [],
+        achievements: [],
+        testimonials: [],
         logo: null,
         featuredImage: null,
       })
@@ -532,6 +592,99 @@ export default function VenturesPage() {
                               type="button"
                               className="ml-2 text-gray-500 hover:text-gray-700"
                               onClick={() => removeTechnology(tech)}
+                            >
+                              ×
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Key Features</h3>
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add key feature"
+                          value={featureInput}
+                          onChange={(e) => setFeatureInput(e.target.value)}
+                          onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddFeature())}
+                        />
+                        <Button type="button" onClick={handleAddFeature}>
+                          Add
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {formData.keyFeatures.map((feature) => (
+                          <Badge key={feature} variant="secondary" className="px-2 py-1">
+                            {feature}
+                            <button
+                              type="button"
+                              className="ml-2 text-gray-500 hover:text-gray-700"
+                              onClick={() => removeFeature(feature)}
+                            >
+                              ×
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Achievements</h3>
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add achievement"
+                          value={achievementInput}
+                          onChange={(e) => setAchievementInput(e.target.value)}
+                          onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddAchievement())}
+                        />
+                        <Button type="button" onClick={handleAddAchievement}>
+                          Add
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {formData.achievements.map((achievement) => (
+                          <Badge key={achievement} variant="secondary" className="px-2 py-1">
+                            {achievement}
+                            <button
+                              type="button"
+                              className="ml-2 text-gray-500 hover:text-gray-700"
+                              onClick={() => removeAchievement(achievement)}
+                            >
+                              ×
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Testimonials</h3>
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add testimonial"
+                          value={testimonialInput}
+                          onChange={(e) => setTestimonialInput(e.target.value)}
+                          onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTestimonial())}
+                        />
+                        <Button type="button" onClick={handleAddTestimonial}>
+                          Add
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {formData.testimonials.map((testimonial) => (
+                          <Badge key={testimonial} variant="secondary" className="px-2 py-1">
+                            {testimonial}
+                            <button
+                              type="button"
+                              className="ml-2 text-gray-500 hover:text-gray-700"
+                              onClick={() => removeTestimonial(testimonial)}
                             >
                               ×
                             </button>
