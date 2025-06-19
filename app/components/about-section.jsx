@@ -2,11 +2,47 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 
-export default function AboutSection() {
+export default function AboutSection({ content }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true })
+
+  const [aboutData, setAboutData] = useState({
+    title: "Who We Are",
+    description:
+      "Connected began with a vision to nurture and scale innovative ideas into leading market solutions. We are more than just a conglomerate; we are a community of visionaries and creators dedicated to making a significant impact through our collective expertise and passion for innovation.",
+    vision:
+      "Our vision is to become the world's leading launchpad for next-generation ventures. We aim to create a global ecosystem where bold ideas grow into influential brands that define the future of technology, culture, and commerce.",
+    mission:
+      "Connected's mission is to build ventures that shape the future. We turn ideas into impactful businesses across tech, digital, media, and lifestyle. Our goal is to empower creators, disrupt industries, and deliver innovation with purpose and precision.",
+    values: [
+      {
+        number: "01",
+        title: "Innovation",
+        description:
+          "We push boundaries and challenge the status quo to create cutting-edge solutions that transform industries.",
+      },
+      {
+        number: "02",
+        title: "Collaboration",
+        description:
+          "We believe in the power of community and partnerships to achieve extraordinary results and sustainable growth.",
+      },
+      {
+        number: "03",
+        title: "Impact",
+        description:
+          "We're committed to creating meaningful change and lasting value that drives transformative growth across markets.",
+      },
+    ],
+  })
+
+  useEffect(() => {
+    if (content?.about) {
+      setAboutData(content.about)
+    }
+  }, [content])
 
   return (
     <section ref={ref} className="w-full py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 bg-white">
@@ -19,11 +55,11 @@ export default function AboutSection() {
         >
           <div className="space-y-2 max-w-4xl mx-auto">
             <div className="inline-block rounded-lg bg-accent px-3 py-1 text-sm font-medium text-primary">About Us</div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter">Who We Are</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter">
+              {aboutData.title}
+            </h2>
             <p className="max-w-[900px] mx-auto text-muted-foreground text-base sm:text-lg md:text-xl leading-relaxed px-4">
-              Connected began with a vision to nurture and scale innovative ideas into leading market solutions. We are
-              more than just a conglomerate; we are a community of visionaries and creators dedicated to making a
-              significant impact through our collective expertise and passion for innovation.
+              {aboutData.description}
             </p>
           </div>
         </motion.div>
@@ -39,19 +75,11 @@ export default function AboutSection() {
             <div className="space-y-4">
               <div className="p-4 sm:p-6 rounded-lg bg-purple-50 border-l-4 border-purple-500">
                 <h4 className="font-bold text-purple-900 mb-2">Vision</h4>
-                <p className="text-purple-800 text-sm sm:text-base">
-                  Our vision is to become the world's leading launchpad for next-generation ventures. We aim to create a
-                  global ecosystem where bold ideas grow into influential brands that define the future of technology,
-                  culture, and commerce.
-                </p>
+                <p className="text-purple-800 text-sm sm:text-base">{aboutData.vision}</p>
               </div>
               <div className="p-4 sm:p-6 rounded-lg bg-blue-50 border-l-4 border-blue-500">
                 <h4 className="font-bold text-blue-900 mb-2">Mission</h4>
-                <p className="text-blue-800 text-sm sm:text-base">
-                  Connected's mission is to build ventures that shape the future. We turn ideas into impactful
-                  businesses across tech, digital, media, and lifestyle. Our goal is to empower creators, disrupt
-                  industries, and deliver innovation with purpose and precision.
-                </p>
+                <p className="text-blue-800 text-sm sm:text-base">{aboutData.mission}</p>
               </div>
             </div>
           </div>
@@ -87,26 +115,7 @@ export default function AboutSection() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="mx-auto grid max-w-5xl items-center gap-6 sm:gap-8 md:gap-12 py-8 sm:py-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {[
-            {
-              number: "01",
-              title: "Innovation",
-              description:
-                "We push boundaries and challenge the status quo to create cutting-edge solutions that transform industries.",
-            },
-            {
-              number: "02",
-              title: "Collaboration",
-              description:
-                "We believe in the power of community and partnerships to achieve extraordinary results and sustainable growth.",
-            },
-            {
-              number: "03",
-              title: "Impact",
-              description:
-                "We're committed to creating meaningful change and lasting value that drives transformative growth across markets.",
-            },
-          ].map((item, index) => (
+          {aboutData.values.map((item, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}

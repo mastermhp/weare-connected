@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -19,7 +19,25 @@ import {
 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-export default function ContactSection() {
+export default function ContactSection({ content }) {
+  const [contactData, setContactData] = useState({
+    title: "Get in Touch",
+    description:
+      "Whether you have a specific project in mind or just want to explore possibilities, we're here to help. Our team of experts is ready to discuss your vision and provide tailored solutions.",
+    office: {
+      address: "1234 Innovation Drive, Suite 500",
+      city: "San Francisco, CA 94107",
+      country: "United States",
+    },
+    emails: {
+      general: "hello@connected.com",
+      business: "business@connected.com",
+      careers: "careers@connected.com",
+    },
+    phone: "+1 (415) 555-0164",
+    hours: "Mon-Fri: 9:00 AM - 6:00 PM (PST)",
+  })
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -32,6 +50,12 @@ export default function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState(null)
   const [errorMessage, setErrorMessage] = useState("")
+
+  useEffect(() => {
+    if (content?.contact) {
+      setContactData(content.contact)
+    }
+  }, [content])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -105,7 +129,7 @@ export default function ContactSection() {
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">Get in Touch</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">{contactData.title}</h2>
         </div>
 
         {/* Two Column Layout */}
@@ -114,10 +138,7 @@ export default function ContactSection() {
           <div className="space-y-8">
             <div>
               <h3 className="text-2xl font-bold text-black mb-4">Let's Talk</h3>
-              <p className="text-gray-600 text-base leading-relaxed">
-                Whether you have a specific project in mind or just want to explore possibilities, we're here to help.
-                Our team of experts is ready to discuss your vision and provide tailored solutions.
-              </p>
+              <p className="text-gray-600 text-base leading-relaxed">{contactData.description}</p>
             </div>
 
             {/* Our Office */}
@@ -127,9 +148,9 @@ export default function ContactSection() {
                 <h4 className="font-semibold text-black">Our Office</h4>
               </div>
               <div className="ml-8 text-gray-600">
-                <p>1234 Innovation Drive, Suite 500</p>
-                <p>San Francisco, CA 94107</p>
-                <p>United States</p>
+                <p>{contactData.office.address}</p>
+                <p>{contactData.office.city}</p>
+                <p>{contactData.office.country}</p>
               </div>
             </div>
 
@@ -140,9 +161,9 @@ export default function ContactSection() {
                 <h4 className="font-semibold text-black">Email Us</h4>
               </div>
               <div className="ml-8 text-gray-600 space-y-1">
-                <p>General: hello@connected.com</p>
-                <p>Business: business@connected.com</p>
-                <p>Careers: careers@connected.com</p>
+                <p>General: {contactData.emails.general}</p>
+                <p>Business: {contactData.emails.business}</p>
+                <p>Careers: {contactData.emails.careers}</p>
               </div>
             </div>
 
@@ -153,8 +174,8 @@ export default function ContactSection() {
                 <h4 className="font-semibold text-black">Call Us</h4>
               </div>
               <div className="ml-8 text-gray-600">
-                <p>+1 (415) 555-0164</p>
-                <p>Mon-Fri: 9:00 AM - 6:00 PM (PST)</p>
+                <p>{contactData.phone}</p>
+                <p>{contactData.hours}</p>
               </div>
             </div>
 

@@ -1,7 +1,25 @@
 "use client"
 import { motion } from "framer-motion"
+import { useState, useEffect } from "react"
 
-export default function HeroSection() {
+export default function HeroSection({ content }) {
+  const [heroData, setHeroData] = useState({
+    title: "THE FUTURE IS CONNECTED",
+    subtitle:
+      "We don't just build products. We architect digital ecosystems that transform industries and connect the world.",
+    stats: [
+      { value: "5+", label: "Ventures Built" },
+      { value: "$20M+", label: "Value Created" },
+      { value: "15", label: "Countries" },
+    ],
+  })
+
+  useEffect(() => {
+    if (content?.hero) {
+      setHeroData(content.hero)
+    }
+  }, [content])
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden -mt-[90px] sm:-mt-[140px] md:-mt-[140px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
       {/* Dynamic Background - extends up to cover header area */}
@@ -52,32 +70,27 @@ export default function HeroSection() {
             {/* Main content */}
             <div className="space-y-4 sm:space-y-6">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-pot-black leading-tight">
-                THE FUTURE IS
+                {heroData.title.split(" ").slice(0, -1).join(" ")}
                 <span className="block text-transparent bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text">
-                  CONNECTED
+                  {heroData.title.split(" ").slice(-1)[0]}
                 </span>
               </h1>
 
               <p className="text-lg sm:text-xl text-gray-600 max-w-lg mx-auto lg:mx-0 leading-relaxed">
-                We don't just build products. We architect digital ecosystems that transform industries and connect the
-                world.
+                {heroData.subtitle}
               </p>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 sm:gap-6 md:gap-8 pt-6 sm:pt-8 border-t border-white/10 max-w-md mx-auto lg:mx-0">
-              <div className="text-center lg:text-left">
-                <div className="text-2xl sm:text-3xl font-bold text-pot-black">5+</div>
-                <div className="text-xs sm:text-sm text-gray-500">Ventures Built</div>
-              </div>
-              <div className="text-center lg:text-left">
-                <div className="text-2xl sm:text-3xl font-bold text-pot-black">$20M+</div>
-                <div className="text-xs sm:text-sm text-gray-500">Value Created</div>
-              </div>
-              <div className="text-center lg:text-left">
-                <div className="text-2xl sm:text-3xl font-bold text-pot-black">15</div>
-                <div className="text-xs sm:text-sm text-gray-500">Countries</div>
-              </div>
+            <div
+              className={`grid grid-cols-${heroData.stats.length} gap-4 sm:gap-6 md:gap-8 pt-6 sm:pt-8 border-t border-white/10 max-w-md mx-auto lg:mx-0`}
+            >
+              {heroData.stats.map((stat, index) => (
+                <div key={index} className="text-center lg:text-left">
+                  <div className="text-2xl sm:text-3xl font-bold text-pot-black">{stat.value}</div>
+                  <div className="text-xs sm:text-sm text-gray-500">{stat.label}</div>
+                </div>
+              ))}
             </div>
           </motion.div>
 

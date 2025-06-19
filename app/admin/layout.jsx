@@ -23,6 +23,7 @@ import {
   UserCheck,
   UserPlus,
   User,
+  SettingsIcon,
 } from "lucide-react";
 import { Suspense } from "react";
 
@@ -82,9 +83,9 @@ const sidebarItems = [
     icon: BarChart3,
   },
   {
-    title: "Settings",
-    href: "/admin/settings",
-    icon: Settings,
+    title: "Content",
+    href: "/admin/content",
+    icon: SettingsIcon,
   },
 ];
 

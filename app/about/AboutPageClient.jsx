@@ -1,73 +1,87 @@
-"use client";
+"use client"
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Target, Lightbulb, Linkedin, Twitter, Mail } from "lucide-react";
-// import Header from "@/components/header"
-import Footer from "../components/footer";
-import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import Header from "../components/header";
-
-const teamMembers = [
-  {
-    name: "Ikramul Haque Ikram",
-    role: "Chairman & Managing Director",
-    bio: "Visionary leader with extensive experience in strategic business development and venture building.",
-    image: "/professional-ceo-portrait.png",
-    linkedin: "#",
-    twitter: "#",
-    email: "ikram@connected.com",
-  },
-  {
-    name: "Mayeen Rahman",
-    role: "Chief Executive Officer (CEO)",
-    bio: "Innovative executive focused on scaling businesses and driving sustainable growth across markets.",
-    image: "/professional-woman-executive.png",
-    linkedin: "#",
-    twitter: "#",
-    email: "mayeen@connected.com",
-  },
-  {
-    name: "Touhidul Haque",
-    role: "Chief Technical Officer (CTO)",
-    bio: "Technology leader specializing in cutting-edge solutions and digital transformation initiatives.",
-    image: "/professional-cto-portrait.png",
-    linkedin: "#",
-    twitter: "#",
-    email: "touhidul@connected.com",
-  },
-  {
-    name: "Md. Minhaz Imran",
-    role: "Executive Director & COO",
-    bio: "Operations specialist focused on scaling systems and optimizing business processes for maximum efficiency.",
-    image: "/production-director-portrait.png",
-    linkedin: "#",
-    twitter: "#",
-    email: "minhaz@connected.com",
-  },
-  {
-    name: "Rasel Ahmed Shifat",
-    role: "Executive Director & Production Head",
-    bio: "Production specialist with expertise in managing complex projects and delivering exceptional results.",
-    image: "/production-director-portrait.png",
-    linkedin: "#",
-    twitter: "#",
-    email: "rasel@connected.com",
-  },
-  {
-    name: "Shafin Haider",
-    role: "Creative Director – Social & Visual Media",
-    bio: "Creative professional focused on building compelling brand narratives and driving visual excellence.",
-    image: "/professional-woman-designer.png",
-    linkedin: "#",
-    twitter: "#",
-    email: "shafin@connected.com",
-  },
-];
+import { useState, useEffect } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Target, Lightbulb, Linkedin, Twitter, Mail } from "lucide-react"
+import Footer from "../components/footer"
+import Image from "next/image"
+import Link from "next/link"
+import { motion } from "framer-motion"
+import Header from "../components/header"
 
 export default function AboutPageClient() {
+  const [content, setContent] = useState(null)
+  const [teamMembers, setTeamMembers] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await fetch("/api/content/site")
+        if (response.ok) {
+          const data = await response.json()
+          setContent(data)
+        }
+      } catch (error) {
+        console.error("Error fetching content:", error)
+      }
+    }
+
+    const fetchTeamMembers = async () => {
+      try {
+        const response = await fetch("/api/content/team")
+        if (response.ok) {
+          const data = await response.json()
+          setTeamMembers(data)
+        }
+      } catch (error) {
+        console.error("Error fetching team members:", error)
+      }
+    }
+
+    Promise.all([fetchContent(), fetchTeamMembers()]).finally(() => {
+      setLoading(false)
+    })
+  }, [])
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-white">
+          <div className="animate-pulse">
+            <div className="h-96 bg-gray-200"></div>
+            <div className="max-w-7xl mx-auto px-4 py-16 space-y-8">
+              <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3 mx-auto"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </>
+    )
+  }
+
+  // Use dynamic content with fallbacks
+  const aboutContent = content?.about || {
+    hero: {
+      title: "About Connected",
+      subtitle: "Connected isn't just a name — it's a philosophy.",
+    },
+    story: {
+      title: "Our Story",
+      content: "Founded with a vision to transform how businesses operate in the digital age...",
+    },
+    team: {
+      title: "Leadership",
+      subtitle: "Our leadership blends strategy, execution, and creative firepower.",
+    },
+  }
+
+  const homepageContent = content?.homepage || {}
+
   return (
     <>
       <Header />
@@ -108,17 +122,14 @@ export default function AboutPageClient() {
               className="text-center mb-12 mx-auto max-w-4xl"
             >
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-pot-black mb-6 font-syne">
-                About Connected
+                {aboutContent.hero.title}
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
-                <span className="text-pot-black font-semibold">
-                  Connected isn't just a name — it's a philosophy.
-                </span>
+                <span className="text-pot-black font-semibold">{aboutContent.hero.subtitle}</span>
               </p>
               <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
-                We are a modern venture ecosystem that builds, launches, and
-                scales high-impact businesses across digital, tech, media,
-                consumer goods, and beyond.
+                We are a modern venture ecosystem that builds, launches, and scales high-impact businesses across
+                digital, tech, media, consumer goods, and beyond.
               </p>
               <p className="text-lg sm:text-xl text-pot-black font-medium max-w-3xl mx-auto leading-relaxed">
                 We don't follow the market. We build what the market follows.
@@ -161,17 +172,11 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto text-center"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-8 font-syne">
-              Who We Are
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-8 font-syne">Who We Are</h2>
             <p className="text-lg sm:text-xl text-gray-600 leading-relaxed mb-8 max-w-3xl mx-auto">
-              Connected is a multi-vertical venture company that operates at the
-              intersection of{" "}
-              <span className="text-pot-black font-semibold">
-                innovation, creativity, and execution.
-              </span>{" "}
-              We design ventures from the ground up — powering ideas with
-              infrastructure, capital, and world-class teams.
+              Connected is a multi-vertical venture company that operates at the intersection of{" "}
+              <span className="text-pot-black font-semibold">innovation, creativity, and execution.</span> We design
+              ventures from the ground up — powering ideas with infrastructure, capital, and world-class teams.
             </p>
             <motion.p
               initial={{ opacity: 0, scale: 0.95 }}
@@ -183,8 +188,8 @@ export default function AboutPageClient() {
               We don't just launch brands. We build machines that scale.
             </motion.p>
             <p className="text-base text-gray-600 leading-relaxed max-w-3xl mx-auto">
-              From stealth-mode tools to high-visibility consumer brands,
-              everything we create is tied together by one vision:{" "}
+              From stealth-mode tools to high-visibility consumer brands, everything we create is tied together by one
+              vision:{" "}
               <span className="text-pot-black font-semibold">
                 To shape how the next generation lives, works, and grows.
               </span>
@@ -210,15 +215,10 @@ export default function AboutPageClient() {
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mb-4 mx-auto lg:mx-0">
                     <Target className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-pot-black mb-4 font-syne">
-                    Our Mission
-                  </h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-pot-black mb-4 font-syne">Our Mission</h3>
                   <p className="text-base text-gray-600 leading-relaxed">
-                    To empower bold ideas and ambitious founders by providing
-                    the systems, strategy, and scale needed to{" "}
-                    <span className="text-pot-black font-semibold">
-                      dominate their industries.
-                    </span>
+                    To empower bold ideas and ambitious founders by providing the systems, strategy, and scale needed to{" "}
+                    <span className="text-pot-black font-semibold">dominate their industries.</span>
                   </p>
                 </CardContent>
               </Card>
@@ -235,9 +235,7 @@ export default function AboutPageClient() {
                   <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mb-4 mx-auto lg:mx-0">
                     <Lightbulb className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-pot-black mb-4 font-syne">
-                    Our Vision
-                  </h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-pot-black mb-4 font-syne">Our Vision</h3>
                   <p className="text-base text-gray-600 leading-relaxed">
                     To become the most influential venture ecosystem in Asia —{" "}
                     <span className="text-pot-black font-semibold">
@@ -261,9 +259,7 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto text-center mb-12"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-8 font-syne">
-              What We Do
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-8 font-syne">What We Do</h2>
           </motion.div>
 
           {/* Cards Container with Flex Wrap */}
@@ -287,9 +283,7 @@ export default function AboutPageClient() {
                 <Card className="text-center border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white h-full">
                   <CardContent className="p-6">
                     <div className="w-3 h-3 bg-primary rounded-full mx-auto mb-4"></div>
-                    <p className="text-sm text-gray-600 leading-relaxed font-medium">
-                      {item}
-                    </p>
+                    <p className="text-sm text-gray-600 leading-relaxed font-medium">{item}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -308,22 +302,17 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto text-center mb-12"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
-              Our Ecosystem
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">Our Ecosystem</h2>
             <p className="text-lg text-gray-600 mb-8">
-              <span className="text-pot-black font-semibold">
-                We don't reveal everything we build.
-              </span>{" "}
-              But here's a glimpse of the industries we touch:
+              <span className="text-pot-black font-semibold">We don't reveal everything we build.</span> But here's a
+              glimpse of the industries we touch:
             </p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[
               {
                 title: "Digital Advertising & Media",
-                description:
-                  "Performance marketing, creative assets, content automation, and monetization systems.",
+                description: "Performance marketing, creative assets, content automation, and monetization systems.",
               },
               {
                 title: "Tech & SaaS Infrastructure",
@@ -342,8 +331,7 @@ export default function AboutPageClient() {
               },
               {
                 title: "Food & Urban Experience",
-                description:
-                  "Fast, modern, and scalable food brands with focus on convenience, culture, and branding.",
+                description: "Fast, modern, and scalable food brands with focus on convenience, culture, and branding.",
               },
             ].map((ecosystem, index) => (
               <motion.div
@@ -357,12 +345,8 @@ export default function AboutPageClient() {
                 <Card className="text-center border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 bg-white">
                   <CardContent className="p-6">
                     <div className="w-4 h-4 bg-primary rounded-full mx-auto mb-4"></div>
-                    <h3 className="font-bold text-lg mb-3 text-pot-black">
-                      {ecosystem.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      {ecosystem.description}
-                    </p>
+                    <h3 className="font-bold text-lg mb-3 text-pot-black">{ecosystem.title}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">{ecosystem.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -376,12 +360,9 @@ export default function AboutPageClient() {
             className="text-center mt-12 max-w-2xl mx-auto"
           >
             <p className="text-base text-gray-600 leading-relaxed">
-              <span className="text-pot-black font-semibold">
-                Each venture is unique. Each one stands on its own.
-              </span>
+              <span className="text-pot-black font-semibold">Each venture is unique. Each one stands on its own.</span>
               <br />
-              But behind all of them is one root system:{" "}
-              <span className="text-pot-black font-bold">Connected.</span>
+              But behind all of them is one root system: <span className="text-pot-black font-bold">Connected.</span>
             </p>
           </motion.div>
         </div>
@@ -391,13 +372,9 @@ export default function AboutPageClient() {
       <section className="py-16 sm:py-20 bg-white">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-7xl">
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
-              What Makes Us Different
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">What Makes Us Different</h2>
             <p className="text-lg text-gray-600 mb-8">
-              <span className="text-pot-black font-semibold">
-                We don't just talk ideas — we execute them.
-              </span>
+              <span className="text-pot-black font-semibold">We don't just talk ideas — we execute them.</span>
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -416,9 +393,7 @@ export default function AboutPageClient() {
                 className="flex items-start space-x-4"
               >
                 <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-base text-gray-600 leading-relaxed">
-                  {item}
-                </p>
+                <p className="text-base text-gray-600 leading-relaxed">{item}</p>
               </motion.div>
             ))}
           </div>
@@ -432,9 +407,7 @@ export default function AboutPageClient() {
             <p className="text-lg font-medium text-pot-black">
               No middlemen. No wasted time. No vanity metrics.
               <br />
-              <span className="font-bold">
-                Just results, impact, and ownership.
-              </span>
+              <span className="font-bold">Just results, impact, and ownership.</span>
             </p>
           </motion.div>
         </div>
@@ -444,92 +417,92 @@ export default function AboutPageClient() {
       <section className="py-16 sm:py-20 bg-lynx-white">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-7xl">
           <div className="text-center mb-12 mx-auto max-w-4xl">
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
-              Leadership
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-4">
-              Our leadership blends strategy, execution, and creative firepower.
-            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">{aboutContent.team.title}</h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-4">{aboutContent.team.subtitle}</p>
             <p className="text-base font-medium text-pot-black">
-              <span className="font-bold">
-                We don't run companies. We launch weapons.
-              </span>
+              <span className="font-bold">We don't run companies. We launch weapons.</span>
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
-            {teamMembers.map((member, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-              >
-                <Card className="text-center border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 mx-auto w-full max-w-sm lg:max-w-none bg-white">
-                  <CardContent className="p-6">
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4">
-                      <Image
-                        src={member.image || "/placeholder.svg"}
-                        alt={member.name}
-                        fill
-                        className="object-cover rounded-full"
-                      />
-                    </div>
-                    <h3 className="font-bold text-lg mb-1 text-pot-black">
-                      {member.name}
-                    </h3>
-                    <p className="text-primary font-medium mb-3">
-                      {member.role}
-                    </p>
-                    <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                      {member.bio}
-                    </p>
-                    <div className="flex justify-center space-x-3">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="hover:bg-primary/10"
-                      >
-                        <a
-                          href={member.linkedin}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Linkedin className="h-4 w-4 text-gray-600" />
-                        </a>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="hover:bg-primary/10"
-                      >
-                        <a
-                          href={member.twitter}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Twitter className="h-4 w-4 text-gray-600" />
-                        </a>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="hover:bg-primary/10"
-                      >
-                        <a href={`mailto:${member.email}`}>
-                          <Mail className="h-4 w-4 text-gray-600" />
-                        </a>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+            {teamMembers.length > 0 ? (
+              teamMembers.map((member, index) => (
+                <motion.div
+                  key={member._id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -5 }}
+                >
+                  <Card className="text-center border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 mx-auto w-full max-w-sm lg:max-w-none bg-white">
+                    <CardContent className="p-6">
+                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4">
+                        {member.profileImage ? (
+                          <Image
+                            src={member.profileImage || "/placeholder.svg"}
+                            alt={member.name}
+                            fill
+                            className="object-cover rounded-full"
+                            onError={(e) => {
+                              e.target.style.display = "none"
+                              e.target.nextSibling.style.display = "flex"
+                            }}
+                          />
+                        ) : null}
+                        <div className="w-full h-full bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center text-2xl font-bold text-purple-600">
+                          {member.name.charAt(0)}
+                        </div>
+                      </div>
+                      <h3 className="font-bold text-lg mb-1 text-pot-black">{member.name}</h3>
+                      <p className="text-primary font-medium mb-3">{member.role}</p>
+                      <p className="text-sm text-gray-600 mb-4 leading-relaxed">{member.bio}</p>
+                      <div className="flex justify-center space-x-3">
+                        {member.social?.linkedin && (
+                          <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10">
+                            <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer">
+                              <Linkedin className="h-4 w-4 text-gray-600" />
+                            </a>
+                          </Button>
+                        )}
+                        {member.social?.twitter && (
+                          <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10">
+                            <a href={member.social.twitter} target="_blank" rel="noopener noreferrer">
+                              <Twitter className="h-4 w-4 text-gray-600" />
+                            </a>
+                          </Button>
+                        )}
+                        {member.email && (
+                          <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10">
+                            <a href={`mailto:${member.email}`}>
+                              <Mail className="h-4 w-4 text-gray-600" />
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))
+            ) : (
+              // Fallback to show message when no team members
+              <div className="col-span-full text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <svg className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">Team Members Coming Soon</h3>
+                <p className="text-gray-500">
+                  Our amazing team will be featured here once they're added to the system.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -544,14 +517,10 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="text-center mb-12 mx-auto max-w-4xl"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
-              Our Impact
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">Our Impact</h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
               Numbers that reflect our commitment to{" "}
-              <span className="text-pot-black font-semibold">
-                building successful ventures.
-              </span>
+              <span className="text-pot-black font-semibold">building successful ventures.</span>
             </p>
           </motion.div>
 
@@ -600,12 +569,8 @@ export default function AboutPageClient() {
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary mb-2 group-hover:text-secondary transition-colors duration-300">
                   {stat.number}
                 </div>
-                <div className="text-sm sm:text-base font-medium text-pot-black mb-1">
-                  {stat.label}
-                </div>
-                <div className="text-xs sm:text-sm text-gray-600">
-                  {stat.description}
-                </div>
+                <div className="text-sm sm:text-base font-medium text-pot-black mb-1">{stat.label}</div>
+                <div className="text-xs sm:text-sm text-gray-600">{stat.description}</div>
               </motion.div>
             ))}
           </div>
@@ -616,13 +581,9 @@ export default function AboutPageClient() {
       <section className="py-16 sm:py-20 bg-lynx-white">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-7xl">
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
-              Our Culture
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">Our Culture</h2>
             <p className="text-lg text-gray-600 mb-8">
-              <span className="text-pot-black font-semibold">
-                Connected is not a 9-to-5 company. It's a mindset.
-              </span>
+              <span className="text-pot-black font-semibold">Connected is not a 9-to-5 company. It's a mindset.</span>
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
@@ -641,9 +602,7 @@ export default function AboutPageClient() {
                 className="flex items-start space-x-4"
               >
                 <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-base text-gray-600 leading-relaxed">
-                  {item}
-                </p>
+                <p className="text-base text-gray-600 leading-relaxed">{item}</p>
               </motion.div>
             ))}
           </div>
@@ -655,13 +614,10 @@ export default function AboutPageClient() {
             className="text-center max-w-3xl mx-auto"
           >
             <p className="text-lg text-gray-600 mb-4">
-              We're building a home for the smartest minds, wildest thinkers,
-              and most relentless builders.
+              We're building a home for the smartest minds, wildest thinkers, and most relentless builders.
             </p>
             <p className="text-lg font-medium text-pot-black">
-              <span className="font-bold">
-                If you can't stand the average — you'll love it here.
-              </span>
+              <span className="font-bold">If you can't stand the average — you'll love it here.</span>
             </p>
           </motion.div>
         </div>
@@ -677,11 +633,7 @@ export default function AboutPageClient() {
           <div className="absolute top-1/3 right-1/4 w-12 h-12 bg-accent/20 rounded-full animate-ping"></div>
 
           {/* Curved lines */}
-          <svg
-            className="absolute inset-0 w-full h-full"
-            viewBox="0 0 1000 400"
-            fill="none"
-          >
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1000 400" fill="none">
             <path
               d="M0,200 Q250,100 500,200 T1000,200"
               stroke="url(#gradient1)"
@@ -888,31 +840,18 @@ export default function AboutPageClient() {
                 What's Coming Next
               </h2>
               <p className="text-lg sm:text-xl mb-8 text-gray-700 max-w-2xl mx-auto relative z-10">
-                We're just getting started. More ventures. More firepower. More
-                disruption. More ways to win.
+                We're just getting started. More ventures. More firepower. More disruption. More ways to win.
               </p>
               <p className="text-lg font-medium text-pot-black mb-8 relative z-10">
-                <span className="font-bold">
-                  We don't ask for permission. We just build.
-                </span>
+                <span className="font-bold">We don't ask for permission. We just build.</span>
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    size="lg"
-                    className="bg-primary hover:bg-primary/90 shadow-lg"
-                    asChild
-                  >
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button size="lg" className="bg-primary hover:bg-primary/90 shadow-lg" asChild>
                     <Link href="/contact">Get in Touch</Link>
                   </Button>
                 </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     size="lg"
                     variant="outline"
@@ -930,5 +869,5 @@ export default function AboutPageClient() {
 
       <Footer />
     </>
-  );
+  )
 }

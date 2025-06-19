@@ -3,7 +3,6 @@ import { useState, useEffect } from "react"
 import HeroSection from "./components/hero-section"
 import AboutSection from "./components/about-section"
 import VenturesSection from "./components/ventures-section"
-import ServicesSection from "./components/services-section"
 import InnovationEcosystemSection from "./components/innovation-ecosystem-section"
 import ContactSection from "./components/contact-section"
 import Footer from "./components/footer"
@@ -35,19 +34,27 @@ export default function Home() {
     services: [],
     caseStudies: [],
   })
+  const [siteContent, setSiteContent] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch("/api/homepage")
-        if (!response.ok) {
-          throw new Error("Failed to fetch homepage data")
+        // Fetch homepage data
+        const homepageResponse = await fetch("/api/homepage")
+        if (homepageResponse.ok) {
+          const homepageData = await homepageResponse.json()
+          setData(homepageData)
         }
-        const homepageData = await response.json()
-        setData(homepageData)
+
+        // Fetch site content
+        const contentResponse = await fetch("/api/content/site")
+        if (contentResponse.ok) {
+          const contentData = await contentResponse.json()
+          setSiteContent(contentData)
+        }
       } catch (error) {
-        console.error("Error fetching homepage data:", error)
+        console.error("Error fetching data:", error)
       } finally {
         setLoading(false)
       }
@@ -58,31 +65,13 @@ export default function Home() {
 
   return (
     <main className="relative">
-      <Header/>
-      <HeroSection {...data.heroData} />
-      <AboutSection {...data.aboutData} />
+      <Header />
+      <HeroSection content={siteContent?.homepage} />
+      <AboutSection content={siteContent?.homepage} />
       <VenturesSection ventures={data.featuredVentures} />
-      {/* <ServicesSection services={data.services} /> */}
       <InnovationEcosystemSection caseStudies={data.caseStudies} />
-      <ContactSection />
+      <ContactSection content={siteContent?.homepage} />
       <Footer />
-      {/* {process.env.NODE_ENV === "development" && (
-        <button
-          onClick={() => {
-            // Find the AdminLoginModal component and open it
-            const event = new KeyboardEvent("keydown", {
-              key: "a",
-              ctrlKey: true,
-              shiftKey: true,
-              bubbles: true,
-            })
-            document.dispatchEvent(event)
-          }}
-          className="fixed bottom-4 right-4 bg-gray-200 p-2 text-xs rounded opacity-50 hover:opacity-100"
-        >
-          Admin Login (Dev Only)
-        </button>
-      )} */}
     </main>
   )
 }

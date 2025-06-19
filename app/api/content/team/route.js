@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { connectToDatabase } from "@/app/lib/mongodb"
 
-// GET all team members
+// GET all team members (public endpoint)
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -9,50 +9,30 @@ export async function GET(request) {
 
     const { db } = await connectToDatabase()
 
-    // Build query
-    const query = {}
+    // Build query - only show active members publicly
+    const query = { status: "Active" }
     if (department) query.department = department
 
-    const teamMembers = await db.collection("team").find(query).toArray()
+    const teamMembers = await db.collection("team").find(query).sort({ createdAt: -1 }).toArray()
 
-    return NextResponse.json(teamMembers)
+    // Serialize the data and remove sensitive information
+    const publicMembers = teamMembers.map((member) => ({
+      _id: member._id.toString(),
+      name: member.name,
+      role: member.role,
+      department: member.department,
+      bio: member.bio,
+      profileImage: member.profileImage,
+      location: member.location,
+      skills: member.skills,
+      social: member.social,
+      joinDate: member.joinDate,
+      // Don't expose email or other sensitive data publicly
+    }))
+
+    return NextResponse.json(publicMembers)
   } catch (error) {
     console.error("Error fetching team members:", error)
     return NextResponse.json({ error: "Failed to fetch team members" }, { status: 500 })
-  }
-}
-
-// POST new team member (admin only)
-export async function POST(request) {
-  try {
-    const data = await request.json()
-
-    // Validate required fields
-    if (!data.name || !data.role) {
-      return NextResponse.json({ error: "Name and role are required" }, { status: 400 })
-    }
-
-    const { db } = await connectToDatabase()
-
-    // Create team member with timestamps
-    const teamMember = {
-      ...data,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      status: data.status || "Active",
-    }
-
-    const result = await db.collection("team").insertOne(teamMember)
-
-    return NextResponse.json(
-      {
-        message: "Team member created successfully",
-        id: result.insertedId,
-      },
-      { status: 201 },
-    )
-  } catch (error) {
-    console.error("Error creating team member:", error)
-    return NextResponse.json({ error: "Failed to create team member" }, { status: 500 })
   }
 }
