@@ -9,7 +9,9 @@
     "lint": "next lint",
     "setup-db": "node scripts/setup-database.js",
     "setup-mongodb": "node scripts/setup-mongodb-env.js",
-    "seed-database": "node scripts/seed-database.js"
+    "seed-database": "node scripts/seed-database.js",
+    "check-db": "node scripts/check-production-db.js",
+    "seed-blog": "node scripts/seed-production-blog.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
