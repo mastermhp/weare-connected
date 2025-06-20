@@ -17,23 +17,39 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
-        // port: "",
-        // pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "images.unsplash.com",
-        // port: "",
-        // pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "via.placeholder.com",
-        // port: "",
-        // pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "placeholder.com",
       },
     ],
     unoptimized: true,
+  },
+  // Force HTTPS in production
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "upgrade-insecure-requests"
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains'
+          }
+        ],
+      },
+    ]
   },
   // Ensure proper trailing slash handling
   // trailingSlash: false,
@@ -60,6 +76,7 @@ const nextConfig = {
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
   },
 };
 

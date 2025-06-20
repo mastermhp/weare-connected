@@ -8,18 +8,42 @@ const AuthContext = createContext()
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
+
+  // Handle client-side mounting to prevent hydration issues
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Check if user is authenticated on initial load
   useEffect(() => {
+    if (!mounted) return
+
     const checkAuth = async () => {
       try {
-        const res = await fetch("/api/auth/me")
-        const data = await res.json()
+        console.log("Checking authentication...")
+        const res = await fetch("/api/auth/me", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
 
-        if (data.authenticated) {
-          setUser(data.user)
+        console.log("Auth check response status:", res.status)
+
+        if (res.ok) {
+          const data = await res.json()
+          console.log("Auth check response:", data)
+
+          if (data.authenticated) {
+            setUser(data.user)
+          } else {
+            setUser(null)
+          }
         } else {
+          console.log("Auth check failed with status:", res.status)
           setUser(null)
         }
       } catch (error) {
@@ -31,7 +55,7 @@ export function AuthProvider({ children }) {
     }
 
     checkAuth()
-  }, [])
+  }, [mounted])
 
   // Login function
   const login = async (email, password) => {
@@ -43,6 +67,7 @@ export function AuthProvider({ children }) {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       })
 
@@ -57,7 +82,9 @@ export function AuthProvider({ children }) {
 
       if (data.success) {
         // Refresh auth state
-        const authCheck = await fetch("/api/auth/me")
+        const authCheck = await fetch("/api/auth/me", {
+          credentials: "include",
+        })
 
         if (!authCheck.ok) {
           console.error("Auth check failed after login")
@@ -91,6 +118,7 @@ export function AuthProvider({ children }) {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ username, password }),
       })
 
@@ -105,7 +133,9 @@ export function AuthProvider({ children }) {
 
       if (data.success) {
         // Refresh auth state
-        const authCheck = await fetch("/api/auth/me")
+        const authCheck = await fetch("/api/auth/me", {
+          credentials: "include",
+        })
 
         if (!authCheck.ok) {
           console.error("Auth check failed after admin login")
@@ -137,6 +167,7 @@ export function AuthProvider({ children }) {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(userData),
       })
 
@@ -157,6 +188,7 @@ export function AuthProvider({ children }) {
     try {
       await fetch("/api/auth/logout", {
         method: "POST",
+        credentials: "include",
       })
       setUser(null)
       router.push("/")
@@ -167,6 +199,11 @@ export function AuthProvider({ children }) {
 
   // Check if user is admin
   const isAdmin = user?.role === "admin"
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return null
+  }
 
   const value = {
     user,
