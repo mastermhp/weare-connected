@@ -147,9 +147,10 @@ export default function ContentManagement() {
       </div>
 
       <Tabs defaultValue="homepage" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="homepage">Homepage</TabsTrigger>
           <TabsTrigger value="about">About Page</TabsTrigger>
+          <TabsTrigger value="offices">Offices</TabsTrigger>
           <TabsTrigger value="contact">Contact Page</TabsTrigger>
         </TabsList>
 
@@ -523,6 +524,43 @@ export default function ContentManagement() {
                 <p className="text-sm text-blue-800">
                   <strong>Note:</strong> Team members are managed separately in the Team Management section. This
                   section only controls the team section title and subtitle.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Offices Content */}
+        <TabsContent value="offices" className="space-y-6">
+          {/* Offices Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Offices Gallery Section</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="offices-title">Section Title</Label>
+                <Input
+                  id="offices-title"
+                  value={content?.offices?.title || ""}
+                  onChange={(e) => updateContent("offices.title", e.target.value)}
+                  placeholder="Enter offices section title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="offices-subtitle">Section Subtitle</Label>
+                <Textarea
+                  id="offices-subtitle"
+                  value={content?.offices?.subtitle || ""}
+                  onChange={(e) => updateContent("offices.subtitle", e.target.value)}
+                  placeholder="Enter offices section subtitle"
+                  rows={2}
+                />
+              </div>
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Note:</strong> Individual office locations and galleries are managed in the Offices Management
+                  section. This section only controls the main title and subtitle for the offices gallery section.
                 </p>
               </div>
             </CardContent>

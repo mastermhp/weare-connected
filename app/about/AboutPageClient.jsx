@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Target, Lightbulb, Linkedin, Twitter, Mail } from "lucide-react"
+import { Target, Lightbulb, Linkedin, Twitter, Mail, Github } from "lucide-react"
 import Footer from "../components/footer"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import Header from "../components/header"
+import OfficesGallerySection from "../components/offices-gallery-section"
 
 export default function AboutPageClient() {
   const [content, setContent] = useState(null)
@@ -413,7 +414,10 @@ export default function AboutPageClient() {
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* Offices Gallery Section - NEW ADDITION */}
+      <OfficesGallerySection content={content} />
+
+      {/* Team Section - WITH FIXED SOCIAL LINKS */}
       <section className="py-16 sm:py-20 bg-lynx-white">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-7xl">
           <div className="text-center mb-12 mx-auto max-w-4xl">
@@ -454,9 +458,33 @@ export default function AboutPageClient() {
                           {member.name.charAt(0)}
                         </div>
                       </div>
+
                       <h3 className="font-bold text-lg mb-1 text-pot-black">{member.name}</h3>
-                      <p className="text-primary font-medium mb-3">{member.role}</p>
-                      <p className="text-sm text-gray-600 mb-4 leading-relaxed">{member.bio}</p>
+                      <p className="text-primary font-medium mb-2">{member.role}</p>
+                      <p className="text-sm text-gray-600 mb-3 leading-relaxed">{member.bio}</p>
+
+                      {/* Skills */}
+                      {member.skills && member.skills.length > 0 && (
+                        <div className="mb-4">
+                          <div className="flex flex-wrap gap-1 justify-center">
+                            {member.skills.slice(0, 3).map((skill, skillIndex) => (
+                              <span
+                                key={skillIndex}
+                                className="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs font-medium"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                            {member.skills.length > 3 && (
+                              <span className="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-medium">
+                                +{member.skills.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Social Links */}
                       <div className="flex justify-center space-x-3">
                         {member.social?.linkedin && (
                           <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10">
@@ -469,6 +497,13 @@ export default function AboutPageClient() {
                           <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10">
                             <a href={member.social.twitter} target="_blank" rel="noopener noreferrer">
                               <Twitter className="h-4 w-4 text-gray-600" />
+                            </a>
+                          </Button>
+                        )}
+                        {member.social?.github && (
+                          <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10">
+                            <a href={member.social.github} target="_blank" rel="noopener noreferrer">
+                              <Github className="h-4 w-4 text-gray-600" />
                             </a>
                           </Button>
                         )}
@@ -855,7 +890,7 @@ export default function AboutPageClient() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-2 border-primary text-primary hover:bg-primary hover:text-white shadow-lg"
+                    className="border-2 border-primary text-primary hover:bg-primary hover:text-white shadow-lg bg-white"
                     asChild
                   >
                     <Link href="/ventures">View Our Ventures</Link>

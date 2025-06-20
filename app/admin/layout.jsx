@@ -24,6 +24,7 @@ import {
   UserPlus,
   User,
   SettingsIcon,
+  Building,
 } from "lucide-react";
 import { Suspense } from "react";
 
@@ -86,6 +87,12 @@ const sidebarItems = [
     title: "Content",
     href: "/admin/content",
     icon: SettingsIcon,
+  },
+  {
+    title: "Offices",
+    href: "/admin/offices",
+    icon: Building,
+    current: false,
   },
 ];
 
