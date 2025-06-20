@@ -17,17 +17,24 @@ function calculateReadTime(content) {
   return `${readTime} min read`
 }
 
-// Get base URL for API calls
+// Get base URL for API calls - FIXED VERSION
 function getBaseUrl() {
+  // For client-side requests, use relative URLs
   if (typeof window !== "undefined") {
     return ""
   }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`
+
+  // For server-side requests in production
+  if (process.env.NODE_ENV === "production") {
+    // Try VERCEL_URL first (automatically set by Vercel)
+    if (process.env.VERCEL_URL) {
+      return `https://${process.env.VERCEL_URL}`
+    }
+    // Fallback to your actual domain
+    return "https://weare-connected.vercel.app"
   }
-  if (process.env.NEXT_PUBLIC_BASE_URL) {
-    return process.env.NEXT_PUBLIC_BASE_URL
-  }
+
+  // For development
   return "http://localhost:3000"
 }
 
@@ -123,7 +130,7 @@ export default async function BlogPost({ params }) {
   const relatedPosts = getRelatedPosts(post, allPosts)
 
   // Ensure we have proper author data
-  const authorName = post.author?.name || "Connected Team"
+  const authorName = post.author?.name || post.author || "Connected Team"
   const authorRole = post.author?.role || post.authorRole || "Author"
   const authorImage =
     post.author?.image?.url ||
@@ -156,14 +163,16 @@ export default async function BlogPost({ params }) {
             {/* Header */}
             <header className="mb-8">
               <div className="flex items-center gap-2 mb-4">
-                <Badge variant="secondary">{post.category}</Badge>
+                <Badge variant="secondary">{post.category || "Blog"}</Badge>
                 <span className="text-sm text-gray-500">•</span>
                 <span className="text-sm text-gray-500">{post.readTime || calculateReadTime(post.content)}</span>
               </div>
 
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">{post.title}</h1>
 
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">{post.excerpt}</p>
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                {post.excerpt || "Read our latest insights and perspectives."}
+              </p>
 
               {/* Author and Meta Info */}
               <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
@@ -182,7 +191,7 @@ export default async function BlogPost({ params }) {
                   <Separator orientation="vertical" className="h-8" />
                   <div className="flex items-center text-sm text-gray-600">
                     <Calendar className="w-4 h-4 mr-1" />
-                    {new Date(post.publishedAt).toLocaleDateString("en-US", {
+                    {new Date(post.publishedAt || post.createdAt || Date.now()).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
@@ -221,7 +230,7 @@ export default async function BlogPost({ params }) {
             {/* Content */}
             <div className="prose prose-lg max-w-none mb-12">
               <div className="text-gray-700 leading-relaxed space-y-6">
-                {post.content.split("\n\n").map((paragraph, index) => (
+                {(post.content || "Content coming soon...").split("\n\n").map((paragraph, index) => (
                   <p key={index} className="text-lg">
                     {paragraph}
                   </p>
@@ -257,8 +266,8 @@ export default async function BlogPost({ params }) {
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{authorName}</h3>
                   <p className="text-gray-600 mb-4">{authorRole}</p>
                   <p className="text-gray-700">
-                    {authorName} is a leading expert in {post.category.toLowerCase()}, helping businesses navigate the
-                    complexities of modern technology adoption and digital transformation.
+                    {authorName} is a leading expert in {(post.category || "technology").toLowerCase()}, helping
+                    businesses navigate the complexities of modern technology adoption and digital transformation.
                   </p>
                 </div>
               </div>
@@ -281,7 +290,6 @@ export default async function BlogPost({ params }) {
                           relatedPost.image?.url ||
                           relatedPost.image ||
                           `https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop` ||
-                          "/placeholder.svg" ||
                           "/placeholder.svg"
                         }
                         alt={relatedPost.title}
@@ -338,10 +346,10 @@ export async function generateMetadata({ params }) {
 
     return {
       title: `${post.title} | Connected Blog`,
-      description: post.excerpt,
+      description: post.excerpt || "Read our latest insights and perspectives.",
       openGraph: {
         title: post.title,
-        description: post.excerpt,
+        description: post.excerpt || "Read our latest insights and perspectives.",
         images: [post.image],
       },
     }
