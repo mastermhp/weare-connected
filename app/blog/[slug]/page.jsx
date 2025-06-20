@@ -37,15 +37,21 @@ async function getBlogPost(slug) {
 
   try {
     const baseUrl = getBaseUrl()
-    const response = await fetch(`${baseUrl}/api/content/blog/${slug}`, {
+    const apiUrl = `${baseUrl}/api/content/blog/${slug}`
+    console.log(`API URL: ${apiUrl}`)
+
+    const response = await fetch(apiUrl, {
       cache: "no-store", // Always fetch fresh data
+      headers: {
+        "Content-Type": "application/json",
+      },
     })
 
     console.log(`API response status: ${response.status}`)
 
     if (response.ok) {
       const post = await response.json()
-      console.log(`API response:`, post)
+      console.log(`API response received:`, post)
 
       if (post && !post.error) {
         console.log(`Found blog post: ${post.title}`)
@@ -53,9 +59,12 @@ async function getBlogPost(slug) {
           post.readTime = calculateReadTime(post.content)
         }
         return post
+      } else {
+        console.log(`API returned error:`, post)
       }
     } else {
-      console.log(`API returned error: ${response.status}`)
+      const errorText = await response.text()
+      console.log(`API returned error status ${response.status}:`, errorText)
     }
   } catch (error) {
     console.error(`Failed to fetch blog post ${slug} from API:`, error)
@@ -272,6 +281,7 @@ export default async function BlogPost({ params }) {
                           relatedPost.image?.url ||
                           relatedPost.image ||
                           `https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop` ||
+                          "/placeholder.svg" ||
                           "/placeholder.svg"
                         }
                         alt={relatedPost.title}
