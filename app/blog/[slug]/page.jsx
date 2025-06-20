@@ -1,14 +1,33 @@
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, Calendar, Clock, Share2, Bookmark, User } from "lucide-react"
+import { ArrowLeft, Calendar, Clock, Share2, Bookmark } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import Header from "@/app/components/header"
 import Footer from "@/app/components/footer"
 
-// Calculate dynamic read time
+async function getBlogPost(slug) {
+  const baseUrl = process.env.NODE_ENV === "production" ? "https://weare-connected.vercel.app" : "http://localhost:3000"
+
+  try {
+    const response = await fetch(`${baseUrl}/api/content/blog/${slug}`, {
+      cache: "no-store",
+    })
+
+    if (response.ok) {
+      const post = await response.json()
+      return post
+    }
+
+    return null
+  } catch (error) {
+    console.error("Error:", error)
+    return null
+  }
+}
+
 function calculateReadTime(content) {
   if (!content) return "1 min read"
   const wordsPerMinute = 200
@@ -17,133 +36,25 @@ function calculateReadTime(content) {
   return `${readTime} min read`
 }
 
-// Get base URL for API calls - FIXED VERSION
-function getBaseUrl() {
-  // For client-side requests, use relative URLs
-  if (typeof window !== "undefined") {
-    return ""
-  }
-
-  // For server-side requests in production
-  if (process.env.NODE_ENV === "production") {
-    // Try VERCEL_URL first (automatically set by Vercel)
-    if (process.env.VERCEL_URL) {
-      return `https://${process.env.VERCEL_URL}`
-    }
-    // Fallback to your actual domain
-    return "https://weare-connected.vercel.app"
-  }
-
-  // For development
-  return "http://localhost:3000"
-}
-
-// Fetch blog post from database via API
-async function getBlogPost(slug) {
-  console.log(`Fetching blog post for slug: ${slug}`)
-
-  try {
-    const baseUrl = getBaseUrl()
-    const apiUrl = `${baseUrl}/api/content/blog/${slug}`
-    console.log(`API URL: ${apiUrl}`)
-
-    const response = await fetch(apiUrl, {
-      cache: "no-store", // Always fetch fresh data
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-
-    console.log(`API response status: ${response.status}`)
-
-    if (response.ok) {
-      const post = await response.json()
-      console.log(`API response received:`, post)
-
-      if (post && !post.error) {
-        console.log(`Found blog post: ${post.title}`)
-        if (!post.readTime) {
-          post.readTime = calculateReadTime(post.content)
-        }
-        return post
-      } else {
-        console.log(`API returned error:`, post)
-      }
-    } else {
-      const errorText = await response.text()
-      console.log(`API returned error status ${response.status}:`, errorText)
-    }
-  } catch (error) {
-    console.error(`Failed to fetch blog post ${slug} from API:`, error)
-  }
-
-  console.log(`Blog post not found: ${slug}`)
-  return null
-}
-
-// Fetch all blog posts for related posts
-async function getAllBlogPosts() {
-  try {
-    const baseUrl = getBaseUrl()
-    const response = await fetch(`${baseUrl}/api/content/blog`, {
-      cache: "no-store",
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      return Array.isArray(data.posts) ? data.posts : []
-    }
-  } catch (error) {
-    console.error("Failed to fetch all blog posts:", error)
-  }
-
-  return []
-}
-
-// Get related posts
-function getRelatedPosts(currentPost, allPosts) {
-  if (!Array.isArray(allPosts)) return []
-  return allPosts.filter((post) => post.slug !== currentPost.slug && post.category === currentPost.category).slice(0, 3)
-}
-
-export default async function BlogPost({ params }) {
+export default async function BlogPage({ params }) {
   const { slug } = await params
-
-  console.log(`Blog page rendering for slug: ${slug}`)
-
-  if (!slug || typeof slug !== "string") {
-    console.log("Invalid slug provided")
-    notFound()
-  }
-
   const post = await getBlogPost(slug)
 
   if (!post) {
-    console.log(`Post not found for slug: ${slug}`)
     notFound()
   }
 
-  console.log(`Rendering blog post: ${post.title}`)
-
-  // Get all posts for related posts
-  const allPosts = await getAllBlogPosts()
-  const relatedPosts = getRelatedPosts(post, allPosts)
-
-  // Ensure we have proper author data
   const authorName = post.author?.name || post.author || "Connected Team"
-  const authorRole = post.author?.role || post.authorRole || "Author"
+  const authorRole = post.author?.role || "Author"
   const authorImage =
     post.author?.image?.url ||
     post.author?.image ||
-    post.authorImage ||
-    `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face`
-
-  // Use actual image from database
+    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face"
   const postImage =
     post.featuredImage?.url ||
     post.image?.url ||
     post.image ||
-    `https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop`
+    "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop"
 
   return (
     <>
@@ -204,11 +115,11 @@ export default async function BlogPost({ params }) {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="bg-white text-gray-700 border-gray-300">
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="bg-white text-gray-700 border-gray-300">
                     <Bookmark className="w-4 h-4 mr-2" />
                     Save
                   </Button>
@@ -239,16 +150,18 @@ export default async function BlogPost({ params }) {
             </div>
 
             {/* Tags */}
-            <div className="mb-12">
-              <h3 className="text-lg font-semibold mb-4">Tags</h3>
-              <div className="flex flex-wrap gap-2">
-                {(post.tags || []).map((tag, index) => (
-                  <Badge key={index} variant="outline">
-                    {tag}
-                  </Badge>
-                ))}
+            {post.tags && post.tags.length > 0 && (
+              <div className="mb-12">
+                <h3 className="text-lg font-semibold mb-4">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {post.tags.map((tag, index) => (
+                    <Badge key={index} variant="outline">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <Separator className="mb-12" />
 
@@ -272,51 +185,6 @@ export default async function BlogPost({ params }) {
                 </div>
               </div>
             </div>
-
-            {/* Related Posts */}
-            {relatedPosts.length > 0 && (
-              <section>
-                <h2 className="text-2xl font-bold text-gray-900 mb-8">Related Articles</h2>
-                <div className="grid md:grid-cols-3 gap-6">
-                  {relatedPosts.map((relatedPost) => (
-                    <Link
-                      key={relatedPost.id}
-                      href={`/blog/${relatedPost.slug}`}
-                      className="group block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border"
-                    >
-                      <Image
-                        src={
-                          relatedPost.featuredImage?.url ||
-                          relatedPost.image?.url ||
-                          relatedPost.image ||
-                          `https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop` ||
-                          "/placeholder.svg"
-                        }
-                        alt={relatedPost.title}
-                        width={300}
-                        height={200}
-                        className="w-full h-48 object-cover rounded-t-lg"
-                      />
-                      <div className="p-4">
-                        <Badge variant="secondary" className="mb-2">
-                          {relatedPost.category}
-                        </Badge>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors mb-2">
-                          {relatedPost.title}
-                        </h3>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <User className="w-3 h-3 mr-1" />
-                          {relatedPost.author?.name || "Author"}
-                          <span className="mx-2">•</span>
-                          <Clock className="w-3 h-3 mr-1" />
-                          {relatedPost.readTime || calculateReadTime(relatedPost.content)}
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            )}
           </div>
         </article>
       </div>
@@ -325,42 +193,27 @@ export default async function BlogPost({ params }) {
   )
 }
 
-// Remove static generation - make it fully dynamic
-export async function generateStaticParams() {
-  // Return empty array to make all routes dynamic
-  return []
-}
-
 export async function generateMetadata({ params }) {
   const { slug } = await params
+  const post = await getBlogPost(slug)
 
-  try {
-    const post = await getBlogPost(slug)
-
-    if (!post) {
-      return {
-        title: "Post Not Found | Connected Blog",
-        description: "The requested blog post could not be found.",
-      }
-    }
-
+  if (!post) {
     return {
-      title: `${post.title} | Connected Blog`,
+      title: "Post Not Found | Connected Blog",
+      description: "The requested blog post could not be found.",
+    }
+  }
+
+  return {
+    title: `${post.title} | Connected Blog`,
+    description: post.excerpt || "Read our latest insights and perspectives.",
+    openGraph: {
+      title: post.title,
       description: post.excerpt || "Read our latest insights and perspectives.",
-      openGraph: {
-        title: post.title,
-        description: post.excerpt || "Read our latest insights and perspectives.",
-        images: [post.image],
-      },
-    }
-  } catch (error) {
-    return {
-      title: "Blog Post | Connected",
-      description: "Read our latest insights and perspectives on technology and innovation.",
-    }
+      images: [post.image],
+    },
   }
 }
 
-// Make it fully dynamic to fetch from database
 export const dynamic = "force-dynamic"
 export const revalidate = 0
