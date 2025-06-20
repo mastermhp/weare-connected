@@ -8,6 +8,15 @@ import { Separator } from "@/components/ui/separator"
 import Header from "@/app/components/header"
 import Footer from "@/app/components/footer"
 
+// Calculate dynamic read time
+function calculateReadTime(content) {
+  if (!content) return "1 min read"
+  const wordsPerMinute = 200
+  const wordCount = content.trim().split(/\s+/).length
+  const readTime = Math.ceil(wordCount / wordsPerMinute)
+  return `${readTime} min read`
+}
+
 // Sample blog posts for fallback
 const sampleBlogPosts = [
   {
@@ -38,74 +47,17 @@ As we look to the future, these technologies will continue to converge and creat
     category: "Technology",
     readTime: "8 min read",
   },
-  {
-    id: "2",
-    slug: "building-successful-ventures",
-    title: "Building Successful Ventures: Lessons Learned",
-    excerpt: "Key insights and strategies for building and scaling successful technology ventures in today's market.",
-    content: `Building a successful venture requires more than just a great idea. It demands strategic planning, execution excellence, and the ability to adapt to changing market conditions.
-
-Market Research and Validation are crucial first steps. Understanding your target audience, their pain points, and willingness to pay for your solution can make the difference between success and failure.
-
-Building the Right Team is equally important. Successful ventures are built by diverse teams with complementary skills, shared vision, and unwavering commitment to the mission.
-
-Product-Market Fit should be your primary focus in the early stages. Iterate quickly, gather feedback, and be willing to pivot when necessary to find the sweet spot between what you're building and what the market needs.
-
-Funding Strategy varies depending on your business model and growth trajectory. Whether bootstrapping, seeking angel investment, or pursuing venture capital, align your funding approach with your long-term goals.
-
-Scaling Challenges will test your systems, processes, and team. Prepare for rapid growth by building scalable infrastructure and maintaining company culture as you expand.`,
-    author: {
-      name: "Connected Team",
-      role: "Venture Builder",
-      image: "/placeholder.svg?height=40&width=40&text=VB",
-    },
-    authorImage: "/placeholder.svg?height=80&width=80&text=VB",
-    authorRole: "Venture Builder",
-    publishedAt: new Date(Date.now() - 86400000).toISOString(),
-    image: "/placeholder.svg?height=400&width=600&text=Successful+Ventures",
-    tags: ["Ventures", "Startup", "Business", "Strategy", "Growth"],
-    category: "Business",
-    readTime: "6 min read",
-  },
-  {
-    id: "3",
-    slug: "innovation-ecosystem",
-    title: "Creating an Innovation Ecosystem",
-    excerpt: "How to foster innovation within organizations and build ecosystems that drive continuous growth.",
-    content: `Innovation doesn't happen in isolation. It thrives in environments that encourage experimentation, collaboration, and continuous learning.
-
-Culture of Innovation starts with leadership commitment and permeates throughout the organization. Leaders must create psychological safety where team members feel comfortable sharing ideas and taking calculated risks.
-
-Cross-functional Collaboration breaks down silos and brings diverse perspectives to problem-solving. When teams from different departments work together, they often discover unexpected solutions and opportunities.
-
-Investment in Research and Development demonstrates long-term commitment to innovation. This includes not just financial resources but also time and space for exploration and experimentation.
-
-External Partnerships with startups, universities, and research institutions can inject fresh ideas and accelerate innovation cycles. These collaborations often lead to breakthrough innovations that wouldn't be possible in isolation.
-
-Measurement and Iteration ensure that innovation efforts are aligned with business objectives. Establish clear metrics for innovation success and be prepared to adjust strategies based on results.
-
-The most successful innovation ecosystems are those that balance structure with flexibility, providing clear direction while allowing room for creative exploration.`,
-    author: {
-      name: "Connected Team",
-      role: "Innovation Lead",
-      image: "/placeholder.svg?height=40&width=40&text=IL",
-    },
-    authorImage: "/placeholder.svg?height=80&width=80&text=IL",
-    authorRole: "Innovation Lead",
-    publishedAt: new Date(Date.now() - 172800000).toISOString(),
-    image: "/placeholder.svg?height=400&width=600&text=Innovation+Ecosystem",
-    tags: ["Innovation", "Ecosystem", "Growth", "Collaboration", "Culture"],
-    category: "Innovation",
-    readTime: "7 min read",
-  },
 ]
 
 // Safe function to get blog posts
 async function getBlogPosts() {
   try {
-    // Try to fetch from API
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/content/blog`, {
-      cache: "no-store",
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+
+    const response = await fetch(`${baseUrl}/api/content/blog`, {
+      next: { revalidate: 60 }, // ISR with 60 second revalidation
     })
 
     if (response.ok) {
@@ -122,17 +74,21 @@ async function getBlogPosts() {
 // Safe function to get a single blog post
 async function getBlogPost(slug) {
   try {
-    // Try to fetch from API first
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/content/blog/${slug}`,
-      {
-        cache: "no-store",
-      },
-    )
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+
+    const response = await fetch(`${baseUrl}/api/content/blog/${slug}`, {
+      next: { revalidate: 60 }, // ISR with 60 second revalidation
+    })
 
     if (response.ok) {
       const post = await response.json()
       if (post && post.slug === slug) {
+        // Ensure dynamic read time calculation
+        if (!post.readTime) {
+          post.readTime = calculateReadTime(post.content)
+        }
         return post
       }
     }
@@ -141,7 +97,11 @@ async function getBlogPost(slug) {
   }
 
   // Fallback to sample data
-  return sampleBlogPosts.find((post) => post.slug === slug) || null
+  const fallbackPost = sampleBlogPosts.find((post) => post.slug === slug)
+  if (fallbackPost && !fallbackPost.readTime) {
+    fallbackPost.readTime = calculateReadTime(fallbackPost.content)
+  }
+  return fallbackPost || null
 }
 
 // Get related posts
@@ -163,6 +123,15 @@ export default async function BlogPost({ params }) {
   const allPosts = await getBlogPosts()
   const relatedPosts = getRelatedPosts(post, allPosts)
 
+  // Ensure we have proper author data
+  const authorName = post.author?.name || "Connected Team"
+  const authorRole = post.author?.role || post.authorRole || "Author"
+  const authorImage =
+    post.author?.image?.url ||
+    post.author?.image ||
+    post.authorImage ||
+    `/placeholder.svg?height=80&width=80&text=${encodeURIComponent(authorName.charAt(0))}`
+
   return (
     <>
       <Header />
@@ -183,7 +152,7 @@ export default async function BlogPost({ params }) {
               <div className="flex items-center gap-2 mb-4">
                 <Badge variant="secondary">{post.category}</Badge>
                 <span className="text-sm text-gray-500">•</span>
-                <span className="text-sm text-gray-500">{post.readTime}</span>
+                <span className="text-sm text-gray-500">{post.readTime || calculateReadTime(post.content)}</span>
               </div>
 
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">{post.title}</h1>
@@ -194,15 +163,15 @@ export default async function BlogPost({ params }) {
               <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
                 <div className="flex items-center space-x-4">
                   <Image
-                    src={post.authorImage || post.author?.image || "/placeholder.svg?height=48&width=48"}
-                    alt={post.author?.name || "Author"}
+                    src={authorImage || "/placeholder.svg"}
+                    alt={authorName}
                     width={48}
                     height={48}
-                    className="rounded-full"
+                    className="rounded-full object-cover"
                   />
                   <div>
-                    <div className="font-semibold text-gray-900">{post.author?.name || "Anonymous"}</div>
-                    <div className="text-sm text-gray-600">{post.authorRole || post.author?.role || "Author"}</div>
+                    <div className="font-semibold text-gray-900">{authorName}</div>
+                    <div className="text-sm text-gray-600">{authorRole}</div>
                   </div>
                   <Separator orientation="vertical" className="h-8" />
                   <div className="flex items-center text-sm text-gray-600">
@@ -215,7 +184,7 @@ export default async function BlogPost({ params }) {
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
                     <Clock className="w-4 h-4 mr-1" />
-                    {post.readTime}
+                    {post.readTime || calculateReadTime(post.content)}
                   </div>
                 </div>
 
@@ -272,18 +241,18 @@ export default async function BlogPost({ params }) {
             <div className="bg-gray-50 rounded-lg p-8 mb-12">
               <div className="flex items-start space-x-4">
                 <Image
-                  src={post.authorImage || post.author?.image || "/placeholder.svg?height=80&width=80"}
-                  alt={post.author?.name || "Author"}
+                  src={authorImage || "/placeholder.svg"}
+                  alt={authorName}
                   width={80}
                   height={80}
-                  className="rounded-full"
+                  className="rounded-full object-cover"
                 />
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{post.author?.name || "Anonymous"}</h3>
-                  <p className="text-gray-600 mb-4">{post.authorRole || post.author?.role || "Author"}</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{authorName}</h3>
+                  <p className="text-gray-600 mb-4">{authorRole}</p>
                   <p className="text-gray-700">
-                    {post.author?.name || "Our team"} is a leading expert in {post.category.toLowerCase()}, helping
-                    businesses navigate the complexities of modern technology adoption and digital transformation.
+                    {authorName} is a leading expert in {post.category.toLowerCase()}, helping businesses navigate the
+                    complexities of modern technology adoption and digital transformation.
                   </p>
                 </div>
               </div>
@@ -319,7 +288,7 @@ export default async function BlogPost({ params }) {
                           {relatedPost.author?.name || "Author"}
                           <span className="mx-2">•</span>
                           <Clock className="w-3 h-3 mr-1" />
-                          {relatedPost.readTime}
+                          {relatedPost.readTime || calculateReadTime(relatedPost.content)}
                         </div>
                       </div>
                     </Link>
@@ -335,12 +304,10 @@ export default async function BlogPost({ params }) {
   )
 }
 
-// Build-safe static params generation
+// Generate static params for better performance
 export async function generateStaticParams() {
   try {
-    // During build, we might not have database access
-    // So we'll generate params for our sample posts
-    const posts = sampleBlogPosts
+    const posts = await getBlogPosts()
 
     if (Array.isArray(posts)) {
       return posts.map((post) => ({
@@ -351,12 +318,7 @@ export async function generateStaticParams() {
     return []
   } catch (error) {
     console.warn("Error generating static params for blog posts:", error.message)
-    // Return sample slugs as fallback
-    return [
-      { slug: "future-of-technology" },
-      { slug: "building-successful-ventures" },
-      { slug: "innovation-ecosystem" },
-    ]
+    return [{ slug: "future-of-technology" }]
   }
 }
 

@@ -30,6 +30,219 @@ import {
   Loader2,
 } from "lucide-react"
 
+// Move this outside the main OfficesPage component
+const TeamMemberForm = ({
+  isEdit = false,
+  formData,
+  handleInputChange,
+  handleSubmit,
+  handleImageUpload,
+  uploadingImage,
+  isSubmitting,
+  resetForm,
+  setIsCreateModalOpen,
+  setIsEditModalOpen,
+  departments,
+  statuses,
+}) => (
+  <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <Label htmlFor="name">Full Name *</Label>
+        <Input
+          id="name"
+          name="name"
+          value={formData.name}
+          onChange={handleInputChange}
+          placeholder="Enter full name"
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor="email">Email *</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          value={formData.email}
+          onChange={handleInputChange}
+          placeholder="Enter email address"
+          required
+        />
+      </div>
+    </div>
+
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <Label htmlFor="role">Role *</Label>
+        <Input
+          id="role"
+          name="role"
+          value={formData.role}
+          onChange={handleInputChange}
+          placeholder="e.g., Senior Developer"
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor="department">Department</Label>
+        <select
+          name="department"
+          value={formData.department}
+          onChange={handleInputChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        >
+          {departments
+            .filter((d) => d !== "All")
+            .map((dept) => (
+              <option key={dept} value={dept}>
+                {dept}
+              </option>
+            ))}
+        </select>
+      </div>
+    </div>
+
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <Label htmlFor="location">Location</Label>
+        <Input
+          id="location"
+          name="location"
+          value={formData.location}
+          onChange={handleInputChange}
+          placeholder="e.g., San Francisco, CA"
+        />
+      </div>
+      <div>
+        <Label htmlFor="joinDate">Join Date</Label>
+        <Input id="joinDate" name="joinDate" type="date" value={formData.joinDate} onChange={handleInputChange} />
+      </div>
+    </div>
+
+    <div>
+      <Label htmlFor="profileImage">Profile Image</Label>
+      <div className="flex items-center gap-4">
+        {formData.profileImage && (
+          <img
+            src={formData.profileImage || "/placeholder.svg"}
+            alt="Profile preview"
+            className="w-16 h-16 rounded-full object-cover"
+          />
+        )}
+        <div className="flex-1">
+          <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} />
+          {uploadingImage && (
+            <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Uploading image...
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <Label htmlFor="bio">Bio</Label>
+      <Textarea
+        id="bio"
+        name="bio"
+        value={formData.bio}
+        onChange={handleInputChange}
+        placeholder="Brief description about the team member..."
+        rows={3}
+        key="bio-textarea"
+      />
+    </div>
+
+    <div>
+      <Label htmlFor="skills">Skills (comma-separated)</Label>
+      <Input
+        id="skills"
+        name="skills"
+        value={formData.skills}
+        onChange={handleInputChange}
+        placeholder="React, Node.js, AWS, Leadership..."
+      />
+    </div>
+
+    <div className="grid grid-cols-3 gap-4">
+      <div>
+        <Label htmlFor="linkedin">LinkedIn URL</Label>
+        <Input
+          id="linkedin"
+          name="linkedin"
+          value={formData.linkedin}
+          onChange={handleInputChange}
+          placeholder="https://linkedin.com/in/..."
+        />
+      </div>
+      <div>
+        <Label htmlFor="twitter">Twitter URL</Label>
+        <Input
+          id="twitter"
+          name="twitter"
+          value={formData.twitter}
+          onChange={handleInputChange}
+          placeholder="https://twitter.com/..."
+        />
+      </div>
+      <div>
+        <Label htmlFor="github">GitHub URL</Label>
+        <Input
+          id="github"
+          name="github"
+          value={formData.github}
+          onChange={handleInputChange}
+          placeholder="https://github.com/..."
+        />
+      </div>
+    </div>
+
+    <div>
+      <Label htmlFor="status">Status</Label>
+      <select
+        name="status"
+        value={formData.status}
+        onChange={handleInputChange}
+        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+      >
+        {statuses
+          .filter((s) => s !== "All")
+          .map((status) => (
+            <option key={status} value={status}>
+              {status}
+            </option>
+          ))}
+      </select>
+    </div>
+
+    <div className="flex justify-end gap-2 pt-4">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => {
+          resetForm()
+          setIsCreateModalOpen(false)
+          setIsEditModalOpen(false)
+        }}
+      >
+        Cancel
+      </Button>
+      <Button type="submit" className="bg-[#6529B2] hover:bg-[#5420A0] text-white" disabled={isSubmitting}>
+        {isSubmitting ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            {isEdit ? "Updating..." : "Adding..."}
+          </>
+        ) : (
+          <>{isEdit ? "Update Member" : "Add Member"}</>
+        )}
+      </Button>
+    </div>
+  </form>
+)
+
 export default function TeamPage() {
   const [teamMembers, setTeamMembers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -254,204 +467,6 @@ export default function TeamPage() {
     }
   }
 
-  const TeamMemberForm = ({ isEdit = false }) => (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">Full Name *</Label>
-          <Input
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            placeholder="Enter full name"
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="email">Email *</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            placeholder="Enter email address"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="role">Role *</Label>
-          <Input
-            id="role"
-            name="role"
-            value={formData.role}
-            onChange={handleInputChange}
-            placeholder="e.g., Senior Developer"
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="department">Department</Label>
-          <select
-            name="department"
-            value={formData.department}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          >
-            {departments
-              .filter((d) => d !== "All")
-              .map((dept) => (
-                <option key={dept} value={dept}>
-                  {dept}
-                </option>
-              ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="location">Location</Label>
-          <Input
-            id="location"
-            name="location"
-            value={formData.location}
-            onChange={handleInputChange}
-            placeholder="e.g., San Francisco, CA"
-          />
-        </div>
-        <div>
-          <Label htmlFor="joinDate">Join Date</Label>
-          <Input id="joinDate" name="joinDate" type="date" value={formData.joinDate} onChange={handleInputChange} />
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="profileImage">Profile Image</Label>
-        <div className="flex items-center gap-4">
-          {formData.profileImage && (
-            <img
-              src={formData.profileImage || "/placeholder.svg"}
-              alt="Profile preview"
-              className="w-16 h-16 rounded-full object-cover"
-            />
-          )}
-          <div className="flex-1">
-            <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} />
-            {uploadingImage && (
-              <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Uploading image...
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="bio">Bio</Label>
-        <Textarea
-          id="bio"
-          name="bio"
-          value={formData.bio}
-          onChange={handleInputChange}
-          placeholder="Brief description about the team member..."
-          rows={3}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="skills">Skills (comma-separated)</Label>
-        <Input
-          id="skills"
-          name="skills"
-          value={formData.skills}
-          onChange={handleInputChange}
-          placeholder="React, Node.js, AWS, Leadership..."
-        />
-      </div>
-
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <Label htmlFor="linkedin">LinkedIn URL</Label>
-          <Input
-            id="linkedin"
-            name="linkedin"
-            value={formData.linkedin}
-            onChange={handleInputChange}
-            placeholder="https://linkedin.com/in/..."
-          />
-        </div>
-        <div>
-          <Label htmlFor="twitter">Twitter URL</Label>
-          <Input
-            id="twitter"
-            name="twitter"
-            value={formData.twitter}
-            onChange={handleInputChange}
-            placeholder="https://twitter.com/..."
-          />
-        </div>
-        <div>
-          <Label htmlFor="github">GitHub URL</Label>
-          <Input
-            id="github"
-            name="github"
-            value={formData.github}
-            onChange={handleInputChange}
-            placeholder="https://github.com/..."
-          />
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="status">Status</Label>
-        <select
-          name="status"
-          value={formData.status}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        >
-          {statuses
-            .filter((s) => s !== "All")
-            .map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-        </select>
-      </div>
-
-      <div className="flex justify-end gap-2 pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            resetForm()
-            setIsCreateModalOpen(false)
-            setIsEditModalOpen(false)
-          }}
-        >
-          Cancel
-        </Button>
-        <Button type="submit" className="bg-[#6529B2] hover:bg-[#5420A0] text-white" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              {isEdit ? "Updating..." : "Adding..."}
-            </>
-          ) : (
-            <>{isEdit ? "Update Member" : "Add Member"}</>
-          )}
-        </Button>
-      </div>
-    </form>
-  )
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -472,7 +487,20 @@ export default function TeamPage() {
               <DialogTitle>Add New Team Member</DialogTitle>
               <DialogDescription>Add a new member to your team</DialogDescription>
             </DialogHeader>
-            <TeamMemberForm />
+            <TeamMemberForm
+              isEdit={false}
+              formData={formData}
+              handleInputChange={handleInputChange}
+              handleSubmit={handleSubmit}
+              handleImageUpload={handleImageUpload}
+              uploadingImage={uploadingImage}
+              isSubmitting={isSubmitting}
+              resetForm={resetForm}
+              setIsCreateModalOpen={setIsCreateModalOpen}
+              setIsEditModalOpen={setIsEditModalOpen}
+              departments={departments}
+              statuses={statuses}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -713,7 +741,20 @@ export default function TeamPage() {
             <DialogTitle>Edit Team Member</DialogTitle>
             <DialogDescription>Update team member information</DialogDescription>
           </DialogHeader>
-          <TeamMemberForm isEdit={true} />
+          <TeamMemberForm
+            isEdit={true}
+            formData={formData}
+            handleInputChange={handleInputChange}
+            handleSubmit={handleSubmit}
+            handleImageUpload={handleImageUpload}
+            uploadingImage={uploadingImage}
+            isSubmitting={isSubmitting}
+            resetForm={resetForm}
+            setIsCreateModalOpen={setIsCreateModalOpen}
+            setIsEditModalOpen={setIsEditModalOpen}
+            departments={departments}
+            statuses={statuses}
+          />
         </DialogContent>
       </Dialog>
 

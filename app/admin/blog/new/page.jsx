@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -20,13 +20,9 @@ function calculateReadTime(content) {
   return `${readTime} min read`
 }
 
-export default function EditBlogPost({ params }) {
+export default function NewBlogPost() {
   const router = useRouter()
-  const { id } = params
-
-  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState("")
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -43,46 +39,6 @@ export default function EditBlogPost({ params }) {
     featuredImage: null,
   })
   const [formErrors, setFormErrors] = useState({})
-
-  // Fetch blog post data
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch(`/api/admin/blog/${id}`)
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch blog post")
-        }
-
-        const post = await response.json()
-
-        // Format data for form
-        setFormData({
-          title: post.title || "",
-          slug: post.slug || "",
-          content: post.content || "",
-          excerpt: post.excerpt || "",
-          author: {
-            name: post.author?.name || "",
-            role: post.author?.role || "",
-            image: post.author?.image || null,
-          },
-          category: post.category || "",
-          tags: post.tags ? post.tags.join(", ") : "",
-          status: post.status || "draft",
-          featuredImage: post.featuredImage || null,
-        })
-      } catch (err) {
-        console.error("Error fetching post:", err)
-        setError("Failed to load blog post. Please try again.")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchPost()
-  }, [id])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -101,6 +57,15 @@ export default function EditBlogPost({ params }) {
         ...prev,
         [name]: value,
       }))
+
+      // Auto-generate slug from title
+      if (name === "title" && !formData.slug) {
+        const slug = value
+          .toLowerCase()
+          .replace(/[^\w\s]/gi, "")
+          .replace(/\s+/g, "-")
+        setFormData((prev) => ({ ...prev, slug }))
+      }
     }
 
     // Clear validation error when field is edited
@@ -153,77 +118,44 @@ export default function EditBlogPost({ params }) {
         ...formData,
         tags: formData.tags ? formData.tags.split(",").map((tag) => tag.trim()) : [],
         readTime,
-        publishedAt:
-          formData.status === "published" && !formData.publishedAt ? new Date().toISOString() : formData.publishedAt,
+        publishedAt: formData.status === "published" ? new Date().toISOString() : null,
       }
 
-      const response = await fetch(`/api/admin/blog/${id}`, {
-        method: "PUT",
+      const response = await fetch("/api/admin/blog", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formattedData),
       })
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to update blog post")
+        throw new Error(errorData.error || "Failed to create blog post")
       }
 
       // Trigger revalidation for production
-      try {
-        await fetch("/api/revalidate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            path: "/blog",
-            secret: process.env.REVALIDATE_SECRET,
-          }),
-        })
-      } catch (revalidateError) {
-        console.warn("Failed to revalidate:", revalidateError)
+      if (formData.status === "published") {
+        try {
+          await fetch("/api/revalidate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              path: "/blog",
+              secret: process.env.REVALIDATE_SECRET,
+            }),
+          })
+        } catch (revalidateError) {
+          console.warn("Failed to revalidate:", revalidateError)
+        }
       }
 
       // Redirect back to blog management page
       router.push("/admin/blog")
     } catch (err) {
-      console.error("Error updating post:", err)
+      console.error("Error creating post:", err)
       setFormErrors((prev) => ({ ...prev, submit: err.message }))
     } finally {
       setSaving(false)
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-emperor" />
-        <span className="ml-2 text-lg text-gray-600">Loading post...</span>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center">
-          <Button variant="ghost" onClick={() => router.push("/admin/blog")} className="mr-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <h1 className="text-3xl font-bold text-gray-900">Error</h1>
-        </div>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-              <p>{error}</p>
-              <Button variant="outline" className="mt-2" onClick={() => router.push("/admin/blog")}>
-                Return to Blog Management
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
   }
 
   return (
@@ -236,34 +168,36 @@ export default function EditBlogPost({ params }) {
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Blog Post</h1>
-            <p className="text-gray-600 mt-1">Update your blog post content and settings</p>
+            <h1 className="text-3xl font-bold text-gray-900">Create New Blog Post</h1>
+            <p className="text-gray-600 mt-1">Fill in the details to create a new blog post</p>
           </div>
         </div>
         <div className="flex space-x-3">
-          <Button variant="outline" asChild>
-            <Link href={`/blog/${formData.slug}`} target="_blank">
-              <Eye className="h-4 w-4 mr-2" />
-              Preview
-            </Link>
-          </Button>
+          {formData.slug && (
+            <Button variant="outline" asChild>
+              <Link href={`/blog/${formData.slug}`} target="_blank">
+                <Eye className="h-4 w-4 mr-2" />
+                Preview
+              </Link>
+            </Button>
+          )}
           <Button onClick={handleSubmit} disabled={saving} className="bg-purple-emperor hover:bg-purple-emperor/90">
             {saving ? (
-              <div>
+              <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </div>
+                Creating...
+              </>
             ) : (
-              <div>
+              <>
                 <Save className="h-4 w-4 mr-2" />
-                Save Changes
-              </div>
+                Create Post
+              </>
             )}
           </Button>
         </div>
       </div>
 
-      {/* Edit Form */}
+      {/* Form */}
       <Card>
         <CardContent className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -417,12 +351,12 @@ export default function EditBlogPost({ params }) {
               </Button>
               <Button type="submit" disabled={saving} className="bg-purple-emperor hover:bg-purple-emperor/90">
                 {saving ? (
-                  <div>
+                  <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </div>
+                    Creating...
+                  </>
                 ) : (
-                  "Save Changes"
+                  "Create Post"
                 )}
               </Button>
             </div>

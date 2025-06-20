@@ -12,14 +12,19 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import { Plus, Search, Filter, Edit, Trash2, Eye, Calendar, User, FileText, Loader2 } from "lucide-react"
 import Link from "next/link"
-import ImageUpload from "@/app/components/admin/image-upload"
+
+// Calculate dynamic read time
+function calculateReadTime(content) {
+  if (!content) return "1 min read"
+  const wordsPerMinute = 200
+  const wordCount = content.trim().split(/\s+/).length
+  const readTime = Math.ceil(wordCount / wordsPerMinute)
+  return `${readTime} min read`
+}
 
 export default function BlogManagement() {
   const router = useRouter()
@@ -34,21 +39,8 @@ export default function BlogManagement() {
     total: 0,
     pages: 0,
   })
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [postToDelete, setPostToDelete] = useState(null)
-  const [formData, setFormData] = useState({
-    title: "",
-    slug: "",
-    content: "",
-    excerpt: "",
-    author: "",
-    category: "",
-    tags: "",
-    status: "draft",
-    featuredImage: null,
-  })
-  const [formErrors, setFormErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Fetch blog posts
@@ -83,96 +75,6 @@ export default function BlogManagement() {
     }
   }
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-
-    // Auto-generate slug from title
-    if (name === "title" && !formData.slug) {
-      const slug = value
-        .toLowerCase()
-        .replace(/[^\w\s]/gi, "")
-        .replace(/\s+/g, "-")
-      setFormData((prev) => ({ ...prev, slug }))
-    }
-
-    // Clear validation error when field is edited
-    if (formErrors[name]) {
-      setFormErrors((prev) => ({ ...prev, [name]: "" }))
-    }
-  }
-
-  const handleImageUpload = (imageData) => {
-    setFormData((prev) => ({
-      ...prev,
-      featuredImage: imageData,
-    }))
-  }
-
-  const validateForm = () => {
-    const errors = {}
-    if (!formData.title.trim()) errors.title = "Title is required"
-    if (!formData.content.trim()) errors.content = "Content is required"
-    if (!formData.slug.trim()) errors.slug = "Slug is required"
-
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
-
-  const handleCreatePost = async (e) => {
-    e.preventDefault()
-
-    if (!validateForm()) return
-
-    try {
-      setIsSubmitting(true)
-
-      // Format tags as array if provided
-      const formattedData = {
-        ...formData,
-        tags: formData.tags ? formData.tags.split(",").map((tag) => tag.trim()) : [],
-      }
-
-      const response = await fetch("/api/admin/blog", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formattedData),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to create blog post")
-      }
-
-      const data = await response.json()
-
-      // Add new post to state and close modal
-      setPosts((prev) => [data.post, ...prev])
-      setIsCreateModalOpen(false)
-
-      // Reset form
-      setFormData({
-        title: "",
-        slug: "",
-        content: "",
-        excerpt: "",
-        author: "",
-        category: "",
-        tags: "",
-        status: "draft",
-        featuredImage: null,
-      })
-    } catch (err) {
-      console.error("Error creating post:", err)
-      setFormErrors((prev) => ({ ...prev, submit: err.message }))
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
   const handleDeleteClick = (post) => {
     setPostToDelete(post)
     setIsDeleteModalOpen(true)
@@ -196,6 +98,20 @@ export default function BlogManagement() {
       setPosts((prev) => prev.filter((post) => post._id !== postToDelete._id))
       setIsDeleteModalOpen(false)
       setPostToDelete(null)
+
+      // Trigger revalidation
+      try {
+        await fetch("/api/revalidate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "/blog",
+            secret: process.env.REVALIDATE_SECRET,
+          }),
+        })
+      } catch (revalidateError) {
+        console.warn("Failed to revalidate:", revalidateError)
+      }
     } catch (err) {
       console.error("Error deleting post:", err)
       setError("Failed to delete post. Please try again.")
@@ -225,155 +141,10 @@ export default function BlogManagement() {
           <h1 className="text-3xl font-bold text-gray-900">Blog Management</h1>
           <p className="text-gray-600 mt-1">Create, edit, and manage your blog posts</p>
         </div>
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-purple-emperor hover:bg-purple-emperor/90">
-              <Plus className="h-4 w-4 mr-2" />
-              New Post
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Create New Blog Post</DialogTitle>
-              <DialogDescription>Fill in the details to create a new blog post</DialogDescription>
-            </DialogHeader>
-
-            <form onSubmit={handleCreatePost} className="space-y-4 mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">
-                    Title <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    placeholder="Enter post title"
-                  />
-                  {formErrors.title && <p className="text-sm text-red-500">{formErrors.title}</p>}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="slug">
-                    Slug <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="slug"
-                    name="slug"
-                    value={formData.slug}
-                    onChange={handleInputChange}
-                    placeholder="enter-post-slug"
-                  />
-                  {formErrors.slug && <p className="text-sm text-red-500">{formErrors.slug}</p>}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="content">
-                  Content <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                  id="content"
-                  name="content"
-                  value={formData.content}
-                  onChange={handleInputChange}
-                  placeholder="Write your blog post content here..."
-                  rows={8}
-                />
-                {formErrors.content && <p className="text-sm text-red-500">{formErrors.content}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="excerpt">Excerpt</Label>
-                <Textarea
-                  id="excerpt"
-                  name="excerpt"
-                  value={formData.excerpt}
-                  onChange={handleInputChange}
-                  placeholder="Brief summary of the post (optional)"
-                  rows={2}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="author">Author</Label>
-                  <Input
-                    id="author"
-                    name="author"
-                    value={formData.author}
-                    onChange={handleInputChange}
-                    placeholder="Author name"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Input
-                    id="category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    placeholder="Post category"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <select
-                    id="status"
-                    name="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="scheduled">Scheduled</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tags">Tags (comma separated)</Label>
-                <Input
-                  id="tags"
-                  name="tags"
-                  value={formData.tags}
-                  onChange={handleInputChange}
-                  placeholder="tag1, tag2, tag3"
-                />
-              </div>
-
-              <ImageUpload
-                onImageUpload={handleImageUpload}
-                defaultImage={formData.featuredImage}
-                label="Featured Image"
-              />
-
-              {formErrors.submit && (
-                <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">{formErrors.submit}</div>
-              )}
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create Post"
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button className="bg-purple-emperor hover:bg-purple-emperor/90" onClick={() => router.push("/admin/blog/new")}>
+          <Plus className="h-4 w-4 mr-2" />
+          New Post
+        </Button>
       </div>
 
       {/* Filters */}
@@ -441,7 +212,7 @@ export default function BlogManagement() {
                     <div className="flex items-center space-x-6 text-sm text-gray-500">
                       <div className="flex items-center space-x-1">
                         <User className="h-4 w-4" />
-                        <span>{post.author || "Unknown Author"}</span>
+                        <span>{post.author?.name || "Unknown Author"}</span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <Calendar className="h-4 w-4" />
@@ -449,6 +220,7 @@ export default function BlogManagement() {
                           {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : "Not published"}
                         </span>
                       </div>
+                      <span>{post.readTime || calculateReadTime(post.content)}</span>
                       {post.category && <Badge variant="outline">{post.category}</Badge>}
                     </div>
                   </div>
@@ -516,7 +288,10 @@ export default function BlogManagement() {
                 ? "Try adjusting your search or filters"
                 : "Get started by creating your first blog post"}
             </p>
-            <Button className="bg-purple-emperor hover:bg-purple-emperor/90" onClick={() => setIsCreateModalOpen(true)}>
+            <Button
+              className="bg-purple-emperor hover:bg-purple-emperor/90"
+              onClick={() => router.push("/admin/blog/new")}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Create Post
             </Button>

@@ -16,7 +16,25 @@ function serializeBlogPosts(posts) {
     excerpt: post.excerpt || post.description || "No excerpt available",
     content: post.content || "",
     category: post.category || "General",
-    author: post.author || "Connected Team",
+    author: typeof post.author === "object" && post.author?.name ? post.author.name : post.author || "Connected Team",
+    authorRole: typeof post.author === "object" && post.author?.role ? post.author.role : "Author",
+    // Fix: Extract URL from author image object
+    authorImage:
+      typeof post.author === "object" && post.author?.image
+        ? typeof post.author.image === "object"
+          ? post.author.image.url
+          : post.author.image
+        : null,
+    // Fix: Extract URL from featured image object
+    image: post.featuredImage
+      ? typeof post.featuredImage === "object"
+        ? post.featuredImage.url
+        : post.featuredImage
+      : post.image
+        ? typeof post.image === "object"
+          ? post.image.url
+          : post.image
+        : null,
     date: post.publishedAt
       ? new Date(post.publishedAt).toLocaleDateString("en-US", {
           year: "numeric",
