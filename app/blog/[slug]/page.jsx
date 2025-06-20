@@ -49,13 +49,28 @@ As we look to the future, these technologies will continue to converge and creat
   },
 ]
 
+// Get base URL for API calls
+function getBaseUrl() {
+  if (typeof window !== "undefined") {
+    // Browser should use relative URL
+    return ""
+  }
+  if (process.env.VERCEL_URL) {
+    // SSR should use vercel url
+    return `https://${process.env.VERCEL_URL}`
+  }
+  if (process.env.NEXT_PUBLIC_BASE_URL) {
+    // Use custom base URL
+    return process.env.NEXT_PUBLIC_BASE_URL
+  }
+  // Development fallback
+  return "http://localhost:3000"
+}
+
 // Safe function to get blog posts
 async function getBlogPosts() {
   try {
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-
+    const baseUrl = getBaseUrl()
     const response = await fetch(`${baseUrl}/api/content/blog`, {
       next: { revalidate: 60 }, // ISR with 60 second revalidation
     })
@@ -74,10 +89,7 @@ async function getBlogPosts() {
 // Safe function to get a single blog post
 async function getBlogPost(slug) {
   try {
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-
+    const baseUrl = getBaseUrl()
     const response = await fetch(`${baseUrl}/api/content/blog/${slug}`, {
       next: { revalidate: 60 }, // ISR with 60 second revalidation
     })
@@ -304,20 +316,23 @@ export default async function BlogPost({ params }) {
   )
 }
 
-// Generate static params for better performance
+// Generate static params for better performance on Vercel
 export async function generateStaticParams() {
   try {
+    // Use a more robust approach for static generation
     const posts = await getBlogPosts()
 
-    if (Array.isArray(posts)) {
+    if (Array.isArray(posts) && posts.length > 0) {
       return posts.map((post) => ({
         slug: post.slug,
       }))
     }
 
-    return []
+    // Return sample slugs as fallback
+    return [{ slug: "future-of-technology" }]
   } catch (error) {
     console.warn("Error generating static params for blog posts:", error.message)
+    // Return sample slugs as fallback
     return [{ slug: "future-of-technology" }]
   }
 }
@@ -349,3 +364,7 @@ export async function generateMetadata({ params }) {
     }
   }
 }
+
+// Enable ISR for dynamic blog posts
+export const dynamic = "force-static"
+export const revalidate = 60
