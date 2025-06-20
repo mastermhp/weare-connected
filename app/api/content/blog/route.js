@@ -1,263 +1,138 @@
 import { NextResponse } from "next/server"
 import { connectToDatabase } from "@/app/lib/mongodb"
 
-// GET all blog posts
-export async function GET(request) {
+// Sample blog posts as fallback
+const sampleBlogPosts = [
+  {
+    id: "1",
+    slug: "future-of-technology",
+    title: "The Future of Technology: Trends to Watch",
+    excerpt:
+      "Explore the latest technological trends that are shaping our future and transforming industries worldwide.",
+    content: `Technology continues to evolve at an unprecedented pace, bringing new opportunities and challenges to businesses and individuals alike. In this comprehensive analysis, we explore the key trends that will define the next decade of technological advancement.
+
+Artificial Intelligence and Machine Learning are no longer buzzwords but essential tools driving innovation across industries. From healthcare diagnostics to financial fraud detection, AI is revolutionizing how we approach complex problems and make decisions.
+
+The Internet of Things (IoT) is creating a more connected world, where everyday objects communicate and share data to improve efficiency and user experience. Smart homes, connected vehicles, and industrial IoT applications are just the beginning of this transformation.
+
+Blockchain technology is expanding beyond cryptocurrency, offering secure and transparent solutions for supply chain management, digital identity verification, and decentralized applications.
+
+As we look to the future, these technologies will continue to converge and create new possibilities we can barely imagine today.`,
+    author: {
+      name: "Connected Team",
+      role: "Technology Analyst",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face",
+    },
+    publishedAt: new Date().toISOString(),
+    image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop",
+    tags: ["Technology", "Innovation", "Future", "AI", "IoT"],
+    category: "Technology",
+    readTime: "8 min read",
+    status: "published",
+  },
+  {
+    id: "2",
+    slug: "digital-transformation-guide",
+    title: "Digital Transformation: A Complete Guide for Businesses",
+    excerpt: "Learn how to successfully navigate digital transformation and modernize your business operations.",
+    content: `Digital transformation is no longer optional for businesses that want to remain competitive in today's market. This comprehensive guide will walk you through the essential steps and strategies needed to successfully modernize your operations.
+
+Understanding Digital Transformation means recognizing that it's not just about adopting new technologies, but fundamentally changing how your business operates and delivers value to customers.
+
+Key Components include cloud migration, data analytics, automation, and customer experience optimization. Each of these elements plays a crucial role in creating a more efficient and responsive organization.
+
+Implementation Strategy requires careful planning, stakeholder buy-in, and a phased approach that minimizes disruption while maximizing benefits.
+
+Success Stories from various industries demonstrate that companies that embrace digital transformation see improved efficiency, better customer satisfaction, and increased revenue growth.`,
+    author: {
+      name: "Sarah Johnson",
+      role: "Digital Strategy Consultant",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face",
+    },
+    publishedAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=400&fit=crop",
+    tags: ["Digital Transformation", "Business", "Strategy", "Technology"],
+    category: "Business",
+    readTime: "12 min read",
+    status: "published",
+  },
+  {
+    id: "3",
+    slug: "cybersecurity-best-practices",
+    title: "Cybersecurity Best Practices for Modern Businesses",
+    excerpt: "Protect your business from cyber threats with these essential security practices and strategies.",
+    content: `Cybersecurity has become one of the most critical concerns for businesses of all sizes. With cyber attacks becoming more sophisticated and frequent, implementing robust security measures is essential for protecting your organization's data and reputation.
+
+Essential Security Measures include multi-factor authentication, regular software updates, employee training, and comprehensive backup strategies. These foundational elements form the backbone of any effective cybersecurity program.
+
+Threat Detection and Response capabilities are crucial for identifying and mitigating potential security incidents before they can cause significant damage to your organization.
+
+Compliance and Governance ensure that your security practices meet industry standards and regulatory requirements, protecting your business from legal and financial penalties.
+
+Future-Proofing Your Security involves staying informed about emerging threats and continuously updating your security posture to address new challenges.`,
+    author: {
+      name: "Michael Chen",
+      role: "Cybersecurity Expert",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
+    },
+    publishedAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=400&fit=crop",
+    tags: ["Cybersecurity", "Security", "Business", "Technology"],
+    category: "Security",
+    readTime: "10 min read",
+    status: "published",
+  },
+]
+
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url)
-    const limit = Number.parseInt(searchParams.get("limit") || "10")
-    const page = Number.parseInt(searchParams.get("page") || "1")
-    const category = searchParams.get("category")
-    const tag = searchParams.get("tag")
+    console.log("Blog API: Attempting to fetch blog posts")
 
+    // Try to connect to database
     const { db } = await connectToDatabase()
+    console.log("Blog API: Database connected successfully")
 
-    // Build query
-    const query = {}
-    if (category) query.category = category
-    if (tag) query.tags = tag
+    // Try to fetch from database
+    const posts = await db.collection("blog_posts").find({ status: "published" }).sort({ publishedAt: -1 }).toArray()
 
-    // Try multiple collection names for blog posts
-    let posts = []
-    let total = 0
+    console.log(`Blog API: Found ${posts.length} posts in database`)
 
-    // Try 'blog' collection first
-    try {
-      total = await db.collection("blog").countDocuments(query)
-      if (total > 0) {
-        posts = await db
-          .collection("blog")
-          .find(query)
-          .sort({ publishedAt: -1, createdAt: -1 })
-          .skip((page - 1) * limit)
-          .limit(limit)
-          .toArray()
-      }
-    } catch (err) {
-      console.log("Blog collection not found, trying blog_posts...")
-    }
+    if (posts && posts.length > 0) {
+      // Convert MongoDB ObjectIds to strings
+      const formattedPosts = posts.map((post) => ({
+        ...post,
+        id: post._id.toString(),
+        _id: post._id.toString(),
+      }))
 
-    // If no posts found, try 'blog_posts' collection
-    if (posts.length === 0) {
-      try {
-        total = await db.collection("blog_posts").countDocuments(query)
-        if (total > 0) {
-          posts = await db
-            .collection("blog_posts")
-            .find(query)
-            .sort({ publishedAt: -1, createdAt: -1 })
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .toArray()
-        }
-      } catch (err) {
-        console.log("Blog_posts collection not found either...")
-      }
-    }
-
-    // Transform posts data
-    const transformedPosts = posts.map((post) => ({
-      id: post._id.toString(),
-      slug: post.slug || post._id.toString(),
-      title: post.title || "Untitled Post",
-      excerpt:
-        post.excerpt ||
-        post.shortDescription ||
-        (post.content ? post.content.substring(0, 150) + "..." : "No excerpt available"),
-      content: post.content || "No content available",
-      author: post.author || {
-        name: "Connected Team",
-        role: "Author",
-        image: "/placeholder.svg?height=40&width=40&text=A",
-      },
-      publishedAt: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : new Date().toLocaleDateString(),
-      image:
-        post.featuredImage?.url ||
-        post.image ||
-        "/placeholder.svg?height=400&width=600&text=" + encodeURIComponent(post.title || "Blog Post"),
-      tags: post.tags || ["Technology", "Innovation"],
-      category: post.category || "Technology",
-      readTime: post.readTime || "5 min read",
-    }))
-
-    // If still no posts, return sample data
-    if (transformedPosts.length === 0) {
-      const samplePosts = [
+      return NextResponse.json(
         {
-          id: "sample-1",
-          slug: "future-of-technology",
-          title: "The Future of Technology: Trends to Watch",
-          excerpt:
-            "Explore the latest technological trends that are shaping our future and transforming industries worldwide.",
-          content: "Technology continues to evolve at an unprecedented pace...",
-          author: {
-            name: "Connected Team",
-            role: "Technology Analyst",
-            image: "/placeholder.svg?height=40&width=40&text=CT",
-          },
-          publishedAt: new Date().toLocaleDateString(),
-          image: "/placeholder.svg?height=400&width=600&text=Future+of+Technology",
-          tags: ["Technology", "Innovation", "Future"],
-          category: "Technology",
-          readTime: "8 min read",
+          posts: formattedPosts,
+          source: "database",
         },
         {
-          id: "sample-2",
-          slug: "building-successful-ventures",
-          title: "Building Successful Ventures: Lessons Learned",
-          excerpt:
-            "Key insights and strategies for building and scaling successful technology ventures in today's market.",
-          content: "Building a successful venture requires more than just a great idea...",
-          author: {
-            name: "Connected Team",
-            role: "Venture Builder",
-            image: "/placeholder.svg?height=40&width=40&text=VB",
+          headers: {
+            "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
           },
-          publishedAt: new Date(Date.now() - 86400000).toLocaleDateString(),
-          image: "/placeholder.svg?height=400&width=600&text=Successful+Ventures",
-          tags: ["Ventures", "Startup", "Business"],
-          category: "Business",
-          readTime: "6 min read",
         },
-        {
-          id: "sample-3",
-          slug: "innovation-ecosystem",
-          title: "Creating an Innovation Ecosystem",
-          excerpt: "How to foster innovation within organizations and build ecosystems that drive continuous growth.",
-          content: "Innovation doesn't happen in isolation...",
-          author: {
-            name: "Connected Team",
-            role: "Innovation Lead",
-            image: "/placeholder.svg?height=40&width=40&text=IL",
-          },
-          publishedAt: new Date(Date.now() - 172800000).toLocaleDateString(),
-          image: "/placeholder.svg?height=400&width=600&text=Innovation+Ecosystem",
-          tags: ["Innovation", "Ecosystem", "Growth"],
-          category: "Innovation",
-          readTime: "7 min read",
-        },
-      ]
-
-      return NextResponse.json({
-        posts: samplePosts,
-        pagination: {
-          total: samplePosts.length,
-          page: 1,
-          limit: limit,
-          pages: 1,
-        },
-      })
+      )
     }
 
-    return NextResponse.json({
-      posts: transformedPosts,
-      pagination: {
-        total,
-        page,
-        limit,
-        pages: Math.ceil(total / limit),
-      },
-    })
+    console.log("Blog API: No posts found in database, using sample data")
   } catch (error) {
-    console.error("Error fetching blog posts:", error)
-
-    // Return sample data as fallback
-    const samplePosts = [
-      {
-        id: "sample-1",
-        slug: "future-of-technology",
-        title: "The Future of Technology: Trends to Watch",
-        excerpt:
-          "Explore the latest technological trends that are shaping our future and transforming industries worldwide.",
-        content: "Technology continues to evolve at an unprecedented pace...",
-        author: {
-          name: "Connected Team",
-          role: "Technology Analyst",
-          image: "/placeholder.svg?height=40&width=40&text=CT",
-        },
-        publishedAt: new Date().toLocaleDateString(),
-        image: "/placeholder.svg?height=400&width=600&text=Future+of+Technology",
-        tags: ["Technology", "Innovation", "Future"],
-        category: "Technology",
-        readTime: "8 min read",
-      },
-      {
-        id: "sample-2",
-        slug: "building-successful-ventures",
-        title: "Building Successful Ventures: Lessons Learned",
-        excerpt:
-          "Key insights and strategies for building and scaling successful technology ventures in today's market.",
-        content: "Building a successful venture requires more than just a great idea...",
-        author: {
-          name: "Connected Team",
-          role: "Venture Builder",
-          image: "/placeholder.svg?height=40&width=40&text=VB",
-        },
-        publishedAt: new Date(Date.now() - 86400000).toLocaleDateString(),
-        image: "/placeholder.svg?height=400&width=600&text=Successful+Ventures",
-        tags: ["Ventures", "Startup", "Business"],
-        category: "Business",
-        readTime: "6 min read",
-      },
-    ]
-
-    return NextResponse.json({
-      posts: samplePosts,
-      pagination: {
-        total: samplePosts.length,
-        page: 1,
-        limit: 10,
-        pages: 1,
-      },
-    })
+    console.error("Blog API: Database error:", error)
   }
-}
 
-// POST new blog post (admin only)
-export async function POST(request) {
-  try {
-    const data = await request.json()
-
-    // Validate required fields
-    if (!data.title || !data.content) {
-      return NextResponse.json({ error: "Title and content are required" }, { status: 400 })
-    }
-
-    const { db } = await connectToDatabase()
-
-    // Create slug from title if not provided
-    if (!data.slug) {
-      data.slug = data.title
-        .toLowerCase()
-        .replace(/[^\w\s]/gi, "")
-        .replace(/\s+/g, "-")
-    }
-
-    // Check if slug already exists
-    const existingPost = await db.collection("blog").findOne({ slug: data.slug })
-    if (existingPost) {
-      return NextResponse.json({ error: "A post with this slug already exists" }, { status: 400 })
-    }
-
-    // Create blog post with timestamps
-    const post = {
-      ...data,
-      publishedAt: data.publishedAt || new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-
-    const result = await db.collection("blog").insertOne(post)
-
-    return NextResponse.json(
-      {
-        message: "Blog post created successfully",
-        id: result.insertedId,
+  // Return sample data as fallback
+  return NextResponse.json(
+    {
+      posts: sampleBlogPosts,
+      source: "fallback",
+    },
+    {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
       },
-      { status: 201 },
-    )
-  } catch (error) {
-    console.error("Error creating blog post:", error)
-    return NextResponse.json({ error: "Failed to create blog post" }, { status: 500 })
-  }
+    },
+  )
 }

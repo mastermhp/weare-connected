@@ -17,53 +17,17 @@ function calculateReadTime(content) {
   return `${readTime} min read`
 }
 
-// Sample blog posts for fallback
-const sampleBlogPosts = [
-  {
-    id: "1",
-    slug: "future-of-technology",
-    title: "The Future of Technology: Trends to Watch",
-    excerpt:
-      "Explore the latest technological trends that are shaping our future and transforming industries worldwide.",
-    content: `Technology continues to evolve at an unprecedented pace, bringing new opportunities and challenges to businesses and individuals alike. In this comprehensive analysis, we explore the key trends that will define the next decade of technological advancement.
-
-Artificial Intelligence and Machine Learning are no longer buzzwords but essential tools driving innovation across industries. From healthcare diagnostics to financial fraud detection, AI is revolutionizing how we approach complex problems and make decisions.
-
-The Internet of Things (IoT) is creating a more connected world, where everyday objects communicate and share data to improve efficiency and user experience. Smart homes, connected vehicles, and industrial IoT applications are just the beginning of this transformation.
-
-Blockchain technology is expanding beyond cryptocurrency, offering secure and transparent solutions for supply chain management, digital identity verification, and decentralized applications.
-
-As we look to the future, these technologies will continue to converge and create new possibilities we can barely imagine today.`,
-    author: {
-      name: "Connected Team",
-      role: "Technology Analyst",
-      image: "/placeholder.svg?height=40&width=40&text=CT",
-    },
-    authorImage: "/placeholder.svg?height=80&width=80&text=CT",
-    authorRole: "Technology Analyst",
-    publishedAt: new Date().toISOString(),
-    image: "/placeholder.svg?height=400&width=600&text=Future+of+Technology",
-    tags: ["Technology", "Innovation", "Future", "AI", "IoT"],
-    category: "Technology",
-    readTime: "8 min read",
-  },
-]
-
 // Get base URL for API calls
 function getBaseUrl() {
   if (typeof window !== "undefined") {
-    // Browser should use relative URL
     return ""
   }
   if (process.env.VERCEL_URL) {
-    // SSR should use vercel url
     return `https://${process.env.VERCEL_URL}`
   }
   if (process.env.NEXT_PUBLIC_BASE_URL) {
-    // Use custom base URL
     return process.env.NEXT_PUBLIC_BASE_URL
   }
-  // Development fallback
   return "http://localhost:3000"
 }
 
@@ -72,18 +36,18 @@ async function getBlogPosts() {
   try {
     const baseUrl = getBaseUrl()
     const response = await fetch(`${baseUrl}/api/content/blog`, {
-      next: { revalidate: 60 }, // ISR with 60 second revalidation
+      next: { revalidate: 60 },
     })
 
     if (response.ok) {
       const data = await response.json()
-      return Array.isArray(data.posts) ? data.posts : sampleBlogPosts
+      return Array.isArray(data.posts) ? data.posts : []
     }
   } catch (error) {
-    console.warn("Failed to fetch blog posts from API, using sample data:", error.message)
+    console.warn("Failed to fetch blog posts:", error.message)
   }
 
-  return sampleBlogPosts
+  return []
 }
 
 // Safe function to get a single blog post
@@ -91,13 +55,12 @@ async function getBlogPost(slug) {
   try {
     const baseUrl = getBaseUrl()
     const response = await fetch(`${baseUrl}/api/content/blog/${slug}`, {
-      next: { revalidate: 60 }, // ISR with 60 second revalidation
+      next: { revalidate: 60 },
     })
 
     if (response.ok) {
       const post = await response.json()
-      if (post && post.slug === slug) {
-        // Ensure dynamic read time calculation
+      if (post && !post.error) {
         if (!post.readTime) {
           post.readTime = calculateReadTime(post.content)
         }
@@ -105,26 +68,25 @@ async function getBlogPost(slug) {
       }
     }
   } catch (error) {
-    console.warn(`Failed to fetch blog post ${slug} from API, checking sample data:`, error.message)
+    console.warn(`Failed to fetch blog post ${slug}:`, error.message)
   }
 
-  // Fallback to sample data
-  const fallbackPost = sampleBlogPosts.find((post) => post.slug === slug)
-  if (fallbackPost && !fallbackPost.readTime) {
-    fallbackPost.readTime = calculateReadTime(fallbackPost.content)
-  }
-  return fallbackPost || null
+  return null
 }
 
 // Get related posts
 function getRelatedPosts(currentPost, allPosts) {
   if (!Array.isArray(allPosts)) return []
-
   return allPosts.filter((post) => post.slug !== currentPost.slug && post.category === currentPost.category).slice(0, 3)
 }
 
 export default async function BlogPost({ params }) {
   const { slug } = await params
+
+  if (!slug || typeof slug !== "string") {
+    notFound()
+  }
+
   const post = await getBlogPost(slug)
 
   if (!post) {
@@ -139,10 +101,10 @@ export default async function BlogPost({ params }) {
   const authorName = post.author?.name || "Connected Team"
   const authorRole = post.author?.role || post.authorRole || "Author"
   const authorImage =
-    post.author?.image?.url ||
-    post.author?.image ||
-    post.authorImage ||
-    `/placeholder.svg?height=80&width=80&text=${encodeURIComponent(authorName.charAt(0))}`
+    post.author?.image || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face`
+
+  // Use Unsplash for images instead of placeholder.svg
+  const postImage = post.image || `https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop`
 
   return (
     <>
@@ -216,7 +178,7 @@ export default async function BlogPost({ params }) {
             {/* Featured Image */}
             <div className="mb-12">
               <Image
-                src={post.image || "/placeholder.svg?height=400&width=800"}
+                src={postImage || "/placeholder.svg"}
                 alt={post.title}
                 width={800}
                 height={400}
@@ -282,7 +244,10 @@ export default async function BlogPost({ params }) {
                       className="group block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border"
                     >
                       <Image
-                        src={relatedPost.image || "/placeholder.svg?height=200&width=300"}
+                        src={
+                          relatedPost.image ||
+                          `https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop`
+                        }
                         alt={relatedPost.title}
                         width={300}
                         height={200}
@@ -319,22 +284,25 @@ export default async function BlogPost({ params }) {
 // Generate static params for better performance on Vercel
 export async function generateStaticParams() {
   try {
-    // Use a more robust approach for static generation
     const posts = await getBlogPosts()
 
     if (Array.isArray(posts) && posts.length > 0) {
-      return posts.map((post) => ({
-        slug: post.slug,
-      }))
+      return posts
+        .filter((post) => post.slug && typeof post.slug === "string")
+        .map((post) => ({
+          slug: post.slug,
+        }))
     }
-
-    // Return sample slugs as fallback
-    return [{ slug: "future-of-technology" }]
   } catch (error) {
-    console.warn("Error generating static params for blog posts:", error.message)
-    // Return sample slugs as fallback
-    return [{ slug: "future-of-technology" }]
+    console.warn("Error generating static params:", error.message)
   }
+
+  // Return sample slugs as fallback
+  return [
+    { slug: "future-of-technology" },
+    { slug: "digital-transformation-guide" },
+    { slug: "cybersecurity-best-practices" },
+  ]
 }
 
 export async function generateMetadata({ params }) {

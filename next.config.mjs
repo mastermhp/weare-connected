@@ -8,36 +8,49 @@ const nextConfig = {
   },
   images: {
     domains: [
-      'res.cloudinary.com',
-      'images.unsplash.com',
-      'via.placeholder.com',
-      'placeholder.com'
+      "res.cloudinary.com",
+      "images.unsplash.com",
+      "via.placeholder.com",
+      "placeholder.com",
     ],
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        port: "",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        port: "",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'via.placeholder.com',
-        port: '',
-        pathname: '/**',
-      }
+        protocol: "https",
+        hostname: "via.placeholder.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
     unoptimized: true,
   },
+  // Ensure proper trailing slash handling
+  trailingSlash: false,
+  // Enable experimental features for better ISR
   // Disable static optimization for API routes during build
   experimental: {
-    serverComponentsExternalPackages: ['mongodb']
+    isrMemoryCacheSize: 0, // Disable ISR memory cache for Vercel
+    serverComponentsExternalPackages: ["mongodb"],
+  },
+  // Add rewrites for placeholder images
+  async rewrites() {
+    return [
+      {
+        source: '/placeholder.svg',
+        destination: '/api/placeholder',
+      },
+    ]
   },
   // Handle build-time environment variables
   env: {
@@ -47,7 +60,7 @@ const nextConfig = {
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
-  }
-}
+  },
+};
 
-export default nextConfig
+export default nextConfig;
