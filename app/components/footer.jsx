@@ -9,11 +9,11 @@ export default function Footer() {
     <footer className="w-full bg-gray-900 text-gray-300 relative overflow-hidden">
       {/* Top Section: Prominent Logo Banner with Unique Background */}
       <div className="bg-slate-950/50 py-12 sm:py-16 md:py-20 lg:py-24 relative overflow-hidden">
-        {/* Animated gradient orbs */}
+        {/* Static decorative elements instead of animated ones */}
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-purple-600/20 to-pink-500/20 rounded-full blur-xl animate-pulse"></div>
-          <div className="absolute top-3/4 right-1/4 w-24 h-24 bg-gradient-to-r from-orange-500/20 to-purple-600/20 rounded-full blur-xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-3/4 w-20 h-20 bg-gradient-to-r from-pink-500/20 to-orange-500/20 rounded-full blur-xl animate-pulse delay-500"></div>
+          <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-purple-600/20 to-pink-500/20 rounded-full blur-xl opacity-50"></div>
+          <div className="absolute top-3/4 right-1/4 w-24 h-24 bg-gradient-to-r from-orange-500/20 to-purple-600/20 rounded-full blur-xl opacity-60"></div>
+          <div className="absolute top-1/2 left-3/4 w-20 h-20 bg-gradient-to-r from-pink-500/20 to-orange-500/20 rounded-full blur-xl opacity-40"></div>
         </div>
 
         {/* Subtle grid pattern */}
@@ -38,6 +38,7 @@ export default function Footer() {
               width={384}
               height={64}
               className="h-auto w-48 sm:w-60 md:w-72 lg:w-80 xl:w-96 brightness-0 invert drop-shadow-2xl"
+              style={{ width: "auto", height: "auto" }}
             />
           </Link>
         </div>

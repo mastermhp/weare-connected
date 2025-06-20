@@ -31,12 +31,46 @@ function getBaseUrl() {
   return "http://localhost:3000"
 }
 
-// Safe function to get blog posts
-async function getBlogPosts() {
+// Fetch blog post from database via API
+async function getBlogPost(slug) {
+  console.log(`Fetching blog post for slug: ${slug}`)
+
+  try {
+    const baseUrl = getBaseUrl()
+    const response = await fetch(`${baseUrl}/api/content/blog/${slug}`, {
+      cache: "no-store", // Always fetch fresh data
+    })
+
+    console.log(`API response status: ${response.status}`)
+
+    if (response.ok) {
+      const post = await response.json()
+      console.log(`API response:`, post)
+
+      if (post && !post.error) {
+        console.log(`Found blog post: ${post.title}`)
+        if (!post.readTime) {
+          post.readTime = calculateReadTime(post.content)
+        }
+        return post
+      }
+    } else {
+      console.log(`API returned error: ${response.status}`)
+    }
+  } catch (error) {
+    console.error(`Failed to fetch blog post ${slug} from API:`, error)
+  }
+
+  console.log(`Blog post not found: ${slug}`)
+  return null
+}
+
+// Fetch all blog posts for related posts
+async function getAllBlogPosts() {
   try {
     const baseUrl = getBaseUrl()
     const response = await fetch(`${baseUrl}/api/content/blog`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     })
 
     if (response.ok) {
@@ -44,34 +78,10 @@ async function getBlogPosts() {
       return Array.isArray(data.posts) ? data.posts : []
     }
   } catch (error) {
-    console.warn("Failed to fetch blog posts:", error.message)
+    console.error("Failed to fetch all blog posts:", error)
   }
 
   return []
-}
-
-// Safe function to get a single blog post
-async function getBlogPost(slug) {
-  try {
-    const baseUrl = getBaseUrl()
-    const response = await fetch(`${baseUrl}/api/content/blog/${slug}`, {
-      next: { revalidate: 60 },
-    })
-
-    if (response.ok) {
-      const post = await response.json()
-      if (post && !post.error) {
-        if (!post.readTime) {
-          post.readTime = calculateReadTime(post.content)
-        }
-        return post
-      }
-    }
-  } catch (error) {
-    console.warn(`Failed to fetch blog post ${slug}:`, error.message)
-  }
-
-  return null
 }
 
 // Get related posts
@@ -83,28 +93,41 @@ function getRelatedPosts(currentPost, allPosts) {
 export default async function BlogPost({ params }) {
   const { slug } = await params
 
+  console.log(`Blog page rendering for slug: ${slug}`)
+
   if (!slug || typeof slug !== "string") {
+    console.log("Invalid slug provided")
     notFound()
   }
 
   const post = await getBlogPost(slug)
 
   if (!post) {
+    console.log(`Post not found for slug: ${slug}`)
     notFound()
   }
 
+  console.log(`Rendering blog post: ${post.title}`)
+
   // Get all posts for related posts
-  const allPosts = await getBlogPosts()
+  const allPosts = await getAllBlogPosts()
   const relatedPosts = getRelatedPosts(post, allPosts)
 
   // Ensure we have proper author data
   const authorName = post.author?.name || "Connected Team"
   const authorRole = post.author?.role || post.authorRole || "Author"
   const authorImage =
-    post.author?.image || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face`
+    post.author?.image?.url ||
+    post.author?.image ||
+    post.authorImage ||
+    `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face`
 
-  // Use Unsplash for images instead of placeholder.svg
-  const postImage = post.image || `https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop`
+  // Use actual image from database
+  const postImage =
+    post.featuredImage?.url ||
+    post.image?.url ||
+    post.image ||
+    `https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop`
 
   return (
     <>
@@ -245,8 +268,11 @@ export default async function BlogPost({ params }) {
                     >
                       <Image
                         src={
+                          relatedPost.featuredImage?.url ||
+                          relatedPost.image?.url ||
                           relatedPost.image ||
-                          `https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop`
+                          `https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop` ||
+                          "/placeholder.svg"
                         }
                         alt={relatedPost.title}
                         width={300}
@@ -281,38 +307,22 @@ export default async function BlogPost({ params }) {
   )
 }
 
-// Generate static params for better performance on Vercel
+// Remove static generation - make it fully dynamic
 export async function generateStaticParams() {
-  try {
-    const posts = await getBlogPosts()
-
-    if (Array.isArray(posts) && posts.length > 0) {
-      return posts
-        .filter((post) => post.slug && typeof post.slug === "string")
-        .map((post) => ({
-          slug: post.slug,
-        }))
-    }
-  } catch (error) {
-    console.warn("Error generating static params:", error.message)
-  }
-
-  // Return sample slugs as fallback
-  return [
-    { slug: "future-of-technology" },
-    { slug: "digital-transformation-guide" },
-    { slug: "cybersecurity-best-practices" },
-  ]
+  // Return empty array to make all routes dynamic
+  return []
 }
 
 export async function generateMetadata({ params }) {
+  const { slug } = await params
+
   try {
-    const { slug } = await params
     const post = await getBlogPost(slug)
 
     if (!post) {
       return {
-        title: "Post Not Found",
+        title: "Post Not Found | Connected Blog",
+        description: "The requested blog post could not be found.",
       }
     }
 
@@ -333,6 +343,6 @@ export async function generateMetadata({ params }) {
   }
 }
 
-// Enable ISR for dynamic blog posts
-export const dynamic = "force-static"
-export const revalidate = 60
+// Make it fully dynamic to fetch from database
+export const dynamic = "force-dynamic"
+export const revalidate = 0

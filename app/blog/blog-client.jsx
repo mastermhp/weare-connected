@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/app/components/header"
 import Footer from "@/app/components/footer"
-import { motion } from "framer-motion"
 
 export default function BlogClientPage({ posts }) {
   const [searchTerm, setSearchTerm] = useState("")
@@ -45,26 +44,14 @@ export default function BlogClientPage({ posts }) {
       <div className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden -mt-[100px] sm:-mt-[120px] md:-mt-[140px] pt-[120px] sm:pt-[160px] md:pt-[200px]">
         {/* Hero section background that extends behind header */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-[#E9E6FF]/40 to-[#AA99FF]/30 -top-[120px] -mt-[120px] pt-[120px]">
-          {/* Floating particles */}
-          {[...Array(50)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-primary/30 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                y: [0, -100, 0],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: Math.random() * 10 + 10,
-                repeat: Number.POSITIVE_INFINITY,
-                delay: Math.random() * 10,
-              }}
-            />
-          ))}
+          {/* Static decorative elements instead of animated particles */}
+          <div className="absolute inset-0">
+            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary/20 rounded-full"></div>
+            <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-primary/30 rounded-full"></div>
+            <div className="absolute top-1/2 left-3/4 w-1.5 h-1.5 bg-primary/25 rounded-full"></div>
+            <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-primary/20 rounded-full"></div>
+            <div className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-primary/15 rounded-full"></div>
+          </div>
           <div className="absolute inset-0 bg-primary/8" />
 
           {/* Grid overlay */}
@@ -171,10 +158,10 @@ export default function BlogClientPage({ posts }) {
                     </p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        {featuredPost.authorImage ? (
+                        {featuredPost.author?.image ? (
                           <img
-                            src={featuredPost.authorImage || "/placeholder.svg"}
-                            alt={featuredPost.author}
+                            src={featuredPost.author.image || "/placeholder.svg"}
+                            alt={featuredPost.author?.name || "Author"}
                             className="w-10 h-10 rounded-full object-cover"
                             onError={(e) => {
                               e.target.style.display = "none"
@@ -184,15 +171,17 @@ export default function BlogClientPage({ posts }) {
                         ) : null}
                         <div
                           className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center"
-                          style={{ display: featuredPost.authorImage ? "none" : "flex" }}
+                          style={{ display: featuredPost.author?.image ? "none" : "flex" }}
                         >
                           <User className="w-5 h-5" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-gray-900 truncate">{featuredPost.author}</p>
+                          <p className="font-semibold text-gray-900 truncate">
+                            {featuredPost.author?.name || "Author"}
+                          </p>
                           <div className="flex items-center text-sm text-gray-500">
                             <Calendar className="w-4 h-4 mr-1 flex-shrink-0" />
-                            <span className="truncate">{featuredPost.date}</span>
+                            <span className="truncate">{new Date(featuredPost.publishedAt).toLocaleDateString()}</span>
                           </div>
                         </div>
                       </div>
@@ -252,10 +241,10 @@ export default function BlogClientPage({ posts }) {
                       <div className="space-y-4">
                         <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center">
-                            {post.authorImage ? (
+                            {post.author?.image ? (
                               <img
-                                src={post.authorImage || "/placeholder.svg"}
-                                alt={post.author}
+                                src={post.author.image || "/placeholder.svg"}
+                                alt={post.author?.name || "Author"}
                                 className="h-4 w-4 mr-1 rounded-full object-cover"
                                 onError={(e) => {
                                   e.target.style.display = "none"
@@ -263,12 +252,15 @@ export default function BlogClientPage({ posts }) {
                                 }}
                               />
                             ) : null}
-                            <User className="h-4 w-4 mr-1" style={{ display: post.authorImage ? "none" : "inline" }} />
-                            {post.author}
+                            <User
+                              className="h-4 w-4 mr-1"
+                              style={{ display: post.author?.image ? "none" : "inline" }}
+                            />
+                            {post.author?.name || "Author"}
                           </div>
                           <div className="flex items-center">
                             <Calendar className="h-4 w-4 mr-1" />
-                            {post.date}
+                            {new Date(post.publishedAt).toLocaleDateString()}
                           </div>
                         </div>
                         <div className="flex items-center justify-center">

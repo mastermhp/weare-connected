@@ -17,30 +17,30 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
-        port: "",
-        pathname: "/**",
+        // port: "",
+        // pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "images.unsplash.com",
-        port: "",
-        pathname: "/**",
+        // port: "",
+        // pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "via.placeholder.com",
-        port: "",
-        pathname: "/**",
+        // port: "",
+        // pathname: "/**",
       },
     ],
     unoptimized: true,
   },
   // Ensure proper trailing slash handling
-  trailingSlash: false,
+  // trailingSlash: false,
   // Enable experimental features for better ISR
   // Disable static optimization for API routes during build
   experimental: {
-    isrMemoryCacheSize: 0, // Disable ISR memory cache for Vercel
+    // isrMemoryCacheSize: 0, // Disable ISR memory cache for Vercel
     serverComponentsExternalPackages: ["mongodb"],
   },
   // Add rewrites for placeholder images
