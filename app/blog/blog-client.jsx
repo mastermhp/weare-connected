@@ -132,7 +132,7 @@ export default function BlogClientPage({ posts }) {
                       className="w-full h-64 md:h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center"
                       style={{ display: featuredPost.image ? "none" : "flex" }}
                     >
-                      <div className="text-center text-purple-600">
+                      <div className="text-center text-[#6529b2]">
                         <div className="w-16 h-16 bg-purple-300 rounded-full flex items-center justify-center mx-auto mb-2">
                           <span className="text-2xl font-bold">{featuredPost.title.charAt(0)}</span>
                         </div>
@@ -170,7 +170,7 @@ export default function BlogClientPage({ posts }) {
                           />
                         ) : null}
                         <div
-                          className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center"
+                          className="w-10 h-10 bg-[#6529b2] text-white rounded-full flex items-center justify-center"
                           style={{ display: featuredPost.author?.image ? "none" : "flex" }}
                         >
                           <User className="w-5 h-5" />
@@ -185,7 +185,7 @@ export default function BlogClientPage({ posts }) {
                           </div>
                         </div>
                       </div>
-                      <Button asChild className="bg-purple-600 hover:bg-purple-700 flex-shrink-0">
+                      <Button asChild className="bg-[#6529b2] hover:bg-purple-700 flex-shrink-0">
                         <Link href={`/blog/${featuredPost.slug}`}>
                           Read More
                           <ArrowRight className="w-4 h-4 ml-2" />
