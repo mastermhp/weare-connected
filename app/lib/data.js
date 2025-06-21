@@ -567,57 +567,71 @@ export async function getService(slug) {
   return getServiceBySlug(slug)
 }
 
-// Get all ventures - FIXED TO RETURN ALL VENTURES
+// Get all ventures - IMPROVED WITH BETTER ERROR HANDLING
 export async function getVentures() {
   try {
+    console.log("=== GETTING VENTURES ===")
+
     if (!isMongoDBAvailable()) {
       console.warn("MongoDB not available, returning sample ventures")
       return getSampleVentures()
     }
 
     const { db } = await connectToDatabase()
+    console.log("Database connected successfully")
 
-    // First try to get all ventures regardless of status to debug
-    console.log("Fetching all ventures from database...")
-    const allVentures = await db.collection("ventures").find({}).sort({ createdAt: -1 }).toArray()
-    console.log(`Found ${allVentures.length} total ventures in database`)
+    // Get all ventures with any status (active, scaling, etc.)
+    const ventures = await db.collection("ventures").find({}).sort({ createdAt: -1 }).toArray()
 
-    // Log each venture's status for debugging
-    allVentures.forEach((venture) => {
-      console.log(`Venture: ${venture.name}, Status: ${venture.status}`)
-    })
-
-    // Get ventures with active or scaling status (include both)
-    const ventures = await db
-      .collection("ventures")
-      .find({
-        $or: [{ status: "active" }, { status: "scaling" }],
-      })
-      .sort({ createdAt: -1 })
-      .toArray()
-
-    console.log(`Found ${ventures.length} active/scaling ventures`)
+    console.log(`Found ${ventures.length} total ventures in database`)
 
     if (ventures.length === 0) {
-      console.log("No ventures found, returning sample ventures")
+      console.log("No ventures found in database, returning sample ventures")
       return getSampleVentures()
     }
 
-    return ventures.map((venture) => ({
-      ...venture,
-      id: venture._id.toString(),
-      slug: venture.slug || venture._id.toString(), // Ensure slug is always available
-      image:
-        venture.featuredImage?.url ||
-        venture.image ||
-        "/placeholder.svg?height=600&width=1200&text=" + encodeURIComponent(venture.name || "Venture"),
-      logo:
-        venture.logo?.url ||
-        venture.logo ||
-        "/placeholder.svg?height=120&width=120&text=" + encodeURIComponent(venture.name?.charAt(0) || "V"),
-    }))
+    // Transform and return ventures
+    const transformedVentures = ventures.map((venture) => {
+      console.log(`Processing venture: ${venture.name} (Status: ${venture.status})`)
+
+      return {
+        ...venture,
+        id: venture._id.toString(),
+        slug: venture.slug || venture._id.toString(),
+        name: venture.name || "Untitled Venture",
+        tagline: venture.tagline || venture.shortDescription || "Innovative solutions",
+        description: venture.description || "No description available",
+        shortDescription: venture.shortDescription || venture.description?.substring(0, 100) + "..." || "",
+        fullDescription: venture.fullDescription || venture.description || "",
+        category: venture.category || venture.industry || "Technology",
+        status: venture.status || "active",
+        foundedYear: venture.foundedYear || venture.year || new Date().getFullYear(),
+        teamSize: venture.teamSize || "5-10",
+        growth: venture.growth || "+100% YoY",
+        image:
+          venture.featuredImage?.url ||
+          venture.image ||
+          "/placeholder.svg?height=600&width=1200&text=" + encodeURIComponent(venture.name || "Venture"),
+        logo:
+          venture.logo?.url ||
+          venture.logo ||
+          "/placeholder.svg?height=120&width=120&text=" + encodeURIComponent(venture.name?.charAt(0) || "V"),
+        website: venture.website || "#",
+        industry: venture.industry || venture.category || "Technology",
+        metrics: venture.metrics || [],
+        technologies: venture.technologies || [],
+        features: venture.features || [],
+        testimonials: venture.testimonials || [],
+        createdAt: venture.createdAt ? new Date(venture.createdAt).toISOString() : new Date().toISOString(),
+        updatedAt: venture.updatedAt ? new Date(venture.updatedAt).toISOString() : new Date().toISOString(),
+      }
+    })
+
+    console.log(`Returning ${transformedVentures.length} transformed ventures`)
+    return transformedVentures
   } catch (error) {
     console.error("Error fetching ventures:", error)
+    console.log("Falling back to sample ventures due to error")
     return getSampleVentures()
   }
 }
