@@ -65,6 +65,7 @@ export default function Home() {
 
   return (
     <main className="relative">
+      {/* sticky header  */}
       <Header />
       <HeroSection content={siteContent?.homepage} />
       <AboutSection content={siteContent?.homepage} />
