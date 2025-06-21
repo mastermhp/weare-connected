@@ -240,7 +240,7 @@ export async function getBlogPosts() {
     const { db } = await connectToDatabase()
     let posts = []
 
-    // Try 'blog' collection first
+    // Try 'blog' collection first (your original data)
     try {
       posts = await db
         .collection("blog")
@@ -268,14 +268,25 @@ export async function getBlogPosts() {
       }
     }
 
-    // If still no posts, try without status filter (in case status field is missing)
+    // If still no posts, try without status filter from 'blog' collection
     if (posts.length === 0) {
       try {
         posts = await db.collection("blog").find({}).sort({ publishedAt: -1, createdAt: -1 }).toArray()
 
         console.log(`Found ${posts.length} posts in 'blog' collection (no status filter)`)
       } catch (err) {
-        console.log("Error fetching all blog posts:", err.message)
+        console.log("Error fetching all blog posts from blog collection:", err.message)
+      }
+    }
+
+    // If still no posts, try without status filter from 'blog_posts' collection
+    if (posts.length === 0) {
+      try {
+        posts = await db.collection("blog_posts").find({}).sort({ publishedAt: -1, createdAt: -1 }).toArray()
+
+        console.log(`Found ${posts.length} posts in 'blog_posts' collection (no status filter)`)
+      } catch (err) {
+        console.log("Error fetching all blog posts from blog_posts collection:", err.message)
       }
     }
 
@@ -341,7 +352,7 @@ export async function getBlogPostBySlug(slug) {
     const { db } = await connectToDatabase()
     let post = null
 
-    // Try 'blog' collection first
+    // Try 'blog' collection first (your original data)
     try {
       post = await db.collection("blog").findOne({ slug, status: "published" })
     } catch (err) {
@@ -357,12 +368,21 @@ export async function getBlogPostBySlug(slug) {
       }
     }
 
-    // If still not found, try without status filter
+    // If still not found, try without status filter from 'blog' collection
     if (!post) {
       try {
         post = await db.collection("blog").findOne({ slug })
       } catch (err) {
-        console.log("Error finding blog post without status filter:", err.message)
+        console.log("Error finding blog post without status filter in blog collection:", err.message)
+      }
+    }
+
+    // If still not found, try without status filter from 'blog_posts' collection
+    if (!post) {
+      try {
+        post = await db.collection("blog_posts").findOne({ slug })
+      } catch (err) {
+        console.log("Error finding blog post without status filter in blog_posts collection:", err.message)
       }
     }
 

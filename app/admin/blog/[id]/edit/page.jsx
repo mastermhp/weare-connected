@@ -49,13 +49,19 @@ export default function EditBlogPost({ params }) {
     const fetchPost = async () => {
       try {
         setLoading(true)
+        console.log(`Fetching blog post with ID: ${id}`)
+
         const response = await fetch(`/api/admin/blog/${id}`)
+        console.log(`API response status: ${response.status}`)
 
         if (!response.ok) {
-          throw new Error("Failed to fetch blog post")
+          const errorData = await response.json().catch(() => ({}))
+          console.error("API error:", errorData)
+          throw new Error(errorData.error || `HTTP ${response.status}: Failed to fetch blog post`)
         }
 
         const post = await response.json()
+        console.log("Fetched post:", post)
 
         // Format data for form
         setFormData({
@@ -75,13 +81,15 @@ export default function EditBlogPost({ params }) {
         })
       } catch (err) {
         console.error("Error fetching post:", err)
-        setError("Failed to load blog post. Please try again.")
+        setError(`Failed to load blog post: ${err.message}`)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchPost()
+    if (id) {
+      fetchPost()
+    }
   }, [id])
 
   const handleInputChange = (e) => {
@@ -144,6 +152,7 @@ export default function EditBlogPost({ params }) {
 
     try {
       setSaving(true)
+      console.log("Submitting form data:", formData)
 
       // Calculate dynamic read time
       const readTime = calculateReadTime(formData.content)
@@ -157,16 +166,24 @@ export default function EditBlogPost({ params }) {
           formData.status === "published" && !formData.publishedAt ? new Date().toISOString() : formData.publishedAt,
       }
 
+      console.log("Formatted data for API:", formattedData)
+
       const response = await fetch(`/api/admin/blog/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formattedData),
       })
 
+      console.log(`Update API response status: ${response.status}`)
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to update blog post")
+        const errorData = await response.json().catch(() => ({}))
+        console.error("Update API error:", errorData)
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to update blog post`)
       }
+
+      const result = await response.json()
+      console.log("Update result:", result)
 
       // Trigger revalidation for production
       try {
