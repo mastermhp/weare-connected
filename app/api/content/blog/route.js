@@ -92,27 +92,73 @@ export async function GET() {
     const { db } = await connectToDatabase()
     console.log("Blog API: Database connected successfully")
 
-    // Try to fetch from database
-    const posts = await db.collection("blog_posts").find({ status: "published" }).sort({ publishedAt: -1 }).toArray()
+    // Try to fetch from the 'blog' collection first (this is where your admin creates posts)
+    let posts = await db
+      .collection("blog")
+      .find({ status: "published" })
+      .sort({ publishedAt: -1, createdAt: -1 })
+      .toArray()
 
-    console.log(`Blog API: Found ${posts.length} posts in database`)
+    console.log(`Blog API: Found ${posts.length} posts in 'blog' collection`)
+
+    // If no published posts, try to get all posts from blog collection
+    if (posts.length === 0) {
+      posts = await db.collection("blog").find({}).sort({ publishedAt: -1, createdAt: -1 }).toArray()
+      console.log(`Blog API: Found ${posts.length} total posts in 'blog' collection`)
+    }
+
+    // If still no posts, try blog_posts collection as fallback
+    if (posts.length === 0) {
+      posts = await db.collection("blog_posts").find({ status: "published" }).sort({ publishedAt: -1 }).toArray()
+      console.log(`Blog API: Found ${posts.length} posts in 'blog_posts' collection`)
+    }
 
     if (posts && posts.length > 0) {
-      // Convert MongoDB ObjectIds to strings
+      // Convert MongoDB ObjectIds to strings and ensure proper formatting
       const formattedPosts = posts.map((post) => ({
-        ...post,
         id: post._id.toString(),
-        _id: post._id.toString(),
+        slug: post.slug || post._id.toString(),
+        title: post.title || "Untitled Post",
+        excerpt:
+          post.excerpt ||
+          post.shortDescription ||
+          (post.content ? post.content.substring(0, 150) + "..." : "No excerpt available"),
+        content: post.content || "No content available",
+        author: {
+          name: post.author?.name || post.author || "Connected Team",
+          role: post.author?.role || "Author",
+          image:
+            post.author?.image?.url ||
+            post.author?.image ||
+            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face",
+        },
+        publishedAt: post.publishedAt
+          ? new Date(post.publishedAt).toISOString()
+          : new Date(post.createdAt || Date.now()).toISOString(),
+        image:
+          post.featuredImage?.url ||
+          post.image?.url ||
+          post.image ||
+          "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop",
+        tags: Array.isArray(post.tags) ? post.tags : ["Technology", "Innovation"],
+        category: post.category || "Technology",
+        readTime: post.readTime || "5 min read",
+        status: post.status || "published",
+        createdAt: post.createdAt ? new Date(post.createdAt).toISOString() : new Date().toISOString(),
+        updatedAt: post.updatedAt ? new Date(post.updatedAt).toISOString() : new Date().toISOString(),
       }))
 
       return NextResponse.json(
         {
           posts: formattedPosts,
           source: "database",
+          count: formattedPosts.length,
         },
         {
           headers: {
-            "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
           },
         },
       )
@@ -128,10 +174,13 @@ export async function GET() {
     {
       posts: sampleBlogPosts,
       source: "fallback",
+      count: sampleBlogPosts.length,
     },
     {
       headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
       },
     },
   )

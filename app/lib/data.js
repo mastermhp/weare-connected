@@ -240,7 +240,7 @@ export async function getBlogPosts() {
     const { db } = await connectToDatabase()
     let posts = []
 
-    // Try 'blog' collection first (your original data)
+    // Try 'blog' collection first (this is where admin creates posts)
     try {
       posts = await db
         .collection("blog")
@@ -248,12 +248,19 @@ export async function getBlogPosts() {
         .sort({ publishedAt: -1, createdAt: -1 })
         .toArray()
 
-      console.log(`Found ${posts.length} posts in 'blog' collection`)
+      console.log(`Found ${posts.length} published posts in 'blog' collection`)
+
+      // If no published posts, get all posts from blog collection
+      if (posts.length === 0) {
+        posts = await db.collection("blog").find({}).sort({ publishedAt: -1, createdAt: -1 }).toArray()
+
+        console.log(`Found ${posts.length} total posts in 'blog' collection`)
+      }
     } catch (err) {
-      console.log("Blog collection not found, trying blog_posts...")
+      console.log("Error accessing blog collection:", err.message)
     }
 
-    // If no posts found, try 'blog_posts' collection
+    // If no posts found, try 'blog_posts' collection as fallback
     if (posts.length === 0) {
       try {
         posts = await db
@@ -264,29 +271,7 @@ export async function getBlogPosts() {
 
         console.log(`Found ${posts.length} posts in 'blog_posts' collection`)
       } catch (err) {
-        console.log("Blog_posts collection not found either...")
-      }
-    }
-
-    // If still no posts, try without status filter from 'blog' collection
-    if (posts.length === 0) {
-      try {
-        posts = await db.collection("blog").find({}).sort({ publishedAt: -1, createdAt: -1 }).toArray()
-
-        console.log(`Found ${posts.length} posts in 'blog' collection (no status filter)`)
-      } catch (err) {
-        console.log("Error fetching all blog posts from blog collection:", err.message)
-      }
-    }
-
-    // If still no posts, try without status filter from 'blog_posts' collection
-    if (posts.length === 0) {
-      try {
-        posts = await db.collection("blog_posts").find({}).sort({ publishedAt: -1, createdAt: -1 }).toArray()
-
-        console.log(`Found ${posts.length} posts in 'blog_posts' collection (no status filter)`)
-      } catch (err) {
-        console.log("Error fetching all blog posts from blog_posts collection:", err.message)
+        console.log("Error accessing blog_posts collection:", err.message)
       }
     }
 

@@ -7,6 +7,10 @@ export const metadata = {
     "Insights, stories, and updates from the Connected team. Discover the latest trends in technology, entrepreneurship, and innovation.",
 }
 
+// Disable caching for this page
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 // Serialize blog posts for client component
 function serializeBlogPosts(posts) {
   return posts.map((post) => ({
@@ -56,13 +60,18 @@ function serializeBlogPosts(posts) {
 
 export default async function BlogPage() {
   try {
+    console.log("BlogPage: Fetching blog posts...")
+
     // Fetch real blog posts from database
     const rawPosts = await getBlogPosts()
+    console.log(`BlogPage: Retrieved ${rawPosts.length} posts`)
+
     const posts = serializeBlogPosts(rawPosts)
+    console.log(`BlogPage: Serialized ${posts.length} posts`)
 
     return <BlogClientPage posts={posts} />
   } catch (error) {
-    console.error("Error fetching blog posts:", error)
+    console.error("BlogPage: Error fetching blog posts:", error)
 
     // Fallback data if database fails
     const fallbackPosts = [

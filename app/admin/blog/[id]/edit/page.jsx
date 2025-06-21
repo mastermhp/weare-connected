@@ -187,14 +187,20 @@ export default function EditBlogPost({ params }) {
 
       // Trigger revalidation for production
       try {
-        await fetch("/api/revalidate", {
+        const revalidateResponse = await fetch("/api/revalidate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             path: "/blog",
-            secret: process.env.REVALIDATE_SECRET,
+            secret: process.env.REVALIDATE_SECRET || "fallback-secret",
           }),
         })
+
+        if (revalidateResponse.ok) {
+          console.log("Revalidation successful")
+        } else {
+          console.warn("Revalidation failed:", await revalidateResponse.text())
+        }
       } catch (revalidateError) {
         console.warn("Failed to revalidate:", revalidateError)
       }
