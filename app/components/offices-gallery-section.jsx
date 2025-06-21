@@ -114,7 +114,7 @@ const OfficesGallerySection = ({ content }) => {
         </motion.div>
 
         {/* Category Filter */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -140,7 +140,7 @@ const OfficesGallerySection = ({ content }) => {
               {category}
             </motion.button>
           ))}
-        </motion.div>
+        </motion.div> */}
 
         {/* Featured Office Hero */}
         {featuredOffice && (
@@ -175,11 +175,11 @@ const OfficesGallerySection = ({ content }) => {
                     whileInView={{ scale: 1, opacity: 1 }}
                     className="text-center text-white transform scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-300"
                   >
-                    <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3 mx-auto">
+                    {/* <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3 mx-auto">
                       <Building className="w-8 h-8" />
-                    </div>
-                    <p className="text-lg font-bold mb-1">Explore Gallery</p>
-                    <p className="text-sm opacity-90">Interactive Office Tour</p>
+                    </div> */}
+                    {/* <p className="text-lg font-bold mb-1">Explore Gallery</p>
+                    <p className="text-sm opacity-90">Interactive Office Tour</p> */}
                   </motion.div>
                 </div>
               </div>
