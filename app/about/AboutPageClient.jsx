@@ -65,19 +65,156 @@ export default function AboutPageClient() {
     )
   }
 
-  // Use dynamic content with fallbacks
-  const aboutContent = content?.about || {
+  // Use dynamic content with your exact current text as fallbacks
+  const aboutContent = {
     hero: {
-      title: "About Connected",
-      subtitle: "Connected isn't just a name — it's a philosophy.",
+      title: content?.about?.hero?.title || "About Connected",
+      subtitle: content?.about?.hero?.subtitle || "Connected isn't just a name — it's a philosophy.",
     },
-    story: {
-      title: "Our Story",
-      content: "Founded with a vision to transform how businesses operate in the digital age...",
+    description:
+      content?.about?.description ||
+      "We are a modern venture ecosystem that builds, launches, and scales high-impact businesses across digital, tech, media, consumer goods, and beyond.",
+    tagline: content?.about?.tagline || "We don't follow the market. We build what the market follows.",
+    whoWeAre: {
+      title: content?.about?.whoWeAre?.title || "Who We Are",
+      description1:
+        content?.about?.whoWeAre?.description1 ||
+        "Connected is a multi-vertical venture company that operates at the intersection of innovation, creativity, and execution. We design ventures from the ground up — powering ideas with infrastructure, capital, and world-class teams.",
+      description2:
+        content?.about?.whoWeAre?.description2 || "We don't just launch brands. We build machines that scale.",
+      description3:
+        content?.about?.whoWeAre?.description3 ||
+        "From stealth-mode tools to high-visibility consumer brands, everything we create is tied together by one vision: To shape how the next generation lives, works, and grows.",
+    },
+    mission: {
+      title: content?.about?.mission?.title || "Our Mission",
+      description:
+        content?.about?.mission?.description ||
+        "To empower bold ideas and ambitious founders by providing the systems, strategy, and scale needed to dominate their industries.",
+    },
+    vision: {
+      title: content?.about?.vision?.title || "Our Vision",
+      description:
+        content?.about?.vision?.description ||
+        "To become the most influential venture ecosystem in Asia — exporting culture, products, and technology to the world.",
+    },
+    whatWeDo: {
+      title: content?.about?.whatWeDo?.title || "What We Do",
+      items: content?.about?.whatWeDo?.items || [
+        "Build and operate ventures in-house from concept to execution",
+        "Provide growth infrastructure — media, marketing, tech, and brand strategy",
+        "Incubate smart ideas with internal capital and core leadership support",
+        "Create unfair advantages through proprietary tools, networks, and insights",
+        "Scale with speed, backed by remote talent and lean operation systems",
+      ],
+    },
+    ecosystem: {
+      title: content?.about?.ecosystem?.title || "Our Ecosystem",
+      subtitle:
+        content?.about?.ecosystem?.subtitle ||
+        "We don't reveal everything we build. But here's a glimpse of the industries we touch:",
+      description:
+        content?.about?.ecosystem?.description ||
+        "Each venture is unique. Each one stands on its own. But behind all of them is one root system: Connected.",
+      items: content?.about?.ecosystem?.items || [
+        {
+          title: "Digital Advertising & Media",
+          description: "Performance marketing, creative assets, content automation, and monetization systems.",
+        },
+        {
+          title: "Tech & SaaS Infrastructure",
+          description: "Tools that power online businesses: browser systems, automation, security, and backend tech.",
+        },
+        {
+          title: "Consumer Products & DTC",
+          description:
+            "Aesthetic, functional products built with deep insight, viral storytelling, and modern branding.",
+        },
+        {
+          title: "Lifestyle, Wellness & Fitness",
+          description: "Ventures that improve how people look, feel, and perform — from daily routines to peak habits.",
+        },
+        {
+          title: "Food & Urban Experience",
+          description: "Fast, modern, and scalable food brands with focus on convenience, culture, and branding.",
+        },
+      ],
+    },
+    different: {
+      title: content?.about?.different?.title || "What Makes Us Different",
+      subtitle: content?.about?.different?.subtitle || "We don't just talk ideas — we execute them.",
+      items: content?.about?.different?.items || [
+        "Built completely remote with global talent",
+        "Cross-functional leadership across tech, design, operations, and marketing",
+        "Projects span from stealth-mode to viral consumer brands",
+        "Unapologetically ambitious, brutally efficient, and culture-driven",
+      ],
+      tagline:
+        content?.about?.different?.tagline ||
+        "No middlemen. No wasted time. No vanity metrics. Just results, impact, and ownership.",
+    },
+    stats: {
+      title: content?.about?.stats?.title || "Our Impact",
+      subtitle:
+        content?.about?.stats?.subtitle || "Numbers that reflect our commitment to building successful ventures.",
+      items: content?.about?.stats?.items || [
+        {
+          number: "16+",
+          label: "Countries Touched",
+          description: "With global users, clients, and partners",
+        },
+        {
+          number: "12+",
+          label: "Ventures Built",
+          description: "Built or in progress across multiple industries",
+        },
+        {
+          number: "50+",
+          label: "Team Members",
+          description: "Full-time and remote talent globally",
+        },
+        {
+          number: "$100M+",
+          label: "Total Market Cap",
+          description: "Of upcoming projects and ventures",
+        },
+        {
+          number: "1000s",
+          label: "Clients Served",
+          description: "Users and partners served globally",
+        },
+        {
+          number: "5",
+          label: "Core Industries",
+          description: "Digital, Tech, Consumer, Lifestyle, Food",
+        },
+      ],
+    },
+    culture: {
+      title: content?.about?.culture?.title || "Our Culture",
+      subtitle: content?.about?.culture?.subtitle || "Connected is not a 9-to-5 company. It's a mindset.",
+      items: content?.about?.culture?.items || [
+        "We move fast, but with precision.",
+        "We prioritize ownership, not permission.",
+        "We respect creativity, but execute with systems.",
+        "We work hard, and then work harder.",
+      ],
+      description:
+        content?.about?.culture?.description ||
+        "We're building a home for the smartest minds, wildest thinkers, and most relentless builders.",
+      tagline: content?.about?.culture?.tagline || "If you can't stand the average — you'll love it here.",
+    },
+    cta: {
+      title: content?.about?.cta?.title || "What's Coming Next",
+      description:
+        content?.about?.cta?.description ||
+        "We're just getting started. More ventures. More firepower. More disruption. More ways to win.",
+      tagline: content?.about?.cta?.tagline || "We don't ask for permission. We just build.",
     },
     team: {
-      title: "Leadership",
-      subtitle: "Our leadership blends strategy, execution, and creative firepower.",
+      title: content?.about?.team?.title || "Leadership",
+      subtitle: content?.about?.team?.subtitle || "Our leadership blends strategy, execution, and creative firepower.",
+      tagline: content?.about?.team?.tagline || "We don't run companies. We launch weapons.",
     },
   }
 
@@ -129,11 +266,10 @@ export default function AboutPageClient() {
                 <span className="text-pot-black font-semibold">{aboutContent.hero.subtitle}</span>
               </p>
               <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
-                We are a modern venture ecosystem that builds, launches, and scales high-impact businesses across
-                digital, tech, media, consumer goods, and beyond.
+                {aboutContent.description}
               </p>
               <p className="text-lg sm:text-xl text-pot-black font-medium max-w-3xl mx-auto leading-relaxed">
-                We don't follow the market. We build what the market follows.
+                {aboutContent.tagline}
               </p>
             </motion.div>
           </div>
@@ -173,11 +309,11 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto text-center"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-8 font-syne">Who We Are</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-8 font-syne">
+              {aboutContent.whoWeAre.title}
+            </h2>
             <p className="text-lg sm:text-xl text-gray-600 leading-relaxed mb-8 max-w-3xl mx-auto">
-              Connected is a multi-vertical venture company that operates at the intersection of{" "}
-              <span className="text-pot-black font-semibold">innovation, creativity, and execution.</span> We design
-              ventures from the ground up — powering ideas with infrastructure, capital, and world-class teams.
+              {aboutContent.whoWeAre.description1}
             </p>
             <motion.p
               initial={{ opacity: 0, scale: 0.95 }}
@@ -186,14 +322,10 @@ export default function AboutPageClient() {
               viewport={{ once: true }}
               className="text-lg font-bold text-pot-black mb-8"
             >
-              We don't just launch brands. We build machines that scale.
+              {aboutContent.whoWeAre.description2}
             </motion.p>
             <p className="text-base text-gray-600 leading-relaxed max-w-3xl mx-auto">
-              From stealth-mode tools to high-visibility consumer brands, everything we create is tied together by one
-              vision:{" "}
-              <span className="text-pot-black font-semibold">
-                To shape how the next generation lives, works, and grows.
-              </span>
+              {aboutContent.whoWeAre.description3}
             </p>
           </motion.div>
         </div>
@@ -216,11 +348,10 @@ export default function AboutPageClient() {
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mb-4 mx-auto lg:mx-0">
                     <Target className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-pot-black mb-4 font-syne">Our Mission</h3>
-                  <p className="text-base text-gray-600 leading-relaxed">
-                    To empower bold ideas and ambitious founders by providing the systems, strategy, and scale needed to{" "}
-                    <span className="text-pot-black font-semibold">dominate their industries.</span>
-                  </p>
+                  <h3 className="text-xl sm:text-2xl font-bold text-pot-black mb-4 font-syne">
+                    {aboutContent.mission.title}
+                  </h3>
+                  <p className="text-base text-gray-600 leading-relaxed">{aboutContent.mission.description}</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -236,13 +367,10 @@ export default function AboutPageClient() {
                   <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mb-4 mx-auto lg:mx-0">
                     <Lightbulb className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-pot-black mb-4 font-syne">Our Vision</h3>
-                  <p className="text-base text-gray-600 leading-relaxed">
-                    To become the most influential venture ecosystem in Asia —{" "}
-                    <span className="text-pot-black font-semibold">
-                      exporting culture, products, and technology to the world.
-                    </span>
-                  </p>
+                  <h3 className="text-xl sm:text-2xl font-bold text-pot-black mb-4 font-syne">
+                    {aboutContent.vision.title}
+                  </h3>
+                  <p className="text-base text-gray-600 leading-relaxed">{aboutContent.vision.description}</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -260,18 +388,14 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto text-center mb-12"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-8 font-syne">What We Do</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-8 font-syne">
+              {aboutContent.whatWeDo.title}
+            </h2>
           </motion.div>
 
           {/* Cards Container with Flex Wrap */}
           <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
-            {[
-              "Build and operate ventures in-house from concept to execution",
-              "Provide growth infrastructure — media, marketing, tech, and brand strategy",
-              "Incubate smart ideas with internal capital and core leadership support",
-              "Create unfair advantages through proprietary tools, networks, and insights",
-              "Scale with speed, backed by remote talent and lean operation systems",
-            ].map((item, index) => (
+            {aboutContent.whatWeDo.items.map((item, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
@@ -303,38 +427,15 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto text-center mb-12"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">Our Ecosystem</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
+              {aboutContent.ecosystem.title}
+            </h2>
             <p className="text-lg text-gray-600 mb-8">
-              <span className="text-pot-black font-semibold">We don't reveal everything we build.</span> But here's a
-              glimpse of the industries we touch:
+              <span className="text-pot-black font-semibold">{aboutContent.ecosystem.subtitle}</span>
             </p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {[
-              {
-                title: "Digital Advertising & Media",
-                description: "Performance marketing, creative assets, content automation, and monetization systems.",
-              },
-              {
-                title: "Tech & SaaS Infrastructure",
-                description:
-                  "Tools that power online businesses: browser systems, automation, security, and backend tech.",
-              },
-              {
-                title: "Consumer Products & DTC",
-                description:
-                  "Aesthetic, functional products built with deep insight, viral storytelling, and modern branding.",
-              },
-              {
-                title: "Lifestyle, Wellness & Fitness",
-                description:
-                  "Ventures that improve how people look, feel, and perform — from daily routines to peak habits.",
-              },
-              {
-                title: "Food & Urban Experience",
-                description: "Fast, modern, and scalable food brands with focus on convenience, culture, and branding.",
-              },
-            ].map((ecosystem, index) => (
+            {aboutContent.ecosystem.items.map((ecosystem, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
@@ -361,9 +462,7 @@ export default function AboutPageClient() {
             className="text-center mt-12 max-w-2xl mx-auto"
           >
             <p className="text-base text-gray-600 leading-relaxed">
-              <span className="text-pot-black font-semibold">Each venture is unique. Each one stands on its own.</span>
-              <br />
-              But behind all of them is one root system: <span className="text-pot-black font-bold">Connected.</span>
+              <span className="text-pot-black font-semibold">{aboutContent.ecosystem.description}</span>
             </p>
           </motion.div>
         </div>
@@ -373,18 +472,15 @@ export default function AboutPageClient() {
       <section className="py-16 sm:py-20 bg-white">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-7xl">
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">What Makes Us Different</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
+              {aboutContent.different.title}
+            </h2>
             <p className="text-lg text-gray-600 mb-8">
-              <span className="text-pot-black font-semibold">We don't just talk ideas — we execute them.</span>
+              <span className="text-pot-black font-semibold">{aboutContent.different.subtitle}</span>
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {[
-              "Built completely remote with global talent",
-              "Cross-functional leadership across tech, design, operations, and marketing",
-              "Projects span from stealth-mode to viral consumer brands",
-              "Unapologetically ambitious, brutally efficient, and culture-driven",
-            ].map((item, index) => (
+            {aboutContent.different.items.map((item, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
@@ -405,11 +501,7 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="text-center mt-12 max-w-2xl mx-auto"
           >
-            <p className="text-lg font-medium text-pot-black">
-              No middlemen. No wasted time. No vanity metrics.
-              <br />
-              <span className="font-bold">Just results, impact, and ownership.</span>
-            </p>
+            <p className="text-lg font-medium text-pot-black">{aboutContent.different.tagline}</p>
           </motion.div>
         </div>
       </section>
@@ -424,7 +516,7 @@ export default function AboutPageClient() {
             <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">{aboutContent.team.title}</h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-4">{aboutContent.team.subtitle}</p>
             <p className="text-base font-medium text-pot-black">
-              <span className="font-bold">We don't run companies. We launch weapons.</span>
+              <span className="font-bold">{aboutContent.team.tagline}</span>
             </p>
           </div>
 
@@ -552,46 +644,12 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="text-center mb-12 mx-auto max-w-4xl"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">Our Impact</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-              Numbers that reflect our commitment to{" "}
-              <span className="text-pot-black font-semibold">building successful ventures.</span>
-            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">{aboutContent.stats.title}</h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">{aboutContent.stats.subtitle}</p>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
-            {[
-              {
-                number: "16+",
-                label: "Countries Touched",
-                description: "With global users, clients, and partners",
-              },
-              {
-                number: "12+",
-                label: "Ventures Built",
-                description: "Built or in progress across multiple industries",
-              },
-              {
-                number: "50+",
-                label: "Team Members",
-                description: "Full-time and remote talent globally",
-              },
-              {
-                number: "$100M+",
-                label: "Total Market Cap",
-                description: "Of upcoming projects and ventures",
-              },
-              {
-                number: "1000s",
-                label: "Clients Served",
-                description: "Users and partners served globally",
-              },
-              {
-                number: "5",
-                label: "Core Industries",
-                description: "Digital, Tech, Consumer, Lifestyle, Food",
-              },
-            ].map((stat, index) => (
+            {aboutContent.stats.items.map((stat, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
@@ -616,18 +674,15 @@ export default function AboutPageClient() {
       <section className="py-16 sm:py-20 bg-lynx-white">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 max-w-7xl">
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">Our Culture</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-pot-black mb-4 font-syne">
+              {aboutContent.culture.title}
+            </h2>
             <p className="text-lg text-gray-600 mb-8">
-              <span className="text-pot-black font-semibold">Connected is not a 9-to-5 company. It's a mindset.</span>
+              <span className="text-pot-black font-semibold">{aboutContent.culture.subtitle}</span>
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
-            {[
-              "We move fast, but with precision.",
-              "We prioritize ownership, not permission.",
-              "We respect creativity, but execute with systems.",
-              "We work hard, and then work harder.",
-            ].map((item, index) => (
+            {aboutContent.culture.items.map((item, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
@@ -648,11 +703,9 @@ export default function AboutPageClient() {
             viewport={{ once: true }}
             className="text-center max-w-3xl mx-auto"
           >
-            <p className="text-lg text-gray-600 mb-4">
-              We're building a home for the smartest minds, wildest thinkers, and most relentless builders.
-            </p>
+            <p className="text-lg text-gray-600 mb-4">{aboutContent.culture.description}</p>
             <p className="text-lg font-medium text-pot-black">
-              <span className="font-bold">If you can't stand the average — you'll love it here.</span>
+              <span className="font-bold">{aboutContent.culture.tagline}</span>
             </p>
           </motion.div>
         </div>
@@ -872,13 +925,13 @@ export default function AboutPageClient() {
               ))}
 
               <h2 className="text-2xl sm:text-3xl font-bold mb-4 font-syne text-gray-900 relative z-10">
-                What's Coming Next
+                {aboutContent.cta.title}
               </h2>
               <p className="text-lg sm:text-xl mb-8 text-gray-700 max-w-2xl mx-auto relative z-10">
-                We're just getting started. More ventures. More firepower. More disruption. More ways to win.
+                {aboutContent.cta.description}
               </p>
               <p className="text-lg font-medium text-pot-black mb-8 relative z-10">
-                <span className="font-bold">We don't ask for permission. We just build.</span>
+                <span className="font-bold">{aboutContent.cta.tagline}</span>
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

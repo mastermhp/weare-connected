@@ -7,6 +7,10 @@ export const metadata = {
     "Discover the innovative companies and projects we've built and nurtured across tech, digital, and lifestyle industries.",
 }
 
+// Force dynamic rendering to ensure fresh data
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 // Helper function to serialize MongoDB data for client components
 function serializeVentures(ventures) {
   return ventures.map((venture) => ({
@@ -38,11 +42,22 @@ function serializeVentures(ventures) {
 }
 
 export default async function VenturesPage() {
-  // Fetch real ventures data from database
-  const rawVentures = await getVentures()
+  try {
+    console.log("Fetching ventures for page...")
 
-  // Serialize the data to remove complex objects
-  const ventures = serializeVentures(rawVentures)
+    // Fetch real ventures data from database
+    const rawVentures = await getVentures()
+    console.log("Raw ventures fetched:", rawVentures?.length || 0)
 
-  return <VenturesClientPage ventures={ventures} />
+    // Serialize the data to remove complex objects
+    const ventures = serializeVentures(rawVentures || [])
+    console.log("Serialized ventures:", ventures.length)
+
+    return <VenturesClientPage ventures={ventures} />
+  } catch (error) {
+    console.error("Error in VenturesPage:", error)
+
+    // Return with empty ventures array to show fallback
+    return <VenturesClientPage ventures={[]} />
+  }
 }

@@ -9,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Trash2, Plus, Save, Loader2 } from "lucide-react"
 import { useToast } from "@/app/hooks/use-toast"
-// import { useToast } from "@/hooks/use-toast"
 
 export default function ContentManagement() {
   const [content, setContent] = useState(null)
@@ -123,6 +122,45 @@ export default function ContentManagement() {
     const newValues = [...currentValues]
     newValues[index] = { ...newValues[index], [field]: value }
     updateContent("homepage.about.values", newValues)
+  }
+
+  // About page functions
+  const addAboutValue = () => {
+    const newValue = { number: "", title: "", description: "" }
+    const currentValues = content?.about?.values || []
+    updateContent("about.values", [...currentValues, newValue])
+  }
+
+  const removeAboutValue = (index) => {
+    const currentValues = content?.about?.values || []
+    const newValues = currentValues.filter((_, i) => i !== index)
+    updateContent("about.values", newValues)
+  }
+
+  const updateAboutValue = (index, field, value) => {
+    const currentValues = content?.about?.values || []
+    const newValues = [...currentValues]
+    newValues[index] = { ...newValues[index], [field]: value }
+    updateContent("about.values", newValues)
+  }
+
+  const addWhatWeDo = () => {
+    const newItem = ""
+    const currentItems = content?.about?.whatWeDo || []
+    updateContent("about.whatWeDo", [...currentItems, newItem])
+  }
+
+  const removeWhatWeDo = (index) => {
+    const currentItems = content?.about?.whatWeDo || []
+    const newItems = currentItems.filter((_, i) => i !== index)
+    updateContent("about.whatWeDo", newItems)
+  }
+
+  const updateWhatWeDo = (index, value) => {
+    const currentItems = content?.about?.whatWeDo || []
+    const newItems = [...currentItems]
+    newItems[index] = value
+    updateContent("about.whatWeDo", newItems)
   }
 
   if (loading) {
@@ -468,35 +506,576 @@ export default function ContentManagement() {
             </CardContent>
           </Card>
 
-          {/* About Story Section */}
+          {/* About Main Content */}
           <Card>
             <CardHeader>
-              <CardTitle>Our Story</CardTitle>
+              <CardTitle>About Main Section</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="story-title">Story Title</Label>
-                <Input
-                  id="story-title"
-                  value={content?.about?.story?.title || ""}
-                  onChange={(e) => updateContent("about.story.title", e.target.value)}
-                  placeholder="Enter story title"
+                <Label htmlFor="about-description">Main Description</Label>
+                <Textarea
+                  id="about-description"
+                  value={content?.about?.description || ""}
+                  onChange={(e) => updateContent("about.description", e.target.value)}
+                  placeholder="Enter main about description"
+                  rows={4}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="story-content">Story Content</Label>
-                <Textarea
-                  id="story-content"
-                  value={content?.about?.story?.content || ""}
-                  onChange={(e) => updateContent("about.story.content", e.target.value)}
-                  placeholder="Enter your company story"
-                  rows={6}
+                <Label htmlFor="about-tagline">Hero Tagline</Label>
+                <Input
+                  id="about-tagline"
+                  value={content?.about?.tagline || ""}
+                  onChange={(e) => updateContent("about.tagline", e.target.value)}
+                  placeholder="Enter hero tagline"
                 />
               </div>
             </CardContent>
           </Card>
 
-          {/* Team Section */}
+          {/* Who We Are Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Who We Are Section</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="who-we-are-title">Title</Label>
+                <Input
+                  id="who-we-are-title"
+                  value={content?.about?.whoWeAre?.title || ""}
+                  onChange={(e) => updateContent("about.whoWeAre.title", e.target.value)}
+                  placeholder="Enter who we are title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="who-we-are-desc1">Description 1</Label>
+                <Textarea
+                  id="who-we-are-desc1"
+                  value={content?.about?.whoWeAre?.description1 || ""}
+                  onChange={(e) => updateContent("about.whoWeAre.description1", e.target.value)}
+                  placeholder="Enter first description"
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="who-we-are-desc2">Description 2 (Bold)</Label>
+                <Input
+                  id="who-we-are-desc2"
+                  value={content?.about?.whoWeAre?.description2 || ""}
+                  onChange={(e) => updateContent("about.whoWeAre.description2", e.target.value)}
+                  placeholder="Enter bold description"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="who-we-are-desc3">Description 3</Label>
+                <Textarea
+                  id="who-we-are-desc3"
+                  value={content?.about?.whoWeAre?.description3 || ""}
+                  onChange={(e) => updateContent("about.whoWeAre.description3", e.target.value)}
+                  placeholder="Enter third description"
+                  rows={3}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Mission & Vision */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Mission & Vision</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="mission-title">Mission Title</Label>
+                <Input
+                  id="mission-title"
+                  value={content?.about?.mission?.title || ""}
+                  onChange={(e) => updateContent("about.mission.title", e.target.value)}
+                  placeholder="Enter mission title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="mission-description">Mission Description</Label>
+                <Textarea
+                  id="mission-description"
+                  value={content?.about?.mission?.description || ""}
+                  onChange={(e) => updateContent("about.mission.description", e.target.value)}
+                  placeholder="Enter mission description"
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="vision-title">Vision Title</Label>
+                <Input
+                  id="vision-title"
+                  value={content?.about?.vision?.title || ""}
+                  onChange={(e) => updateContent("about.vision.title", e.target.value)}
+                  placeholder="Enter vision title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="vision-description">Vision Description</Label>
+                <Textarea
+                  id="vision-description"
+                  value={content?.about?.vision?.description || ""}
+                  onChange={(e) => updateContent("about.vision.description", e.target.value)}
+                  placeholder="Enter vision description"
+                  rows={3}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* What We Do Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>What We Do Section</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="what-we-do-title">Section Title</Label>
+                <Input
+                  id="what-we-do-title"
+                  value={content?.about?.whatWeDo?.title || ""}
+                  onChange={(e) => updateContent("about.whatWeDo.title", e.target.value)}
+                  placeholder="Enter what we do title"
+                />
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>What We Do Items</Label>
+                  <Button
+                    onClick={() => {
+                      const currentItems = content?.about?.whatWeDo?.items || []
+                      updateContent("about.whatWeDo.items", [...currentItems, ""])
+                    }}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Item
+                  </Button>
+                </div>
+                {(content?.about?.whatWeDo?.items || []).map((item, index) => (
+                  <div key={index} className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <Textarea
+                      placeholder="Enter what we do item"
+                      value={item}
+                      onChange={(e) => {
+                        const currentItems = content?.about?.whatWeDo?.items || []
+                        const newItems = [...currentItems]
+                        newItems[index] = e.target.value
+                        updateContent("about.whatWeDo.items", newItems)
+                      }}
+                      className="flex-1"
+                      rows={2}
+                    />
+                    <Button
+                      onClick={() => {
+                        const currentItems = content?.about?.whatWeDo?.items || []
+                        const newItems = currentItems.filter((_, i) => i !== index)
+                        updateContent("about.whatWeDo.items", newItems)
+                      }}
+                      size="sm"
+                      variant="destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Ecosystem Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Ecosystem Section</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="ecosystem-title">Section Title</Label>
+                <Input
+                  id="ecosystem-title"
+                  value={content?.about?.ecosystem?.title || ""}
+                  onChange={(e) => updateContent("about.ecosystem.title", e.target.value)}
+                  placeholder="Enter ecosystem title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ecosystem-subtitle">Section Subtitle</Label>
+                <Textarea
+                  id="ecosystem-subtitle"
+                  value={content?.about?.ecosystem?.subtitle || ""}
+                  onChange={(e) => updateContent("about.ecosystem.subtitle", e.target.value)}
+                  placeholder="Enter ecosystem subtitle"
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ecosystem-description">Bottom Description</Label>
+                <Textarea
+                  id="ecosystem-description"
+                  value={content?.about?.ecosystem?.description || ""}
+                  onChange={(e) => updateContent("about.ecosystem.description", e.target.value)}
+                  placeholder="Enter ecosystem description"
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Ecosystem Items</Label>
+                  <Button
+                    onClick={() => {
+                      const currentItems = content?.about?.ecosystem?.items || []
+                      updateContent("about.ecosystem.items", [...currentItems, { title: "", description: "" }])
+                    }}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Item
+                  </Button>
+                </div>
+                {(content?.about?.ecosystem?.items || []).map((item, index) => (
+                  <div key={index} className="space-y-2 p-4 border rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        placeholder="Title"
+                        value={item.title}
+                        onChange={(e) => {
+                          const currentItems = content?.about?.ecosystem?.items || []
+                          const newItems = [...currentItems]
+                          newItems[index] = { ...newItems[index], title: e.target.value }
+                          updateContent("about.ecosystem.items", newItems)
+                        }}
+                        className="flex-1"
+                      />
+                      <Button
+                        onClick={() => {
+                          const currentItems = content?.about?.ecosystem?.items || []
+                          const newItems = currentItems.filter((_, i) => i !== index)
+                          updateContent("about.ecosystem.items", newItems)
+                        }}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Textarea
+                      placeholder="Description"
+                      value={item.description}
+                      onChange={(e) => {
+                        const currentItems = content?.about?.ecosystem?.items || []
+                        const newItems = [...currentItems]
+                        newItems[index] = { ...newItems[index], description: e.target.value }
+                        updateContent("about.ecosystem.items", newItems)
+                      }}
+                      rows={2}
+                    />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* What Makes Us Different */}
+          <Card>
+            <CardHeader>
+              <CardTitle>What Makes Us Different</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="different-title">Section Title</Label>
+                <Input
+                  id="different-title"
+                  value={content?.about?.different?.title || ""}
+                  onChange={(e) => updateContent("about.different.title", e.target.value)}
+                  placeholder="Enter section title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="different-subtitle">Section Subtitle</Label>
+                <Input
+                  id="different-subtitle"
+                  value={content?.about?.different?.subtitle || ""}
+                  onChange={(e) => updateContent("about.different.subtitle", e.target.value)}
+                  placeholder="Enter section subtitle"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="different-tagline">Bottom Tagline</Label>
+                <Textarea
+                  id="different-tagline"
+                  value={content?.about?.different?.tagline || ""}
+                  onChange={(e) => updateContent("about.different.tagline", e.target.value)}
+                  placeholder="Enter bottom tagline"
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Different Items</Label>
+                  <Button
+                    onClick={() => {
+                      const currentItems = content?.about?.different?.items || []
+                      updateContent("about.different.items", [...currentItems, ""])
+                    }}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Item
+                  </Button>
+                </div>
+                {(content?.about?.different?.items || []).map((item, index) => (
+                  <div key={index} className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <Textarea
+                      placeholder="Enter difference item"
+                      value={item}
+                      onChange={(e) => {
+                        const currentItems = content?.about?.different?.items || []
+                        const newItems = [...currentItems]
+                        newItems[index] = e.target.value
+                        updateContent("about.different.items", newItems)
+                      }}
+                      className="flex-1"
+                      rows={2}
+                    />
+                    <Button
+                      onClick={() => {
+                        const currentItems = content?.about?.different?.items || []
+                        const newItems = currentItems.filter((_, i) => i !== index)
+                        updateContent("about.different.items", newItems)
+                      }}
+                      size="sm"
+                      variant="destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Stats Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Stats Section</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="stats-title">Section Title</Label>
+                <Input
+                  id="stats-title"
+                  value={content?.about?.stats?.title || ""}
+                  onChange={(e) => updateContent("about.stats.title", e.target.value)}
+                  placeholder="Enter stats title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="stats-subtitle">Section Subtitle</Label>
+                <Textarea
+                  id="stats-subtitle"
+                  value={content?.about?.stats?.subtitle || ""}
+                  onChange={(e) => updateContent("about.stats.subtitle", e.target.value)}
+                  placeholder="Enter stats subtitle"
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Stats Items</Label>
+                  <Button
+                    onClick={() => {
+                      const currentItems = content?.about?.stats?.items || []
+                      updateContent("about.stats.items", [...currentItems, { number: "", label: "", description: "" }])
+                    }}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Stat
+                  </Button>
+                </div>
+                {(content?.about?.stats?.items || []).map((item, index) => (
+                  <div key={index} className="space-y-2 p-4 border rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        placeholder="Number (e.g., 16+)"
+                        value={item.number}
+                        onChange={(e) => {
+                          const currentItems = content?.about?.stats?.items || []
+                          const newItems = [...currentItems]
+                          newItems[index] = { ...newItems[index], number: e.target.value }
+                          updateContent("about.stats.items", newItems)
+                        }}
+                        className="w-24"
+                      />
+                      <Input
+                        placeholder="Label"
+                        value={item.label}
+                        onChange={(e) => {
+                          const currentItems = content?.about?.stats?.items || []
+                          const newItems = [...currentItems]
+                          newItems[index] = { ...newItems[index], label: e.target.value }
+                          updateContent("about.stats.items", newItems)
+                        }}
+                        className="flex-1"
+                      />
+                      <Button
+                        onClick={() => {
+                          const currentItems = content?.about?.stats?.items || []
+                          const newItems = currentItems.filter((_, i) => i !== index)
+                          updateContent("about.stats.items", newItems)
+                        }}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Input
+                      placeholder="Description"
+                      value={item.description}
+                      onChange={(e) => {
+                        const currentItems = content?.about?.stats?.items || []
+                        const newItems = [...currentItems]
+                        newItems[index] = { ...newItems[index], description: e.target.value }
+                        updateContent("about.stats.items", newItems)
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Culture Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Culture Section</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="culture-title">Section Title</Label>
+                <Input
+                  id="culture-title"
+                  value={content?.about?.culture?.title || ""}
+                  onChange={(e) => updateContent("about.culture.title", e.target.value)}
+                  placeholder="Enter culture title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="culture-subtitle">Section Subtitle</Label>
+                <Input
+                  id="culture-subtitle"
+                  value={content?.about?.culture?.subtitle || ""}
+                  onChange={(e) => updateContent("about.culture.subtitle", e.target.value)}
+                  placeholder="Enter culture subtitle"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="culture-description">Description</Label>
+                <Textarea
+                  id="culture-description"
+                  value={content?.about?.culture?.description || ""}
+                  onChange={(e) => updateContent("about.culture.description", e.target.value)}
+                  placeholder="Enter culture description"
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="culture-tagline">Tagline</Label>
+                <Input
+                  id="culture-tagline"
+                  value={content?.about?.culture?.tagline || ""}
+                  onChange={(e) => updateContent("about.culture.tagline", e.target.value)}
+                  placeholder="Enter culture tagline"
+                />
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Culture Items</Label>
+                  <Button
+                    onClick={() => {
+                      const currentItems = content?.about?.culture?.items || []
+                      updateContent("about.culture.items", [...currentItems, ""])
+                    }}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Item
+                  </Button>
+                </div>
+                {(content?.about?.culture?.items || []).map((item, index) => (
+                  <div key={index} className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <Input
+                      placeholder="Enter culture item"
+                      value={item}
+                      onChange={(e) => {
+                        const currentItems = content?.about?.culture?.items || []
+                        const newItems = [...currentItems]
+                        newItems[index] = e.target.value
+                        updateContent("about.culture.items", newItems)
+                      }}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={() => {
+                        const currentItems = content?.about?.culture?.items || []
+                        const newItems = currentItems.filter((_, i) => i !== index)
+                        updateContent("about.culture.items", newItems)
+                      }}
+                      size="sm"
+                      variant="destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* CTA Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>CTA Section</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="cta-title">CTA Title</Label>
+                <Input
+                  id="cta-title"
+                  value={content?.about?.cta?.title || ""}
+                  onChange={(e) => updateContent("about.cta.title", e.target.value)}
+                  placeholder="Enter CTA title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cta-description">CTA Description</Label>
+                <Textarea
+                  id="cta-description"
+                  value={content?.about?.cta?.description || ""}
+                  onChange={(e) => updateContent("about.cta.description", e.target.value)}
+                  placeholder="Enter CTA description"
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cta-tagline">CTA Tagline</Label>
+                <Input
+                  id="cta-tagline"
+                  value={content?.about?.cta?.tagline || ""}
+                  onChange={(e) => updateContent("about.cta.tagline", e.target.value)}
+                  placeholder="Enter CTA tagline"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Team Section Settings - Update existing */}
           <Card>
             <CardHeader>
               <CardTitle>Team Section</CardTitle>
@@ -520,10 +1099,19 @@ export default function ContentManagement() {
                   placeholder="Enter team section subtitle"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="team-tagline">Team Tagline</Label>
+                <Input
+                  id="team-tagline"
+                  value={content?.about?.team?.tagline || ""}
+                  onChange={(e) => updateContent("about.team.tagline", e.target.value)}
+                  placeholder="Enter team section tagline"
+                />
+              </div>
               <div className="p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800">
                   <strong>Note:</strong> Team members are managed separately in the Team Management section. This
-                  section only controls the team section title and subtitle.
+                  section only controls the team section titles and tagline.
                 </p>
               </div>
             </CardContent>
@@ -557,6 +1145,21 @@ export default function ContentManagement() {
                   rows={2}
                 />
               </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="show-category-filter"
+                  checked={content?.offices?.showCategoryFilter !== false}
+                  onChange={(e) => updateContent("offices.showCategoryFilter", e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="show-category-filter" className="text-sm font-medium">
+                  Show Category Filter Buttons
+                </Label>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Toggle to show/hide the category filter buttons (All, Headquarters, Regional Office, etc.)
+              </p>
               <div className="p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800">
                   <strong>Note:</strong> Individual office locations and galleries are managed in the Offices Management
@@ -593,6 +1196,135 @@ export default function ContentManagement() {
                   placeholder="Enter contact page subtitle"
                   rows={2}
                 />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact Main Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Main Section</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="contact-main-title">Main Title</Label>
+                <Input
+                  id="contact-main-title"
+                  value={content?.contact?.title || ""}
+                  onChange={(e) => updateContent("contact.title", e.target.value)}
+                  placeholder="Enter contact main title (e.g., Get in Touch)"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contact-main-description">Main Description</Label>
+                <Textarea
+                  id="contact-main-description"
+                  value={content?.contact?.description || ""}
+                  onChange={(e) => updateContent("contact.description", e.target.value)}
+                  placeholder="Enter contact main description"
+                  rows={3}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Office Information */}
+              <div className="space-y-4">
+                <h4 className="font-semibold">Office Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-office-address">Office Address</Label>
+                    <Input
+                      id="contact-office-address"
+                      value={content?.contact?.office?.address || ""}
+                      onChange={(e) => updateContent("contact.office.address", e.target.value)}
+                      placeholder="Enter office address"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-office-city">City</Label>
+                    <Input
+                      id="contact-office-city"
+                      value={content?.contact?.office?.city || ""}
+                      onChange={(e) => updateContent("contact.office.city", e.target.value)}
+                      placeholder="Enter city"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-office-country">Country</Label>
+                    <Input
+                      id="contact-office-country"
+                      value={content?.contact?.office?.country || ""}
+                      onChange={(e) => updateContent("contact.office.country", e.target.value)}
+                      placeholder="Enter country"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Email Addresses */}
+              <div className="space-y-4">
+                <h4 className="font-semibold">Email Addresses</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-email-general">General Email</Label>
+                    <Input
+                      id="contact-email-general"
+                      value={content?.contact?.emails?.general || ""}
+                      onChange={(e) => updateContent("contact.emails.general", e.target.value)}
+                      placeholder="Enter general email"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-email-business">Business Email</Label>
+                    <Input
+                      id="contact-email-business"
+                      value={content?.contact?.emails?.business || ""}
+                      onChange={(e) => updateContent("contact.emails.business", e.target.value)}
+                      placeholder="Enter business email"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-email-careers">Careers Email</Label>
+                    <Input
+                      id="contact-email-careers"
+                      value={content?.contact?.emails?.careers || ""}
+                      onChange={(e) => updateContent("contact.emails.careers", e.target.value)}
+                      placeholder="Enter careers email"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Phone & Hours */}
+              <div className="space-y-4">
+                <h4 className="font-semibold">Phone & Hours</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-phone-number">Phone Number</Label>
+                    <Input
+                      id="contact-phone-number"
+                      value={content?.contact?.phone || ""}
+                      onChange={(e) => updateContent("contact.phone", e.target.value)}
+                      placeholder="Enter phone number"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-business-hours">Business Hours</Label>
+                    <Input
+                      id="contact-business-hours"
+                      value={content?.contact?.hours || ""}
+                      onChange={(e) => updateContent("contact.hours", e.target.value)}
+                      placeholder="Enter business hours"
+                    />
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

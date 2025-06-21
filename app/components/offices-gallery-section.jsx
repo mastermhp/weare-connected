@@ -49,6 +49,7 @@ const OfficesGallerySection = ({ content }) => {
         ...prev,
         title: content.offices.title || prev.title,
         subtitle: content.offices.subtitle || prev.subtitle,
+        showCategoryFilter: content.offices.showCategoryFilter !== false, // Default to true
       }))
     }
   }, [content])
@@ -113,34 +114,36 @@ const OfficesGallerySection = ({ content }) => {
           </p>
         </motion.div>
 
-        {/* Category Filter */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-wrap justify-center gap-3 mb-16"
-        >
-          {categories.map((category, index) => (
-            <motion.button
-              key={category}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 0.4 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                selectedCategory === category
-                  ? "bg-[#6529B2] text-white shadow-lg"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              {category}
-            </motion.button>
-          ))}
-        </motion.div> */}
+        {/* Category Filter - Conditionally Rendered */}
+        {content?.offices?.showCategoryFilter !== false && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-wrap justify-center gap-3 mb-16"
+          >
+            {categories.map((category, index) => (
+              <motion.button
+                key={category}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.4 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  selectedCategory === category
+                    ? "bg-[#6529B2] text-white shadow-lg"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {category}
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
 
         {/* Featured Office Hero */}
         {featuredOffice && (
@@ -177,8 +180,8 @@ const OfficesGallerySection = ({ content }) => {
                   >
                     {/* <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3 mx-auto">
                       <Building className="w-8 h-8" />
-                    </div> */}
-                    {/* <p className="text-lg font-bold mb-1">Explore Gallery</p>
+                    </div>
+                    <p className="text-lg font-bold mb-1">Explore Gallery</p>
                     <p className="text-sm opacity-90">Interactive Office Tour</p> */}
                   </motion.div>
                 </div>

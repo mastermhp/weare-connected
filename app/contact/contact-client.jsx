@@ -13,6 +13,7 @@ import { motion } from "framer-motion"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function ContactPageClient() {
+  const [content, setContent] = useState(null)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -39,6 +40,45 @@ export default function ContactPageClient() {
     setParticles(generatedParticles)
     setIsMounted(true)
   }, [])
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await fetch("/api/content/site")
+        if (response.ok) {
+          const data = await response.json()
+          setContent(data)
+        }
+      } catch (error) {
+        console.error("Error fetching content:", error)
+      }
+    }
+
+    fetchContent()
+  }, [])
+
+  // Use dynamic content with fallbacks
+  const contactData = content?.contact || {
+    hero: {
+      title: "Get in Touch",
+      subtitle: "Ready to start your next venture or have questions about our services? We'd love to hear from you.",
+    },
+    title: "Get in Touch",
+    description:
+      "Whether you have a specific project in mind or just want to explore possibilities, we're here to help. Our team of experts is ready to discuss your vision and provide tailored solutions.",
+    office: {
+      address: "1234 Innovation Drive, Suite 500",
+      city: "San Francisco, CA 94107",
+      country: "United States",
+    },
+    emails: {
+      general: "hello@weareconnected.io",
+      business: "press@weareconnected.io",
+      careers: "careers@weareconnected.io",
+    },
+    phone: "+1 (415) 555-0123",
+    hours: "Monday - Friday: 9:00 AM - 6:00 PM PST\nSaturday - Sunday: Closed",
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -138,9 +178,12 @@ export default function ContactPageClient() {
         <div className="pt-32 pb-8 relative z-10">
           <div className="container mx-auto px-4 sm:px-6 md:px-8 py-8 max-w-7xl">
             <div className="text-center mb-12 mx-auto max-w-4xl">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-pot-black mb-6 font-syne">Get in Touch</h1>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-pot-black mb-6 font-syne">
+                {contactData.hero?.title || "Get in Touch"}
+              </h1>
               <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Ready to start your next venture or have questions about our services? We'd love to hear from you.
+                {contactData.hero?.subtitle ||
+                  "Ready to start your next venture or have questions about our services? We'd love to hear from you."}
               </p>
             </div>
           </div>
@@ -281,8 +324,12 @@ export default function ContactPageClient() {
                     <Mail className="h-6 w-6 text-primary mt-1" />
                     <div>
                       <h3 className="font-semibold mb-1">Email</h3>
-                      <p className="text-muted-foreground">hello@weareconnected.io</p>
-                      <p className="text-muted-foreground">press@weareconnected.io</p>
+                      <p className="text-muted-foreground">
+                        {contactData.emails?.general || "hello@weareconnected.io"}
+                      </p>
+                      <p className="text-muted-foreground">
+                        {contactData.emails?.business || "press@weareconnected.io"}
+                      </p>
                     </div>
                   </div>
 
@@ -290,7 +337,7 @@ export default function ContactPageClient() {
                     <Phone className="h-6 w-6 text-primary mt-1" />
                     <div>
                       <h3 className="font-semibold mb-1">Phone</h3>
-                      <p className="text-muted-foreground">+1 (415) 555-0123</p>
+                      <p className="text-muted-foreground">{contactData.phone || "+1 (415) 555-0123"}</p>
                     </div>
                   </div>
 
@@ -299,11 +346,11 @@ export default function ContactPageClient() {
                     <div>
                       <h3 className="font-semibold mb-1">Address</h3>
                       <p className="text-muted-foreground">
-                        1234 Innovation Drive
+                        {contactData.office?.address || "1234 Innovation Drive"}
                         <br />
                         Suite 500
                         <br />
-                        San Francisco, CA 94107
+                        {contactData.office?.city || "San Francisco, CA 94107"}
                       </p>
                     </div>
                   </div>
@@ -313,7 +360,7 @@ export default function ContactPageClient() {
                     <div>
                       <h3 className="font-semibold mb-1">Business Hours</h3>
                       <p className="text-muted-foreground">
-                        Monday - Friday: 9:00 AM - 6:00 PM PST
+                        {contactData.hours || "Monday - Friday: 9:00 AM - 6:00 PM PST"}
                         <br />
                         Saturday - Sunday: Closed
                       </p>
@@ -330,7 +377,9 @@ export default function ContactPageClient() {
                     <CardContent className="p-4 text-center">
                       <Mail className="h-8 w-8 text-primary mx-auto mb-2" />
                       <h4 className="font-semibold mb-1">General Inquiries</h4>
-                      <p className="text-sm text-muted-foreground">hello@weareconnected.io</p>
+                      <p className="text-sm text-muted-foreground">
+                        {contactData.emails?.general || "hello@weareconnected.io"}
+                      </p>
                     </CardContent>
                   </Card>
 
@@ -338,7 +387,7 @@ export default function ContactPageClient() {
                     <CardContent className="p-4 text-center">
                       <Phone className="h-8 w-8 text-primary mx-auto mb-2" />
                       <h4 className="font-semibold mb-1">Call Us</h4>
-                      <p className="text-sm text-muted-foreground">+1 (415) 555-0123</p>
+                      <p className="text-sm text-muted-foreground">{contactData.phone || "+1 (415) 555-0123"}</p>
                     </CardContent>
                   </Card>
                 </div>
@@ -365,9 +414,9 @@ export default function ContactPageClient() {
                   <MapPin className="h-12 w-12 text-primary mx-auto mb-4" />
                   <h3 className="text-xl font-bold mb-2">San Francisco Office</h3>
                   <p className="text-muted-foreground">
-                    1234 Innovation Drive, Suite 500
+                    {contactData.office?.address || "1234 Innovation Drive, Suite 500"}
                     <br />
-                    San Francisco, CA 94107
+                    {contactData.office?.city || "San Francisco, CA 94107"}
                   </p>
                 </div>
               </div>
